@@ -1,0 +1,119 @@
+/* Victoria 3 Inspired Grand Strategy Imperial Theme */
+:root {
+  /* Royal Palette */
+  --bg-darkest: #07090e;
+  --bg-dark: #0f131c;
+  --bg-panel: rgba(18, 24, 38, 0.94);
+  --bg-panel-solid: #131a29;
+  --bg-panel-alt: rgba(25, 33, 51, 0.85);
+  --bg-card: rgba(10, 14, 23, 0.7);
+
+  /* Regal Imperial Brass & Gilded Gold */
+  --gold-primary: #d4af37;
+  --gold-bright: #ffd700;
+  --gold-dim: #997d26;
+  --gold-border: #80682a;
+  --gold-border-glow: rgba(212, 175, 55, 0.35);
+  --brass-grad: linear-gradient(180deg, #f3d47a 0%, #d4af37 50%, #997825 100%);
+  --brass-grad-dark: linear-gradient(180deg, #2b2210 0%, #171208 100%);
+
+  /* Accents & States */
+  --royal-blue: #1e3a8a;
+  --crimson-red: #991b1b;
+  --emerald-green: #065f46;
+  --text-main: #f5eedc;
+  --text-dim: #b8ac95;
+  --text-dark: #6e6451;
+  --text-gold: #f7df94;
+
+  /* Fonts */
+  --font-serif: 'Cinzel', 'Playfair Display', 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Shadows & Filigree */
+  --shadow-heavy: 0 12px 36px rgba(0, 0, 0, 0.85);
+  --shadow-glow: 0 0 15px rgba(212, 175, 55, 0.25);
+  --border-regal: 1px solid var(--gold-border);
+  --border-double: 3px double var(--gold-border);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(10, 14, 22, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-primary);
+}
+
+/* Regal Utility Classes */
+.gold-text {
+  color: var(--gold-bright);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.brass-border {
+  border: var(--border-regal);
+  box-shadow: inset 0 0 6px rgba(212, 175, 55, 0.15);
+}
+
+.panel-header {
+  background: linear-gradient(90deg, rgba(30, 41, 64, 0.95), rgba(15, 20, 31, 0.95));
+  border-bottom: var(--border-regal);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-gold);
+}
+
+.btn-regal {
+  background: var(--brass-grad-dark);
+  border: 1px solid var(--gold-border);
+  color: var(--text-gold);
+  padding: 6px 14px;
+  border-radius: 2px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-size: 11px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-regal:hover {
+  background: linear-gradient(180deg, #443519 0%, #291e0a 100%);
+  border-color: var(--gold-bright);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.btn-regal:active {
+  transform: translateY(1px);
+}
+
+.btn-regal.primary {
+  background: var(--brass-grad);
+  color: #1a1304;
+  border-color: #ffe082;
+  font-weight: 700;
+}
+.btn-regal.primary:hover {
+  filter: brightness(1.15);
+  color: #000;
+}

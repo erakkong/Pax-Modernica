@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pax Modernica – Grand-Strategy-Simulation (1700–1930)</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/map.css">
+</head>
+<body>
+  <div id="app-container">
+    
+    <!-- TOP BAR -->
+    <header id="top-bar">
+      <!-- Left: Date & Time controls -->
+      <div class="top-bar-left">
+        <div class="date-container">
+          <div>
+            <div id="game-date-display" class="game-date-display">Jahr 0, 1. Januar</div>
+            <div id="ref-year-display" class="ref-year">(Ref: 1700)</div>
+          </div>
+        </div>
+
+        <div class="speed-btn-group">
+          <button id="btn-pause" class="speed-btn active">⏸ Pause</button>
+          <button id="btn-speed-1" class="speed-btn">1×</button>
+          <button id="btn-speed-2" class="speed-btn">2×</button>
+          <button id="btn-speed-5" class="speed-btn">5×</button>
+        </div>
+
+        <button id="btn-toggle-left-panel" class="btn-regal" title="Reichsverwaltung öffnen">
+          🏛️ Reichsverwaltung
+        </button>
+      </div>
+
+      <!-- Center: National Resources & Ruler Info -->
+      <div class="top-bar-center">
+        <!-- Nation Banner -->
+        <div class="stat-badge" style="border-color:var(--gold-bright); cursor:pointer;" id="btn-switch-nation" title="Klicken, um Nation zu wechseln">
+          <span style="font-size:16px;">👑</span>
+          <div>
+            <div id="player-nation-name" style="font-weight:700; color:var(--gold-bright); font-size:12px;">Preußen</div>
+            <div id="player-ruler-name" style="font-size:10px; color:var(--text-dim);">Friedrich III.</div>
+          </div>
+        </div>
+
+        <!-- Treasury -->
+        <div class="stat-badge" title="Staatsschatz (Gold)">
+          <span class="stat-icon">🪙</span>
+          <span id="stat-gold-val" class="stat-value">1.200</span>
+          <span id="stat-gold-income" class="stat-sub">+18.4/Mo</span>
+        </div>
+
+        <!-- Manpower -->
+        <div class="stat-badge" title="Rekrutenreserve">
+          <span class="stat-icon">⚔️</span>
+          <span id="stat-manpower-val" class="stat-value">25.000</span>
+        </div>
+
+        <!-- Prestige -->
+        <div class="stat-badge" title="Monarchisches Prestige">
+          <span class="stat-icon">⚜️</span>
+          <span id="stat-prestige-val" class="stat-value">65</span>
+        </div>
+
+        <!-- Stability -->
+        <div class="stat-badge" title="Innere Stabilität">
+          <span class="stat-icon">⚖️</span>
+          <span id="stat-stability-val" class="stat-value">85%</span>
+        </div>
+      </div>
+
+      <!-- Right: Actions, Chronicle & Auth -->
+      <div class="top-bar-right">
+        <button id="btn-save-game" class="btn-regal">💾 Speichern</button>
+        <button id="btn-load-game" class="btn-regal">📂 Laden</button>
+        <button id="btn-toggle-right-panel" class="btn-regal" title="Pax Gazette & Chronik">
+          📰 Chronik
+        </button>
+        <button id="btn-toggle-sound" class="btn-regal" title="Ton umschalten">🔊</button>
+        <button id="btn-open-settings" class="btn-regal" title="Einstellungen">⚙️</button>
+        <button id="btn-account-login" class="btn-regal primary">👤 Anmelden</button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main id="workspace">
+
+      <!-- LEFT DRAWER: NATIONAL AFFAIRS -->
+      <aside id="left-panel">
+        <div class="panel-header">
+          <span>Reichsministerium</span>
+          <span style="font-size:11px; color:var(--text-dim);">1700–1930</span>
+        </div>
+        <nav class="left-nav-bar">
+          <button class="left-nav-btn active" data-tab="monarch">Krone</button>
+          <button class="left-nav-btn" data-tab="economy">Wirtschaft</button>
+          <button class="left-nav-btn" data-tab="politics">Politik</button>
+          <button class="left-nav-btn" data-tab="military">Militär</button>
+          <button class="left-nav-btn" data-tab="diplomacy">Diplomatie</button>
+          <button class="left-nav-btn" data-tab="technology">Forschung</button>
+        </nav>
+        <div id="left-panel-content" class="left-panel-content">
+          <!-- Dynamically populated -->
+        </div>
+      </aside>
+
+      <!-- MAP VIEWPORT -->
+      <section id="map-viewport">
+        <!-- Floating Map Modes Bar -->
+        <div id="map-modes-bar">
+          <button class="map-mode-btn active" data-mode="political">🏛️ Politisch</button>
+          <button class="map-mode-btn" data-mode="terrain">⛰️ Gelände</button>
+          <button class="map-mode-btn" data-mode="economy">💰 Wirtschaft</button>
+          <button class="map-mode-btn" data-mode="population">👥 Bevölkerung</button>
+          <button class="map-mode-btn" data-mode="religion">✝️ Religion</button>
+        </div>
+
+        <!-- Zoom & Nav Buttons -->
+        <div id="map-controls">
+          <button id="btn-zoom-in" class="map-ctrl-btn" title="Heranzoomen">+</button>
+          <button id="btn-zoom-out" class="map-ctrl-btn" title="Herauszoomen">−</button>
+          <button id="btn-zoom-reset" class="map-ctrl-btn" title="Ansicht zurücksetzen">⟲</button>
+        </div>
+
+        <!-- SVG Map Container -->
+        <div id="map-svg-container">
+          <svg id="europe-map-svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet">
+            <!-- Sea Background -->
+            <rect width="1600" height="1000" class="sea-bg"></rect>
+            
+            <!-- Map Layers -->
+            <g id="rivers-layer"></g>
+            <g id="provinces-layer"></g>
+            <g id="borders-layer"></g>
+            <g id="armies-layer"></g>
+            <g id="labels-layer"></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- PROVINCE INSPECTOR POPUP -->
+      <aside id="province-inspector">
+        <div class="inspector-header">
+          <div>
+            <div id="inspector-province-name" class="inspector-title">Provinz</div>
+            <div id="inspector-region-owner" class="inspector-subtitle">Region | Hoheit</div>
+          </div>
+          <button id="btn-close-inspector" style="color:var(--text-dim); font-size:16px;">✕</button>
+        </div>
+        
+        <div id="inspector-grid" class="inspector-grid">
+          <!-- Dynamically filled with population, terrain, taxes, infrastructure -->
+        </div>
+
+        <div class="buildings-container">
+          <div class="buildings-title">Bauwerke & Infrastruktur</div>
+          <div id="inspector-buildings-list" class="buildings-list">
+            <!-- Interactive building construction cards -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT DRAWER: PAX GAZETTE / CHRONICLE -->
+      <aside id="right-panel">
+        <div class="panel-header">
+          <span>📰 Pax Gazette</span>
+          <span style="font-size:10px; color:#4ade80;">LIVE TICKER</span>
+        </div>
+        <div id="chronicle-list" style="flex:1; overflow-y:auto; padding:12px;">
+          <!-- Dynamically populated with chronicle cards -->
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- BOTTOM BAR -->
+    <footer id="bottom-bar">
+      <div>
+        <span>Status: </span>
+        <span style="color:#4ade80;">● Server-Simulation Aktiv (1s = 2min)</span>
+        <span style="margin-left:14px; color:var(--text-dim);">Tipp: [Leertaste] Pause | [1, 2, 3] Tempo | Klick auf Provinz für Inspektion</span>
+      </div>
+      <div>
+        <span>Pax Modernica – Version 1.0.0 (Phase 1 & 2 Engine)</span>
+      </div>
+    </footer>
+
+    <!-- MODAL OVERLAY CONTAINER -->
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal-dialog">
+        <div class="panel-header">
+          <span id="modal-title">Dialog</span>
+          <button id="btn-close-modal" style="color:var(--text-dim); font-size:16px;">✕</button>
+        </div>
+        <div id="modal-body" class="modal-body">
+          <!-- Modal content injected dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Main ES6 Application Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

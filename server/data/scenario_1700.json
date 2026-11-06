@@ -1,0 +1,468 @@
+{
+  "id": "scenario_1700",
+  "name": "1700 – Das europäische Mächtegleichgewicht",
+  "starting_year": 0,
+  "historical_reference_year": 1700,
+  "description": "Am Vorabend des Spanischen Erbfolgekriegs und des Großen Nordischen Krieges ringen Europas Monarchen um die Vorherrschaft auf dem Kontinent.",
+  "nations": {
+    "nation_france": {
+      "id": "nation_france",
+      "name": "Königreich Frankreich",
+      "adjective": "Französisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Ludwig XIV.",
+        "house": "Haus Bourbon",
+        "age": 62,
+        "title": "König von Frankreich",
+        "traits": [
+          "Sonnenkönig",
+          "Merkantilist",
+          "Zentralisierer",
+          "Prunkvoll"
+        ],
+        "legitimacy": 95,
+        "military_skill": 8,
+        "diplomacy_skill": 9,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_paris",
+      "color": "#1e3a8a",
+      "gold": 2500,
+      "prestige": 85,
+      "stability": 80,
+      "manpower": 45000,
+      "primary_culture": "Französisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_austria": {
+      "id": "nation_austria",
+      "name": "Erzherzogtum Österreich",
+      "adjective": "Österreichisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Leopold I.",
+        "house": "Haus Habsburg",
+        "age": 60,
+        "title": "Römisch-Deutscher Kaiser & Erzherzog",
+        "traits": [
+          "Bürokrat",
+          "Kaiserliche Würde",
+          "fromm"
+        ],
+        "legitimacy": 90,
+        "military_skill": 7,
+        "diplomacy_skill": 8,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_vienna",
+      "color": "#eab308",
+      "gold": 2100,
+      "prestige": 80,
+      "stability": 75,
+      "manpower": 38000,
+      "primary_culture": "Deutsch-Österreichisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_prussia": {
+      "id": "nation_prussia",
+      "name": "Brandenburg-Preußen",
+      "adjective": "Preußisch",
+      "government": "Feudalmonarchie",
+      "ruler": {
+        "name": "Friedrich III. (bald I.)",
+        "house": "Haus Hohenzollern",
+        "age": 43,
+        "title": "Kurfürst von Brandenburg & Herzog in Preußen",
+        "traits": [
+          "Mäzen",
+          "Diplomatisch",
+          "Ambitioniert"
+        ],
+        "legitimacy": 85,
+        "military_skill": 7,
+        "diplomacy_skill": 8,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_berlin",
+      "color": "#334155",
+      "gold": 1200,
+      "prestige": 65,
+      "stability": 85,
+      "manpower": 25000,
+      "primary_culture": "Preußisch-Deutsch",
+      "state_religion": "Protestantisch"
+    },
+    "nation_england": {
+      "id": "nation_england",
+      "name": "Königreich England & Schottland",
+      "adjective": "Englisch",
+      "government": "Parlamentarische Monarchie",
+      "ruler": {
+        "name": "Wilhelm III.",
+        "house": "Haus Oranien-Nassau",
+        "age": 50,
+        "title": "König von England, Schottland & Irland",
+        "traits": [
+          "General",
+          "Staatsmann",
+          "Protestantischer Verteidiger"
+        ],
+        "legitimacy": 80,
+        "military_skill": 8,
+        "diplomacy_skill": 9,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_london",
+      "color": "#dc2626",
+      "gold": 2800,
+      "prestige": 75,
+      "stability": 78,
+      "manpower": 30000,
+      "primary_culture": "Englisch",
+      "state_religion": "Anglikanisch"
+    },
+    "nation_russia": {
+      "id": "nation_russia",
+      "name": "Zarentum Russland",
+      "adjective": "Russisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Peter I. (Der Große)",
+        "house": "Haus Romanow",
+        "age": 28,
+        "title": "Zar aller Reußen",
+        "traits": [
+          "Reformer",
+          "Schiffbauer",
+          "Visionär",
+          "Unerbittlich"
+        ],
+        "legitimacy": 90,
+        "military_skill": 9,
+        "diplomacy_skill": 7,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_moscow",
+      "color": "#15803d",
+      "gold": 1800,
+      "prestige": 70,
+      "stability": 70,
+      "manpower": 55000,
+      "primary_culture": "Russisch",
+      "state_religion": "Orthodox"
+    },
+    "nation_sweden": {
+      "id": "nation_sweden",
+      "name": "Königreich Schweden",
+      "adjective": "Schwedisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Karl XII.",
+        "house": "Haus Pfalz-Zweibrücken",
+        "age": 18,
+        "title": "König von Schweden",
+        "traits": [
+          "Militärisches Genie",
+          "Unbeugsam",
+          "Taktiker"
+        ],
+        "legitimacy": 92,
+        "military_skill": 10,
+        "diplomacy_skill": 5,
+        "economy_skill": 6
+      },
+      "capital_province_id": "prov_stockholm",
+      "color": "#0284c7",
+      "gold": 1400,
+      "prestige": 75,
+      "stability": 82,
+      "manpower": 28000,
+      "primary_culture": "Schwedisch",
+      "state_religion": "Protestantisch"
+    },
+    "nation_spain": {
+      "id": "nation_spain",
+      "name": "Königreich Spanien",
+      "adjective": "Spanisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Karl II. (Vor Erbfolgekrise)",
+        "house": "Spanische Habsburger",
+        "age": 39,
+        "title": "König von Spanien & beider Sizilien",
+        "traits": [
+          "Krank",
+          "Traditionsverbunden"
+        ],
+        "legitimacy": 70,
+        "military_skill": 4,
+        "diplomacy_skill": 6,
+        "economy_skill": 5
+      },
+      "capital_province_id": "prov_madrid",
+      "color": "#b45309",
+      "gold": 1900,
+      "prestige": 78,
+      "stability": 62,
+      "manpower": 32000,
+      "primary_culture": "Kastilisch-Spanisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_ottoman": {
+      "id": "nation_ottoman",
+      "name": "Osmanisches Reich",
+      "adjective": "Osmanisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Mustafa II.",
+        "house": "Haus Osman",
+        "age": 36,
+        "title": "Sultan des Osmanischen Reiches",
+        "traits": [
+          "Krieger",
+          "Konservativ"
+        ],
+        "legitimacy": 88,
+        "military_skill": 7,
+        "diplomacy_skill": 6,
+        "economy_skill": 6
+      },
+      "capital_province_id": "prov_constantinople",
+      "color": "#047857",
+      "gold": 2200,
+      "prestige": 72,
+      "stability": 68,
+      "manpower": 50000,
+      "primary_culture": "Türkisch",
+      "state_religion": "Sunnitisch"
+    },
+    "nation_poland": {
+      "id": "nation_poland",
+      "name": "Königreich Polen-Litauen",
+      "adjective": "Polnisch",
+      "government": "Wahlmonarchie",
+      "ruler": {
+        "name": "August II. (Der Starke)",
+        "house": "Haus Wettin",
+        "age": 30,
+        "title": "König von Polen & Kurfürst von Sachsen",
+        "traits": [
+          "Lebemann",
+          "Ambitioniert",
+          "Bündnispolitiker"
+        ],
+        "legitimacy": 65,
+        "military_skill": 6,
+        "diplomacy_skill": 7,
+        "economy_skill": 6
+      },
+      "capital_province_id": "prov_warsaw",
+      "color": "#be123c",
+      "gold": 1300,
+      "prestige": 62,
+      "stability": 55,
+      "manpower": 30000,
+      "primary_culture": "Polnisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_denmark": {
+      "id": "nation_denmark",
+      "name": "Königreich Dänemark-Norwegen",
+      "adjective": "Dänisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Friedrich IV.",
+        "house": "Haus Oldenburg",
+        "age": 29,
+        "title": "König von Dänemark und Norwegen",
+        "traits": [
+          "Reformer",
+          "Gegen Schweden"
+        ],
+        "legitimacy": 85,
+        "military_skill": 6,
+        "diplomacy_skill": 7,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_copenhagen",
+      "color": "#991b1b",
+      "gold": 1100,
+      "prestige": 60,
+      "stability": 80,
+      "manpower": 18000,
+      "primary_culture": "Dänisch",
+      "state_religion": "Protestantisch"
+    },
+    "nation_netherlands": {
+      "id": "nation_netherlands",
+      "name": "Republik der Sieben Vereinigten Provinzen",
+      "adjective": "Niederländisch",
+      "government": "Parlamentarische Republik",
+      "ruler": {
+        "name": "Statthalter Wilhelm III. von Oranien",
+        "house": "Haus Oranien",
+        "age": 50,
+        "title": "Generalkapitän & Statthalter",
+        "traits": [
+          "Handelsgenie",
+          "Finanzexperte"
+        ],
+        "legitimacy": 85,
+        "military_skill": 7,
+        "diplomacy_skill": 9,
+        "economy_skill": 10
+      },
+      "capital_province_id": "prov_amsterdam",
+      "color": "#ea580c",
+      "gold": 3500,
+      "prestige": 72,
+      "stability": 88,
+      "manpower": 20000,
+      "primary_culture": "Niederländisch",
+      "state_religion": "Reformiert"
+    },
+    "nation_portugal": {
+      "id": "nation_portugal",
+      "name": "Königreich Portugal",
+      "adjective": "Portugiesisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Peter II. (Pedro II)",
+        "house": "Haus Braganza",
+        "age": 52,
+        "title": "König von Portugal",
+        "traits": [
+          "Pragmatiker",
+          "Handelsförderer"
+        ],
+        "legitimacy": 88,
+        "military_skill": 6,
+        "diplomacy_skill": 8,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_lisbon",
+      "color": "#166534",
+      "gold": 1600,
+      "prestige": 64,
+      "stability": 82,
+      "manpower": 16000,
+      "primary_culture": "Portugiesisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_venice": {
+      "id": "nation_venice",
+      "name": "Serenissima Republik Venedig",
+      "adjective": "Venezianisch",
+      "government": "Parlamentarische Republik",
+      "ruler": {
+        "name": "Alvise II. Mocenigo",
+        "house": "Mocenigo",
+        "age": 72,
+        "title": "Doge von Venedig",
+        "traits": [
+          "Seefahrer",
+          "Kaufmann"
+        ],
+        "legitimacy": 80,
+        "military_skill": 6,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_venice",
+      "color": "#831843",
+      "gold": 1900,
+      "prestige": 68,
+      "stability": 80,
+      "manpower": 14000,
+      "primary_culture": "Italienisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_papal": {
+      "id": "nation_papal",
+      "name": "Kirchenstaat",
+      "adjective": "Päpstlich",
+      "government": "Theokratie",
+      "ruler": {
+        "name": "Innozenz XII. / Klemens XI.",
+        "house": "Albani",
+        "age": 51,
+        "title": "Papst & Bischof von Rom",
+        "traits": [
+          "Gelehrter",
+          "Diplomatisch"
+        ],
+        "legitimacy": 95,
+        "military_skill": 4,
+        "diplomacy_skill": 9,
+        "economy_skill": 6
+      },
+      "capital_province_id": "prov_rome",
+      "color": "#d97706",
+      "gold": 1700,
+      "prestige": 85,
+      "stability": 85,
+      "manpower": 10000,
+      "primary_culture": "Italienisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_bavaria": {
+      "id": "nation_bavaria",
+      "name": "Kurfürstentum Bayern",
+      "adjective": "Bayerisch",
+      "government": "Konstitutionelle Monarchie",
+      "ruler": {
+        "name": "Max II. Emanuel",
+        "house": "Haus Wittelsbach",
+        "age": 38,
+        "title": "Kurfürst von Bayern",
+        "traits": [
+          "Der blaue Kurfürst",
+          "Ehrgeizig",
+          "Feldherr"
+        ],
+        "legitimacy": 82,
+        "military_skill": 8,
+        "diplomacy_skill": 6,
+        "economy_skill": 6
+      },
+      "capital_province_id": "prov_munich",
+      "color": "#38bdf8",
+      "gold": 900,
+      "prestige": 60,
+      "stability": 80,
+      "manpower": 12000,
+      "primary_culture": "Bayerisch-Deutsch",
+      "state_religion": "Katholisch"
+    },
+    "nation_switzerland": {
+      "id": "nation_switzerland",
+      "name": "Alte Eidgenossenschaft",
+      "adjective": "Schweizerisch",
+      "government": "Parlamentarische Republik",
+      "ruler": {
+        "name": "Tagsatzung",
+        "house": "Eidgenössischer Bund",
+        "age": 50,
+        "title": "Landammann der Tagsatzung",
+        "traits": [
+          "Neutral",
+          "Wehrhaft",
+          "Föderalistisch"
+        ],
+        "legitimacy": 90,
+        "military_skill": 8,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_bern",
+      "color": "#ef4444",
+      "gold": 1500,
+      "prestige": 62,
+      "stability": 92,
+      "manpower": 15000,
+      "primary_culture": "Schweizerisch",
+      "state_religion": "Reformiert"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  pax-modernica:
+    build: .
+    container_name: pax_modernica_server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - pax_data:/app/data
+    environment:
+      - PAX_DB_PATH=/app/data/pax_modernica.sqlite3
+      - PORT=8000
+
+volumes:
+  pax_data:
+    driver: local

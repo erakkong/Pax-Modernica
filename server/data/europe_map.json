@@ -1,0 +1,1887 @@
+{
+  "projection": "custom_equirectangular_europe",
+  "viewBox": "0 0 1600 1000",
+  "dimensions": {
+    "width": 1600,
+    "height": 1000
+  },
+  "provinces": [
+    {
+      "id": "prov_iceland_west",
+      "name": "Island (Reykjavik & Borgarfjörður)",
+      "region_id": "reg_iceland",
+      "owner_id": "nation_denmark",
+      "center": [
+        240,
+        110
+      ],
+      "svg_path": "M 190,90 Q 230,70 270,85 Q 260,130 220,135 Q 185,120 190,90 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_iceland_east"
+      ],
+      "population": 35000,
+      "religion": "Protestantisch",
+      "culture": "Isländisch",
+      "tax_revenue": 14,
+      "goods_produced": "Fisch",
+      "buildings": {
+        "port": 1,
+        "castle": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_iceland_east",
+      "name": "Island (Akureyri & Austurland)",
+      "region_id": "reg_iceland",
+      "owner_id": "nation_denmark",
+      "center": [
+        310,
+        105
+      ],
+      "svg_path": "M 270,85 Q 330,75 360,105 Q 340,140 280,135 Q 260,130 270,85 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_iceland_west"
+      ],
+      "population": 25000,
+      "religion": "Protestantisch",
+      "culture": "Isländisch",
+      "tax_revenue": 10,
+      "goods_produced": "Wolle",
+      "buildings": {
+        "port": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 0
+    },
+    {
+      "id": "prov_scotland",
+      "name": "Schottland (Edinburgh)",
+      "region_id": "reg_britain_north",
+      "owner_id": "nation_england",
+      "center": [
+        470,
+        240
+      ],
+      "svg_path": "M 440,200 L 490,190 L 510,250 L 460,280 L 430,240 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_northern_england"
+      ],
+      "population": 1100000,
+      "religion": "Reformiert",
+      "culture": "Schottisch",
+      "tax_revenue": 45,
+      "goods_produced": "Kohle",
+      "buildings": {
+        "castle": 2,
+        "port": 1,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_ireland",
+      "name": "Irland (Dublin)",
+      "region_id": "reg_ireland",
+      "owner_id": "nation_england",
+      "center": [
+        400,
+        310
+      ],
+      "svg_path": "M 380,270 L 430,275 L 430,350 L 370,340 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [],
+      "population": 2000000,
+      "religion": "Katholisch",
+      "culture": "Irisch",
+      "tax_revenue": 50,
+      "goods_produced": "Nahrung",
+      "buildings": {
+        "port": 2,
+        "castle": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_northern_england",
+      "name": "Nordengland & York",
+      "region_id": "reg_britain_north",
+      "owner_id": "nation_england",
+      "center": [
+        490,
+        310
+      ],
+      "svg_path": "M 460,280 L 510,250 L 530,320 L 470,350 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_scotland",
+        "prov_london",
+        "prov_wales"
+      ],
+      "population": 1800000,
+      "religion": "Anglikanisch",
+      "culture": "Englisch",
+      "tax_revenue": 75,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "mines": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_wales",
+      "name": "Wales & West Midlands",
+      "region_id": "reg_britain_south",
+      "owner_id": "nation_england",
+      "center": [
+        450,
+        370
+      ],
+      "svg_path": "M 430,345 L 470,350 L 470,410 L 420,400 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_northern_england",
+        "prov_london"
+      ],
+      "population": 600000,
+      "religion": "Anglikanisch",
+      "culture": "Walisisch",
+      "tax_revenue": 35,
+      "goods_produced": "Kupfer",
+      "buildings": {
+        "mines": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_london",
+      "name": "England & London",
+      "region_id": "reg_britain_south",
+      "owner_id": "nation_england",
+      "center": [
+        510,
+        380
+      ],
+      "svg_path": "M 470,350 L 540,340 L 560,400 L 480,420 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_northern_england",
+        "prov_wales"
+      ],
+      "population": 3500000,
+      "religion": "Anglikanisch",
+      "culture": "Englisch",
+      "tax_revenue": 180,
+      "goods_produced": "Tuch",
+      "buildings": {
+        "palace": 2,
+        "port": 3,
+        "barracks": 2,
+        "university": 2
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_paris",
+      "name": "Île-de-France (Paris & Versailles)",
+      "region_id": "reg_france_north",
+      "owner_id": "nation_france",
+      "center": [
+        570,
+        480
+      ],
+      "svg_path": "M 530,450 L 610,440 L 620,510 L 540,520 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_normandy",
+        "prov_picardy",
+        "prov_champagne",
+        "prov_loire"
+      ],
+      "population": 4800000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 220,
+      "goods_produced": "Luxuswaren",
+      "buildings": {
+        "palace": 3,
+        "university": 2,
+        "barracks": 3
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_normandy",
+      "name": "Normandie & Bretagne",
+      "region_id": "reg_france_north",
+      "owner_id": "nation_france",
+      "center": [
+        470,
+        470
+      ],
+      "svg_path": "M 430,450 L 530,450 L 520,510 L 420,500 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_paris",
+        "prov_loire"
+      ],
+      "population": 2900000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 95,
+      "goods_produced": "Fisch",
+      "buildings": {
+        "port": 2,
+        "castle": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_picardy",
+      "name": "Flandern & Picardie",
+      "region_id": "reg_france_north",
+      "owner_id": "nation_france",
+      "center": [
+        565,
+        420
+      ],
+      "svg_path": "M 540,400 L 610,390 L 610,440 L 530,450 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_paris",
+        "prov_flanders",
+        "prov_champagne"
+      ],
+      "population": 2200000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 110,
+      "goods_produced": "Textilien",
+      "buildings": {
+        "fort": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_champagne",
+      "name": "Champagne & Elsass-Lothringen",
+      "region_id": "reg_france_east",
+      "owner_id": "nation_france",
+      "center": [
+        640,
+        470
+      ],
+      "svg_path": "M 610,440 L 680,440 L 690,510 L 620,510 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_paris",
+        "prov_picardy",
+        "prov_rhineland",
+        "prov_alsace",
+        "prov_burgundy"
+      ],
+      "population": 2400000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 105,
+      "goods_produced": "Wein",
+      "buildings": {
+        "fort": 2,
+        "barracks": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_loire",
+      "name": "Loire & Aquitanien (Bordeaux)",
+      "region_id": "reg_france_west",
+      "owner_id": "nation_france",
+      "center": [
+        520,
+        560
+      ],
+      "svg_path": "M 480,510 L 560,510 L 570,630 L 490,620 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_paris",
+        "prov_normandy",
+        "prov_provence",
+        "prov_burgundy",
+        "prov_pyrenees"
+      ],
+      "population": 3600000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 140,
+      "goods_produced": "Wein",
+      "buildings": {
+        "port": 2,
+        "castle": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_burgundy",
+      "name": "Burgund & Lyon",
+      "region_id": "reg_france_east",
+      "owner_id": "nation_france",
+      "center": [
+        620,
+        550
+      ],
+      "svg_path": "M 570,510 L 660,510 L 650,590 L 570,580 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_champagne",
+        "prov_loire",
+        "prov_provence",
+        "prov_bern"
+      ],
+      "population": 2500000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 115,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "castle": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_provence",
+      "name": "Provence & Marseille",
+      "region_id": "reg_france_south",
+      "owner_id": "nation_france",
+      "center": [
+        620,
+        640
+      ],
+      "svg_path": "M 570,600 L 660,600 L 650,680 L 560,660 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_loire",
+        "prov_burgundy",
+        "prov_piedmont"
+      ],
+      "population": 2100000,
+      "religion": "Katholisch",
+      "culture": "Französisch",
+      "tax_revenue": 125,
+      "goods_produced": "Handelswaren",
+      "buildings": {
+        "port": 3,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_amsterdam",
+      "name": "Holland (Amsterdam)",
+      "region_id": "reg_low_countries",
+      "owner_id": "nation_netherlands",
+      "center": [
+        610,
+        340
+      ],
+      "svg_path": "M 580,310 L 640,310 L 640,360 L 580,360 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_flanders",
+        "prov_hanover",
+        "prov_rhineland"
+      ],
+      "population": 1900000,
+      "religion": "Reformiert",
+      "culture": "Niederländisch",
+      "tax_revenue": 190,
+      "goods_produced": "Handelsgüter",
+      "buildings": {
+        "port": 3,
+        "university": 1,
+        "fort": 1
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_flanders",
+      "name": "Spanische Niederlande (Brüssel & Antwerpen)",
+      "region_id": "reg_low_countries",
+      "owner_id": "nation_spain",
+      "center": [
+        600,
+        390
+      ],
+      "svg_path": "M 570,360 L 640,360 L 630,410 L 560,400 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_amsterdam",
+        "prov_picardy",
+        "prov_rhineland"
+      ],
+      "population": 1800000,
+      "religion": "Katholisch",
+      "culture": "Flämisch",
+      "tax_revenue": 130,
+      "goods_produced": "Tuch",
+      "buildings": {
+        "port": 2,
+        "fort": 2
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_berlin",
+      "name": "Mark Brandenburg (Berlin & Potsdam)",
+      "region_id": "reg_prussia_core",
+      "owner_id": "nation_prussia",
+      "center": [
+        810,
+        350
+      ],
+      "svg_path": "M 770,320 L 850,320 L 850,380 L 770,380 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_hanover",
+        "prov_saxony",
+        "prov_pomerania",
+        "prov_silesia"
+      ],
+      "population": 1500000,
+      "religion": "Protestantisch",
+      "culture": "Preußisch-Deutsch",
+      "tax_revenue": 105,
+      "goods_produced": "Getreide",
+      "buildings": {
+        "palace": 2,
+        "barracks": 2,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_east_prussia",
+      "name": "Herzogtum Preußen (Königsberg)",
+      "region_id": "reg_prussia_east",
+      "owner_id": "nation_prussia",
+      "center": [
+        970,
+        300
+      ],
+      "svg_path": "M 930,270 L 1020,270 L 1010,330 L 930,330 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_danzig",
+        "prov_lithuania",
+        "prov_mazovia"
+      ],
+      "population": 700000,
+      "religion": "Protestantisch",
+      "culture": "Preußisch-Deutsch",
+      "tax_revenue": 65,
+      "goods_produced": "Bernstein",
+      "buildings": {
+        "castle": 2,
+        "port": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_pomerania",
+      "name": "Hinterpommern (Stettin)",
+      "region_id": "reg_prussia_core",
+      "owner_id": "nation_prussia",
+      "center": [
+        860,
+        290
+      ],
+      "svg_path": "M 820,270 L 900,270 L 890,320 L 810,320 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_berlin",
+        "prov_danzig",
+        "prov_saxony"
+      ],
+      "population": 550000,
+      "religion": "Protestantisch",
+      "culture": "Pommersch-Deutsch",
+      "tax_revenue": 45,
+      "goods_produced": "Holz",
+      "buildings": {
+        "port": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_rhineland",
+      "name": "Rheinland & Köln",
+      "region_id": "reg_germany_west",
+      "owner_id": "nation_prussia",
+      "center": [
+        680,
+        410
+      ],
+      "svg_path": "M 640,370 L 710,370 L 710,450 L 640,440 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_amsterdam",
+        "prov_flanders",
+        "prov_champagne",
+        "prov_hanover",
+        "prov_franconia"
+      ],
+      "population": 2200000,
+      "religion": "Katholisch",
+      "culture": "Rheinisch-Deutsch",
+      "tax_revenue": 120,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "castle": 2,
+        "mines": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_hanover",
+      "name": "Kurfürstentum Braunschweig-Lüneburg (Hannover)",
+      "region_id": "reg_germany_north",
+      "owner_id": "nation_england",
+      "center": [
+        730,
+        330
+      ],
+      "svg_path": "M 690,300 L 770,300 L 770,370 L 690,370 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_amsterdam",
+        "prov_berlin",
+        "prov_rhineland",
+        "prov_saxony",
+        "prov_holstein"
+      ],
+      "population": 1100000,
+      "religion": "Protestantisch",
+      "culture": "Niedersächsisch-Deutsch",
+      "tax_revenue": 70,
+      "goods_produced": "Pferde",
+      "buildings": {
+        "castle": 1,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_saxony",
+      "name": "Kurfürstentum Sachsen (Dresden & Leipzig)",
+      "region_id": "reg_germany_east",
+      "owner_id": "nation_poland",
+      "center": [
+        810,
+        410
+      ],
+      "svg_path": "M 760,380 L 850,380 L 850,440 L 760,440 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_berlin",
+        "prov_hanover",
+        "prov_franconia",
+        "prov_bohemia",
+        "prov_silesia"
+      ],
+      "population": 1800000,
+      "religion": "Protestantisch",
+      "culture": "Sächsisch-Deutsch",
+      "tax_revenue": 110,
+      "goods_produced": "Silber",
+      "buildings": {
+        "palace": 1,
+        "university": 1,
+        "mines": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_bavaria_core",
+      "name": "Bayern (München)",
+      "region_id": "reg_germany_south",
+      "owner_id": "nation_bavaria",
+      "center": [
+        780,
+        520
+      ],
+      "svg_path": "M 730,480 L 820,480 L 820,560 L 730,550 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_franconia",
+        "prov_austria_core",
+        "prov_tyrol",
+        "prov_bohemia"
+      ],
+      "population": 1600000,
+      "religion": "Katholisch",
+      "culture": "Bayerisch-Deutsch",
+      "tax_revenue": 85,
+      "goods_produced": "Bier",
+      "buildings": {
+        "palace": 2,
+        "barracks": 1,
+        "castle": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_franconia",
+      "name": "Franken & Schwaben (Stuttgart & Nürnberg)",
+      "region_id": "reg_germany_south",
+      "owner_id": "nation_bavaria",
+      "center": [
+        720,
+        460
+      ],
+      "svg_path": "M 680,430 L 760,430 L 750,490 L 680,480 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_rhineland",
+        "prov_saxony",
+        "prov_bavaria_core",
+        "prov_bern"
+      ],
+      "population": 1400000,
+      "religion": "Protestantisch",
+      "culture": "Schwäbisch-Deutsch",
+      "tax_revenue": 75,
+      "goods_produced": "Werkzeuge",
+      "buildings": {
+        "castle": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_vienna",
+      "name": "Erzherzogtum Österreich (Wien)",
+      "region_id": "reg_austria_core",
+      "owner_id": "nation_austria",
+      "center": [
+        880,
+        510
+      ],
+      "svg_path": "M 830,480 L 920,470 L 920,540 L 830,540 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_bavaria_core",
+        "prov_bohemia",
+        "prov_hungary_west",
+        "prov_tyrol"
+      ],
+      "population": 2500000,
+      "religion": "Katholisch",
+      "culture": "Österreichisch-Deutsch",
+      "tax_revenue": 175,
+      "goods_produced": "Waffen",
+      "buildings": {
+        "palace": 3,
+        "university": 2,
+        "barracks": 3,
+        "fort": 2
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_bohemia",
+      "name": "Königreich Böhmen & Mähren (Prag)",
+      "region_id": "reg_austria_core",
+      "owner_id": "nation_austria",
+      "center": [
+        840,
+        440
+      ],
+      "svg_path": "M 800,410 L 890,410 L 880,470 L 800,470 Z",
+      "terrain": "mountains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_saxony",
+        "prov_silesia",
+        "prov_vienna",
+        "prov_bavaria_core"
+      ],
+      "population": 2800000,
+      "religion": "Katholisch",
+      "culture": "Tschechisch",
+      "tax_revenue": 140,
+      "goods_produced": "Glas",
+      "buildings": {
+        "castle": 2,
+        "university": 1,
+        "mines": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_silesia",
+      "name": "Schlesien (Breslau)",
+      "region_id": "reg_austria_core",
+      "owner_id": "nation_austria",
+      "center": [
+        900,
+        390
+      ],
+      "svg_path": "M 860,360 L 940,360 L 940,420 L 860,420 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_berlin",
+        "prov_saxony",
+        "prov_bohemia",
+        "prov_lesser_poland"
+      ],
+      "population": 1600000,
+      "religion": "Katholisch",
+      "culture": "Schlesisch",
+      "tax_revenue": 95,
+      "goods_produced": "Tuch",
+      "buildings": {
+        "castle": 1,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_tyrol",
+      "name": "Grafschaft Tirol & Steiermark (Innsbruck & Graz)",
+      "region_id": "reg_austria_south",
+      "owner_id": "nation_austria",
+      "center": [
+        820,
+        560
+      ],
+      "svg_path": "M 760,540 L 860,540 L 860,600 L 770,600 Z",
+      "terrain": "mountains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_bavaria_core",
+        "prov_vienna",
+        "prov_venice",
+        "prov_bern"
+      ],
+      "population": 950000,
+      "religion": "Katholisch",
+      "culture": "Österreichisch-Deutsch",
+      "tax_revenue": 70,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "fort": 3,
+        "mines": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_hungary_west",
+      "name": "Königreich Ungarn (Ofen / Buda & Pressburg)",
+      "region_id": "reg_hungary",
+      "owner_id": "nation_austria",
+      "center": [
+        960,
+        530
+      ],
+      "svg_path": "M 910,490 L 1020,490 L 1020,570 L 910,560 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_vienna",
+        "prov_transylvania",
+        "prov_croatia",
+        "prov_belgrade"
+      ],
+      "population": 3200000,
+      "religion": "Katholisch",
+      "culture": "Ungarisch",
+      "tax_revenue": 115,
+      "goods_produced": "Pferde",
+      "buildings": {
+        "castle": 2,
+        "barracks": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_transylvania",
+      "name": "Siebenbürgen (Transsilvanien)",
+      "region_id": "reg_hungary",
+      "owner_id": "nation_austria",
+      "center": [
+        1080,
+        540
+      ],
+      "svg_path": "M 1030,500 L 1130,500 L 1120,570 L 1020,570 Z",
+      "terrain": "mountains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_hungary_west",
+        "prov_wallachia",
+        "prov_galicia"
+      ],
+      "population": 1500000,
+      "religion": "Protestantisch",
+      "culture": "Rumänisch",
+      "tax_revenue": 60,
+      "goods_produced": "Gold",
+      "buildings": {
+        "castle": 2,
+        "mines": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_croatia",
+      "name": "Königreich Kroatien (Agram / Zagreb & Triest)",
+      "region_id": "reg_austria_south",
+      "owner_id": "nation_austria",
+      "center": [
+        880,
+        600
+      ],
+      "svg_path": "M 840,570 L 920,570 L 910,640 L 840,630 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_tyrol",
+        "prov_hungary_west",
+        "prov_venice",
+        "prov_bosnia"
+      ],
+      "population": 850000,
+      "religion": "Katholisch",
+      "culture": "Kroatisch",
+      "tax_revenue": 55,
+      "goods_produced": "Holz",
+      "buildings": {
+        "port": 1,
+        "fort": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_bern",
+      "name": "Schweizerische Eidgenossenschaft (Bern & Zürich)",
+      "region_id": "reg_switzerland",
+      "owner_id": "nation_switzerland",
+      "center": [
+        700,
+        530
+      ],
+      "svg_path": "M 660,500 L 740,500 L 730,560 L 660,550 Z",
+      "terrain": "mountains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_burgundy",
+        "prov_franconia",
+        "prov_tyrol",
+        "prov_milan"
+      ],
+      "population": 1200000,
+      "religion": "Reformiert",
+      "culture": "Schweizerdeutsch",
+      "tax_revenue": 95,
+      "goods_produced": "Finanzen",
+      "buildings": {
+        "fort": 3,
+        "castle": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_madrid",
+      "name": "Kastilien & Madrid",
+      "region_id": "reg_spain_central",
+      "owner_id": "nation_spain",
+      "center": [
+        380,
+        690
+      ],
+      "svg_path": "M 320,640 L 440,640 L 430,740 L 310,730 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_andalusia",
+        "prov_catalonia",
+        "prov_lisbon",
+        "prov_pyrenees"
+      ],
+      "population": 3800000,
+      "religion": "Katholisch",
+      "culture": "Kastilisch",
+      "tax_revenue": 160,
+      "goods_produced": "Wolle",
+      "buildings": {
+        "palace": 2,
+        "university": 1,
+        "barracks": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_andalusia",
+      "name": "Andalusien (Sevilla & Gibraltar)",
+      "region_id": "reg_spain_south",
+      "owner_id": "nation_spain",
+      "center": [
+        350,
+        780
+      ],
+      "svg_path": "M 290,740 L 420,740 L 400,830 L 290,820 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_madrid",
+        "prov_lisbon"
+      ],
+      "population": 2200000,
+      "religion": "Katholisch",
+      "culture": "Andalusisch",
+      "tax_revenue": 130,
+      "goods_produced": "Olivenöl",
+      "buildings": {
+        "port": 2,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_catalonia",
+      "name": "Katalonien & Valencia (Barcelona)",
+      "region_id": "reg_spain_east",
+      "owner_id": "nation_spain",
+      "center": [
+        470,
+        690
+      ],
+      "svg_path": "M 430,640 L 510,640 L 500,740 L 420,740 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_madrid",
+        "prov_pyrenees"
+      ],
+      "population": 1900000,
+      "religion": "Katholisch",
+      "culture": "Katalanisch",
+      "tax_revenue": 115,
+      "goods_produced": "Handelswaren",
+      "buildings": {
+        "port": 2,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_pyrenees",
+      "name": "Baskenland & Navarra",
+      "region_id": "reg_spain_north",
+      "owner_id": "nation_spain",
+      "center": [
+        420,
+        600
+      ],
+      "svg_path": "M 370,570 L 470,570 L 460,630 L 370,630 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_madrid",
+        "prov_catalonia",
+        "prov_loire"
+      ],
+      "population": 900000,
+      "religion": "Katholisch",
+      "culture": "Baskisch",
+      "tax_revenue": 65,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "fort": 3,
+        "mines": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_lisbon",
+      "name": "Portugal (Lissabon & Porto)",
+      "region_id": "reg_portugal",
+      "owner_id": "nation_portugal",
+      "center": [
+        250,
+        720
+      ],
+      "svg_path": "M 220,660 L 290,660 L 290,790 L 210,780 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_madrid",
+        "prov_andalusia"
+      ],
+      "population": 2100000,
+      "religion": "Katholisch",
+      "culture": "Portugiesisch",
+      "tax_revenue": 140,
+      "goods_produced": "Gewürze / Kolonialwaren",
+      "buildings": {
+        "palace": 2,
+        "port": 3,
+        "fort": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_piedmont",
+      "name": "Piemont-Savoyen (Turin)",
+      "region_id": "reg_italy_north",
+      "owner_id": "nation_spain",
+      "center": [
+        680,
+        610
+      ],
+      "svg_path": "M 650,570 L 710,570 L 710,640 L 650,640 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_provence",
+        "prov_milan"
+      ],
+      "population": 1400000,
+      "religion": "Katholisch",
+      "culture": "Italienisch",
+      "tax_revenue": 85,
+      "goods_produced": "Seide",
+      "buildings": {
+        "fort": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_milan",
+      "name": "Herzogtum Mailand (Lombardei)",
+      "region_id": "reg_italy_north",
+      "owner_id": "nation_spain",
+      "center": [
+        730,
+        600
+      ],
+      "svg_path": "M 700,570 L 770,570 L 770,630 L 700,630 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_piedmont",
+        "prov_bern",
+        "prov_venice",
+        "prov_tuscany"
+      ],
+      "population": 1800000,
+      "religion": "Katholisch",
+      "culture": "Italienisch",
+      "tax_revenue": 145,
+      "goods_produced": "Waffen",
+      "buildings": {
+        "castle": 2,
+        "barracks": 2
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_venice",
+      "name": "Venetien (Venedig)",
+      "region_id": "reg_italy_north",
+      "owner_id": "nation_venice",
+      "center": [
+        800,
+        600
+      ],
+      "svg_path": "M 760,570 L 830,570 L 830,630 L 760,630 Z",
+      "terrain": "marsh",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_milan",
+        "prov_tyrol",
+        "prov_croatia",
+        "prov_papal_north"
+      ],
+      "population": 1600000,
+      "religion": "Katholisch",
+      "culture": "Italienisch",
+      "tax_revenue": 160,
+      "goods_produced": "Glas",
+      "buildings": {
+        "palace": 2,
+        "port": 3,
+        "fort": 2
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_rome",
+      "name": "Kirchenstaat & Rom",
+      "region_id": "reg_italy_central",
+      "owner_id": "nation_papal",
+      "center": [
+        780,
+        690
+      ],
+      "svg_path": "M 740,650 L 820,650 L 810,730 L 740,720 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_venice",
+        "prov_naples"
+      ],
+      "population": 1700000,
+      "religion": "Katholisch",
+      "culture": "Italienisch",
+      "tax_revenue": 120,
+      "goods_produced": "Reliquien / Bücher",
+      "buildings": {
+        "palace": 3,
+        "university": 2,
+        "fort": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_naples",
+      "name": "Königreich Neapel & Sizilien",
+      "region_id": "reg_italy_south",
+      "owner_id": "nation_spain",
+      "center": [
+        840,
+        770
+      ],
+      "svg_path": "M 790,730 L 890,730 L 870,830 L 790,810 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_rome"
+      ],
+      "population": 3400000,
+      "religion": "Katholisch",
+      "culture": "Sizilianisch-Italienisch",
+      "tax_revenue": 150,
+      "goods_produced": "Wein",
+      "buildings": {
+        "palace": 2,
+        "port": 3,
+        "castle": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_stockholm",
+      "name": "Svealand (Stockholm)",
+      "region_id": "reg_sweden_core",
+      "owner_id": "nation_sweden",
+      "center": [
+        890,
+        180
+      ],
+      "svg_path": "M 840,140 L 930,130 L 930,220 L 850,220 Z",
+      "terrain": "forest",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_norway_south",
+        "prov_scania",
+        "prov_finland"
+      ],
+      "population": 1300000,
+      "religion": "Protestantisch",
+      "culture": "Schwedisch",
+      "tax_revenue": 120,
+      "goods_produced": "Kupfer",
+      "buildings": {
+        "palace": 2,
+        "port": 2,
+        "barracks": 2,
+        "mines": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_scania",
+      "name": "Skåne & Götaland",
+      "region_id": "reg_sweden_core",
+      "owner_id": "nation_sweden",
+      "center": [
+        840,
+        240
+      ],
+      "svg_path": "M 800,210 L 880,210 L 880,270 L 800,270 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_stockholm",
+        "prov_copenhagen"
+      ],
+      "population": 850000,
+      "religion": "Protestantisch",
+      "culture": "Schwedisch",
+      "tax_revenue": 70,
+      "goods_produced": "Getreide",
+      "buildings": {
+        "port": 1,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_copenhagen",
+      "name": "Dänemark (Kopenhagen & Seeland)",
+      "region_id": "reg_denmark",
+      "owner_id": "nation_denmark",
+      "center": [
+        770,
+        260
+      ],
+      "svg_path": "M 740,230 L 810,230 L 800,290 L 730,280 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_scania",
+        "prov_holstein"
+      ],
+      "population": 1100000,
+      "religion": "Protestantisch",
+      "culture": "Dänisch",
+      "tax_revenue": 95,
+      "goods_produced": "Öresundzoll",
+      "buildings": {
+        "palace": 2,
+        "port": 3,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_norway_south",
+      "name": "Norwegen (Christiania / Oslo & Bergen)",
+      "region_id": "reg_denmark",
+      "owner_id": "nation_denmark",
+      "center": [
+        750,
+        160
+      ],
+      "svg_path": "M 700,110 L 810,120 L 800,210 L 700,190 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_stockholm"
+      ],
+      "population": 650000,
+      "religion": "Protestantisch",
+      "culture": "Norwegisch",
+      "tax_revenue": 55,
+      "goods_produced": "Holz",
+      "buildings": {
+        "port": 2,
+        "castle": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_finland",
+      "name": "Großfürstentum Finnland (Åbo / Turku & Helsinki)",
+      "region_id": "reg_sweden_east",
+      "owner_id": "nation_sweden",
+      "center": [
+        1040,
+        150
+      ],
+      "svg_path": "M 980,100 L 1100,110 L 1100,200 L 980,190 Z",
+      "terrain": "forest",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_stockholm",
+        "prov_ingria",
+        "prov_novgorod"
+      ],
+      "population": 500000,
+      "religion": "Protestantisch",
+      "culture": "Finnisch",
+      "tax_revenue": 40,
+      "goods_produced": "Teer",
+      "buildings": {
+        "castle": 2,
+        "port": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_ingria",
+      "name": "Ingermanland & Livland (Riga & Narva)",
+      "region_id": "reg_baltic",
+      "owner_id": "nation_sweden",
+      "center": [
+        1050,
+        240
+      ],
+      "svg_path": "M 1010,210 L 1100,210 L 1090,280 L 1000,270 Z",
+      "terrain": "marsh",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_finland",
+        "prov_novgorod",
+        "prov_lithuania"
+      ],
+      "population": 800000,
+      "religion": "Protestantisch",
+      "culture": "Estnisch / Lettisch",
+      "tax_revenue": 80,
+      "goods_produced": "Flachs",
+      "buildings": {
+        "fort": 3,
+        "port": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_warsaw",
+      "name": "Masowien (Warschau)",
+      "region_id": "reg_poland_core",
+      "owner_id": "nation_poland",
+      "center": [
+        1010,
+        360
+      ],
+      "svg_path": "M 960,330 L 1060,330 L 1060,400 L 960,400 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_danzig",
+        "prov_lesser_poland",
+        "prov_lithuania",
+        "prov_belarus"
+      ],
+      "population": 2600000,
+      "religion": "Katholisch",
+      "culture": "Polnisch",
+      "tax_revenue": 110,
+      "goods_produced": "Getreide",
+      "buildings": {
+        "palace": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_lesser_poland",
+      "name": "Kleinpolen (Krakau)",
+      "region_id": "reg_poland_core",
+      "owner_id": "nation_poland",
+      "center": [
+        990,
+        420
+      ],
+      "svg_path": "M 940,395 L 1040,395 L 1040,460 L 940,460 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_silesia",
+        "prov_warsaw",
+        "prov_galicia"
+      ],
+      "population": 2100000,
+      "religion": "Katholisch",
+      "culture": "Polnisch",
+      "tax_revenue": 95,
+      "goods_produced": "Salz",
+      "buildings": {
+        "castle": 2,
+        "university": 1,
+        "mines": 1
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_lithuania",
+      "name": "Großfürstentum Litauen (Wilna / Vilnius)",
+      "region_id": "reg_lithuania",
+      "owner_id": "nation_poland",
+      "center": [
+        1060,
+        310
+      ],
+      "svg_path": "M 1010,270 L 1120,270 L 1110,340 L 1010,340 Z",
+      "terrain": "forest",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_east_prussia",
+        "prov_ingria",
+        "prov_warsaw",
+        "prov_belarus"
+      ],
+      "population": 2200000,
+      "religion": "Katholisch",
+      "culture": "Litauisch",
+      "tax_revenue": 85,
+      "goods_produced": "Holz",
+      "buildings": {
+        "castle": 2,
+        "university": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_danzig",
+      "name": "Königliches Preußen (Danzig)",
+      "region_id": "reg_poland_north",
+      "owner_id": "nation_poland",
+      "center": [
+        920,
+        310
+      ],
+      "svg_path": "M 880,280 L 950,280 L 950,335 L 880,335 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_pomerania",
+        "prov_east_prussia",
+        "prov_warsaw"
+      ],
+      "population": 850000,
+      "religion": "Protestantisch",
+      "culture": "Deutsch-Polnisch",
+      "tax_revenue": 140,
+      "goods_produced": "Getreidehandel",
+      "buildings": {
+        "port": 3,
+        "fort": 2
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_galicia",
+      "name": "Galizien & Wolhynien (Lemberg)",
+      "region_id": "reg_poland_east",
+      "owner_id": "nation_poland",
+      "center": [
+        1080,
+        440
+      ],
+      "svg_path": "M 1030,410 L 1140,410 L 1130,480 L 1030,480 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_lesser_poland",
+        "prov_transylvania",
+        "prov_kiev"
+      ],
+      "population": 2400000,
+      "religion": "Katholisch",
+      "culture": "Ruthenisch / Polnisch",
+      "tax_revenue": 90,
+      "goods_produced": "Getreide",
+      "buildings": {
+        "castle": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_moscow",
+      "name": "Moskau (Mutter aller russischen Städte)",
+      "region_id": "reg_russia_core",
+      "owner_id": "nation_russia",
+      "center": [
+        1280,
+        260
+      ],
+      "svg_path": "M 1220,210 L 1350,210 L 1340,310 L 1210,310 Z",
+      "terrain": "forest",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_novgorod",
+        "prov_smolensk",
+        "prov_volga"
+      ],
+      "population": 4200000,
+      "religion": "Orthodox",
+      "culture": "Russisch",
+      "tax_revenue": 180,
+      "goods_produced": "Pelze",
+      "buildings": {
+        "palace": 3,
+        "barracks": 3,
+        "fort": 2
+      },
+      "infrastructure_level": 2,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_novgorod",
+      "name": "Nowgorod (St. Petersburg Gründungsgebiet)",
+      "region_id": "reg_russia_north",
+      "owner_id": "nation_russia",
+      "center": [
+        1180,
+        210
+      ],
+      "svg_path": "M 1120,160 L 1240,160 L 1240,250 L 1120,250 Z",
+      "terrain": "forest",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_finland",
+        "prov_ingria",
+        "prov_moscow",
+        "prov_smolensk"
+      ],
+      "population": 1600000,
+      "religion": "Orthodox",
+      "culture": "Russisch",
+      "tax_revenue": 85,
+      "goods_produced": "Holz",
+      "buildings": {
+        "castle": 2,
+        "barracks": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_smolensk",
+      "name": "Smolensk & Weißrussland",
+      "region_id": "reg_russia_west",
+      "owner_id": "nation_russia",
+      "center": [
+        1180,
+        310
+      ],
+      "svg_path": "M 1120,260 L 1240,260 L 1230,360 L 1120,360 Z",
+      "terrain": "forest",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_novgorod",
+        "prov_moscow",
+        "prov_lithuania",
+        "prov_kiev"
+      ],
+      "population": 1800000,
+      "religion": "Orthodox",
+      "culture": "Russisch",
+      "tax_revenue": 75,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "fort": 3,
+        "barracks": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_kiev",
+      "name": "Ukraine & Kiew",
+      "region_id": "reg_ukraine",
+      "owner_id": "nation_russia",
+      "center": [
+        1210,
+        420
+      ],
+      "svg_path": "M 1150,370 L 1270,370 L 1270,470 L 1150,470 Z",
+      "terrain": "plains",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_galicia",
+        "prov_smolensk",
+        "prov_crimea"
+      ],
+      "population": 3100000,
+      "religion": "Orthodox",
+      "culture": "Ukrainisch-Kosakisch",
+      "tax_revenue": 110,
+      "goods_produced": "Getreide",
+      "buildings": {
+        "castle": 2,
+        "barracks": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    },
+    {
+      "id": "prov_crimea",
+      "name": "Krimtataren-Khanat (Sewastopol & Asow)",
+      "region_id": "reg_pontic",
+      "owner_id": "nation_ottoman",
+      "center": [
+        1280,
+        520
+      ],
+      "svg_path": "M 1220,470 L 1340,470 L 1330,560 L 1220,550 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_kiev",
+        "prov_wallachia"
+      ],
+      "population": 1200000,
+      "religion": "Sunnitisch",
+      "culture": "Tatarisch",
+      "tax_revenue": 75,
+      "goods_produced": "Pferde",
+      "buildings": {
+        "port": 1,
+        "fort": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_constantinople",
+      "name": "Konstantinopel / Istanbul (Die Hohe Pforte)",
+      "region_id": "reg_thrace",
+      "owner_id": "nation_ottoman",
+      "center": [
+        1200,
+        710
+      ],
+      "svg_path": "M 1140,670 L 1260,670 L 1260,760 L 1150,750 Z",
+      "terrain": "hills",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_bulgaria",
+        "prov_greece"
+      ],
+      "population": 5200000,
+      "religion": "Sunnitisch",
+      "culture": "Türkisch",
+      "tax_revenue": 240,
+      "goods_produced": "Seide / Luxusgüter",
+      "buildings": {
+        "palace": 3,
+        "port": 3,
+        "fort": 3,
+        "barracks": 3
+      },
+      "infrastructure_level": 3,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_greece",
+      "name": "Griechenland (Athen & Peloponnes)",
+      "region_id": "reg_greece",
+      "owner_id": "nation_ottoman",
+      "center": [
+        1120,
+        780
+      ],
+      "svg_path": "M 1070,740 L 1160,740 L 1150,840 L 1060,820 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_constantinople",
+        "prov_bulgaria"
+      ],
+      "population": 2100000,
+      "religion": "Orthodox",
+      "culture": "Griechisch",
+      "tax_revenue": 105,
+      "goods_produced": "Olivenöl",
+      "buildings": {
+        "port": 2,
+        "castle": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_bulgaria",
+      "name": "Bulgarien (Sofia & Warna)",
+      "region_id": "reg_balkans_east",
+      "owner_id": "nation_ottoman",
+      "center": [
+        1120,
+        660
+      ],
+      "svg_path": "M 1060,620 L 1160,620 L 1150,700 L 1060,690 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_wallachia",
+        "prov_belgrade",
+        "prov_constantinople",
+        "prov_greece"
+      ],
+      "population": 1900000,
+      "religion": "Orthodox",
+      "culture": "Bulgarisch",
+      "tax_revenue": 85,
+      "goods_produced": "Kupfer",
+      "buildings": {
+        "fort": 2,
+        "castle": 1
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_belgrade",
+      "name": "Serbien & Belgrad (Die Donaufestung)",
+      "region_id": "reg_balkans_west",
+      "owner_id": "nation_ottoman",
+      "center": [
+        1020,
+        620
+      ],
+      "svg_path": "M 970,580 L 1060,580 L 1060,650 L 970,640 Z",
+      "terrain": "hills",
+      "is_coastal": false,
+      "neighbors": [
+        "prov_hungary_west",
+        "prov_bulgaria",
+        "prov_bosnia",
+        "prov_wallachia"
+      ],
+      "population": 1300000,
+      "religion": "Orthodox",
+      "culture": "Serbisch",
+      "tax_revenue": 70,
+      "goods_produced": "Waffen",
+      "buildings": {
+        "fort": 3,
+        "barracks": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 3
+    },
+    {
+      "id": "prov_bosnia",
+      "name": "Bosnien & Dalmatien",
+      "region_id": "reg_balkans_west",
+      "owner_id": "nation_ottoman",
+      "center": [
+        950,
+        650
+      ],
+      "svg_path": "M 900,610 L 980,610 L 970,680 L 900,670 Z",
+      "terrain": "mountains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_croatia",
+        "prov_belgrade"
+      ],
+      "population": 950000,
+      "religion": "Sunnitisch",
+      "culture": "Bosnisch",
+      "tax_revenue": 60,
+      "goods_produced": "Eisen",
+      "buildings": {
+        "castle": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 2
+    },
+    {
+      "id": "prov_wallachia",
+      "name": "Walachei & Moldau (Bukarest & Jassy)",
+      "region_id": "reg_danube_principality",
+      "owner_id": "nation_ottoman",
+      "center": [
+        1140,
+        580
+      ],
+      "svg_path": "M 1080,540 L 1200,540 L 1190,620 L 1080,610 Z",
+      "terrain": "plains",
+      "is_coastal": true,
+      "neighbors": [
+        "prov_transylvania",
+        "prov_crimea",
+        "prov_bulgaria",
+        "prov_belgrade"
+      ],
+      "population": 2200000,
+      "religion": "Orthodox",
+      "culture": "Rumänisch",
+      "tax_revenue": 95,
+      "goods_produced": "Getreide",
+      "buildings": {
+        "castle": 2
+      },
+      "infrastructure_level": 1,
+      "fortification_level": 1
+    }
+  ]
+}
