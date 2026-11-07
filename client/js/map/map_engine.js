@@ -12,22 +12,22 @@ import { audio } from "../ui/audio_controller.js";
 
 // Curated, non-overlapping historical nation label positions (Victoria 3 & HoI4 style)
 const NATION_LABEL_CONFIG = {
-  nation_prussia:     { title: "PREUSSEN",          x: 540, y: 468, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
+  nation_prussia:     { title: "PREUSSEN",          x: 535, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 17, letterSpacing: 5 },
   nation_france:      { title: "FRANKREICH",        x: 395, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
   nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
   nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_russia:      { title: "RUSSLAND",          x: 840, y: 340, minScale: 0.65, maxScale: 1.6, fontSize: 22, letterSpacing: 7 },
+  nation_russia:      { title: "RUSSLAND",          x: 845, y: 340, minScale: 0.65, maxScale: 1.6, fontSize: 22, letterSpacing: 7 },
   nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
   nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
   nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_poland:      { title: "POLEN-LITAUEN",     x: 670, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 405, minScale: 0.95, maxScale: 1.8, fontSize: 14, letterSpacing: 4 },
-  nation_netherlands: { title: "NIEDERLANDE",       x: 420, y: 475, minScale: 1.25, maxScale: 2.2, fontSize: 12, letterSpacing: 3 },
-  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 1.8, fontSize: 14, letterSpacing: 4 },
-  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 615, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 },
-  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 },
-  nation_venice:      { title: "VENEDIG",           x: 535, y: 625, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 },
-  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 710, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 }
+  nation_poland:      { title: "POLEN-LITAUEN",     x: 690, y: 475, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
+  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 395, minScale: 1.15, maxScale: 1.9, fontSize: 13, letterSpacing: 4 },
+  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 475, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
+  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 1.15, maxScale: 1.9, fontSize: 13, letterSpacing: 3 },
+  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 615, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
+  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
+  nation_venice:      { title: "VENEDIG",           x: 540, y: 625, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
+  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 710, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 }
 };
 
 export class MapEngine {

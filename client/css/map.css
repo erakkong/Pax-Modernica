@@ -32,10 +32,10 @@ svg#europe-map-svg {
   user-select: none;
 }
 
-/* Tier 1: Overarching Regional States (Image 2 - 248 States) */
+/* Tier 1: Overarching Regional States (Image 2 - 251 States) */
 .region-path {
-  stroke: rgba(16, 22, 30, 0.7);
-  stroke-width: 1.1px;
+  stroke: rgba(15, 23, 42, 0.28);
+  stroke-width: 0.65px;
   stroke-linejoin: round;
   stroke-linecap: round;
   cursor: pointer;
@@ -43,37 +43,36 @@ svg#europe-map-svg {
 }
 
 .region-path:hover {
-  stroke: #fef08a;
-  stroke-width: 1.8px;
+  stroke: #fde047;
+  stroke-width: 1.4px;
 }
 
 .region-path.region-selected {
   stroke: #fde047;
-  stroke-width: 2.6px;
-  filter: drop-shadow(0 0 6px rgba(253, 224, 71, 0.5));
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 5px rgba(253, 224, 71, 0.5));
 }
 
-/* Tier 2: Granular Internal Provinces (Image 1 - 976 Provinces) */
+/* Tier 2: Granular Internal Provinces (Zero dark grid, seamless borders like Victoria 3) */
 .province-path {
-  stroke: rgba(0, 0, 0, 0.22);
-  stroke-width: 0.5px;
-  stroke-linejoin: round;
-  stroke-linecap: round;
+  stroke: none !important;
+  stroke-width: 0 !important;
   cursor: pointer;
   transition: fill 0.15s ease, stroke 0.15s ease;
 }
 
 .province-path:hover {
-  stroke: #fcd34d;
-  stroke-width: 1.6px;
-  fill: rgba(252, 211, 77, 0.2) !important;
+  stroke: #fde047 !important;
+  stroke-width: 1.5px !important;
+  fill: rgba(253, 224, 71, 0.22) !important;
+  filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.5));
 }
 
 .province-path.selected {
-  stroke: #fef08a;
-  stroke-width: 2.4px;
-  fill: rgba(254, 240, 138, 0.28) !important;
-  filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.5));
+  stroke: #fef08a !important;
+  stroke-width: 2px !important;
+  fill: rgba(254, 240, 138, 0.32) !important;
+  filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.7));
 }
 
 /* Sovereign Macro Empire Labels (Clean, Curated Victorian Typography) */
