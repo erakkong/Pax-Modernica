@@ -12,22 +12,22 @@ import { audio } from "../ui/audio_controller.js";
 
 // Curated, non-overlapping historical nation label positions (Victoria 3 & HoI4 style)
 const NATION_LABEL_CONFIG = {
-  nation_prussia:     { title: "PREUSSEN",          x: 535, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 17, letterSpacing: 5 },
-  nation_france:      { title: "FRANKREICH",        x: 395, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
-  nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
-  nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_russia:      { title: "RUSSLAND",          x: 845, y: 340, minScale: 0.65, maxScale: 1.6, fontSize: 22, letterSpacing: 7 },
-  nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
-  nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
-  nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_poland:      { title: "POLEN-LITAUEN",     x: 690, y: 475, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 395, minScale: 1.15, maxScale: 1.9, fontSize: 13, letterSpacing: 4 },
-  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 475, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
-  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 1.15, maxScale: 1.9, fontSize: 13, letterSpacing: 3 },
-  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 615, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
-  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
-  nation_venice:      { title: "VENEDIG",           x: 540, y: 625, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 },
-  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 710, minScale: 1.45, maxScale: 2.3, fontSize: 11, letterSpacing: 2 }
+  nation_prussia:     { title: "PREUSSEN",          x: 535, y: 465, minScale: 0.65, maxScale: 1.55, fontSize: 17, letterSpacing: 5 },
+  nation_france:      { title: "FRANKREICH",        x: 395, y: 575, minScale: 0.65, maxScale: 1.55, fontSize: 20, letterSpacing: 6 },
+  nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 1.55, fontSize: 19, letterSpacing: 5 },
+  nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 1.55, fontSize: 18, letterSpacing: 5 },
+  nation_russia:      { title: "RUSSLAND",          x: 845, y: 340, minScale: 0.65, maxScale: 1.55, fontSize: 22, letterSpacing: 7 },
+  nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 1.55, fontSize: 19, letterSpacing: 5 },
+  nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 1.55, fontSize: 20, letterSpacing: 6 },
+  nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 1.55, fontSize: 18, letterSpacing: 5 },
+  nation_poland:      { title: "POLEN-LITAUEN",     x: 690, y: 475, minScale: 0.65, maxScale: 1.55, fontSize: 18, letterSpacing: 5 },
+  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 395, minScale: 0.85, maxScale: 1.7, fontSize: 14, letterSpacing: 4 },
+  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 475, minScale: 1.10, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
+  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 1.8, fontSize: 13, letterSpacing: 3 },
+  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 610, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
+  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
+  nation_venice:      { title: "VENEDIG",           x: 540, y: 625, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
+  nation_papal:       { title: "KIRCHENSTAAT",      x: 530, y: 695, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 }
 };
 
 export class MapEngine {
@@ -250,6 +250,17 @@ export class MapEngine {
 
     this.tooltipEl.classList.add("visible");
     this.tooltipVisible = true;
+
+    // Hover Highlight: Reveal city dot & name immediately
+    if (this.labelsGroup) {
+      const marker = this.labelsGroup.querySelector(`.province-city-marker[data-prov-id="${prov.id}"]`);
+      if (marker) {
+        marker.classList.add("hovered");
+        marker.style.display = "block";
+        const label = marker.querySelector(".province-city-label");
+        if (label) label.style.display = "block";
+      }
+    }
   }
 
   showTooltipForRegion(reg, e) {
@@ -281,6 +292,15 @@ export class MapEngine {
       this.tooltipEl.classList.remove("visible");
       this.tooltipVisible = false;
     }
+    // Clean up hover highlights on city markers
+    if (this.labelsGroup) {
+      this.labelsGroup.querySelectorAll(".province-city-marker.hovered").forEach((m) => {
+        m.classList.remove("hovered");
+        if (this.scale < 2.2 && !m.classList.contains("selected")) {
+          m.style.display = "none";
+        }
+      });
+    }
   }
 
   updateActiveMapModeButton(activeMode) {
@@ -301,18 +321,116 @@ export class MapEngine {
 
   /**
    * Hierarchical Level of Detail:
-   * Only Macro Great Power empire titles on overview zoom.
-   * Granular province & region names are displayed strictly on mouse hover via the cursor badge!
+   * 1. scale < 1.40 (Continental Zoom): Macro Great Power sovereign titles
+   * 2. 1.40 <= scale < 2.20 (Regional Zoom): Regional capitals (dot + capital name)
+   * 3. scale >= 2.20 (Detail Zoom): Granular province cities (dot + name)
    */
   updateZoomLOD() {
     if (!this.labelsGroup) return;
 
+    const isDetailZoom = this.scale >= 2.20;
+    const isRegionalZoom = this.scale >= 1.40 && this.scale < 2.20;
+    const isContinentalZoom = this.scale < 1.40;
+
+    // 1. Continental Macro Titles (Shown during overview zoom)
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
       const minS = parseFloat(el.getAttribute("data-min-scale") || "0.65");
-      const maxS = parseFloat(el.getAttribute("data-max-scale") || "1.8");
-      const visible = this.scale >= minS && this.scale <= maxS;
-      el.style.display = visible ? "block" : "none";
+      const maxS = parseFloat(el.getAttribute("data-max-scale") || "1.7");
+      if (this.scale >= minS && this.scale <= maxS) {
+        el.style.display = "block";
+      } else {
+        el.style.display = "none";
+      }
     });
+
+    // 2. Regional Capital Markers (Medium Zoom)
+    const regMarkers = this.labelsGroup.querySelectorAll(".region-capital-marker");
+    if (!isRegionalZoom) {
+      regMarkers.forEach((el) => {
+        el.style.display = "none";
+      });
+    } else {
+      const minDistance = 26 / this.scale;
+      const occupied = [];
+
+      regMarkers.forEach((marker) => {
+        marker.style.display = "block";
+        const rx = parseFloat(marker.getAttribute("data-rx") || "0");
+        const ry = parseFloat(marker.getAttribute("data-ry") || "0");
+        const label = marker.querySelector(".region-capital-label");
+        if (!label) return;
+
+        let collides = false;
+        for (const [ox, oy] of occupied) {
+          const dx = rx - ox;
+          const dy = ry - oy;
+          if (dx * dx + dy * dy < minDistance * minDistance) {
+            collides = true;
+            break;
+          }
+        }
+
+        if (collides) {
+          label.style.display = "none";
+        } else {
+          label.style.display = "block";
+          occupied.push([rx, ry]);
+        }
+      });
+    }
+
+    // 3. Granular Province City Markers (High Zoom)
+    const provMarkers = this.labelsGroup.querySelectorAll(".province-city-marker");
+    if (!isDetailZoom) {
+      provMarkers.forEach((el) => {
+        if (!el.classList.contains("selected") && !el.classList.contains("hovered")) {
+          el.style.display = "none";
+        } else {
+          el.style.display = "block";
+        }
+      });
+    } else {
+      // Dynamic collision avoidance for text labels
+      const minDistance = 24 / this.scale;
+      const occupied = [];
+
+      provMarkers.forEach((marker) => {
+        marker.style.display = "block";
+        const cx = parseFloat(marker.getAttribute("data-cx") || "0");
+        const cy = parseFloat(marker.getAttribute("data-cy") || "0");
+        const isCap = marker.classList.contains("capital");
+        const isSel = marker.classList.contains("selected");
+        const isHov = marker.classList.contains("hovered");
+        const label = marker.querySelector(".province-city-label");
+
+        if (!label) return;
+
+        // Capitals, selected, and hovered cities ALWAYS get full visibility
+        if (isCap || isSel || isHov) {
+          label.style.display = "block";
+          occupied.push([cx, cy]);
+          return;
+        }
+
+        // Distance collision check against already shown labels
+        let collides = false;
+        for (const [ox, oy] of occupied) {
+          const dx = cx - ox;
+          const dy = cy - oy;
+          if (dx * dx + dy * dy < minDistance * minDistance) {
+            collides = true;
+            break;
+          }
+        }
+
+        if (collides) {
+          label.style.display = "none";
+        } else {
+          label.style.display = "block";
+          occupied.push([cx, cy]);
+        }
+      });
+    }
   }
 
   zoom(factor) {
@@ -347,9 +465,9 @@ export class MapEngine {
 
   /**
    * Main Two-Tier Render:
-   * 1. Regions Layer (Image 2 - 248 States)
-   * 2. Provinces Layer (Image 1 - 976 Granular Provinces)
-   * Pristine visual clarity: Province/Region details appear interactively on mouse hover!
+   * 1. Regions Layer (Image 2 - 251 States)
+   * 2. Provinces Layer (Image 1 - 1041 Granular Provinces)
+   * 3. Victoria 3 Interactive City Markers & Regional Capitals
    */
   renderMap() {
     if (!this.regionsGroup || !this.provincesGroup || !this.labelsGroup) return;
@@ -409,11 +527,102 @@ export class MapEngine {
       this.provincesGroup.appendChild(path);
     });
 
-    // 4. Render Sovereign Macro Empire Labels
+    // 4. Render Victoria 3 City Settlements & Regional Capitals
+    this.renderCitiesAndCapitals();
+
+    // 5. Render Sovereign Macro Empire Labels
     this.renderMacroNationLabels();
 
     this.applyTransform();
-    console.log(`Pax Modernica: Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen mit Hover-Inspektor).`);
+    console.log(`Pax Modernica: Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen mit Victoria-3-Städten).`);
+  }
+
+  renderCitiesAndCapitals() {
+    const regions = Object.values(store.regions || {});
+    const provinces = Object.values(store.provinces || {});
+
+    // Sort provinces so capitals and economically larger cities are prioritized in collision checks
+    const sortedProvs = [...provinces].sort((a, b) => {
+      if (a.is_capital) return -1;
+      if (b.is_capital) return 1;
+      return (b.economy || 0) - (a.economy || 0);
+    });
+
+    // 1. Regional Capitals (Medium Zoom)
+    regions.forEach((reg) => {
+      if (!reg.center) return;
+      const [rx, ry] = reg.center;
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.classList.add("region-capital-marker");
+      g.setAttribute("data-region-id", reg.id);
+      g.setAttribute("data-rx", rx.toString());
+      g.setAttribute("data-ry", ry.toString());
+
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", rx);
+      circle.setAttribute("cy", ry);
+      circle.setAttribute("r", "3.0");
+      circle.classList.add("region-capital-dot");
+
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", rx + 4.5);
+      text.setAttribute("y", ry + 2.5);
+      text.classList.add("region-capital-label");
+      text.textContent = reg.capital_city || reg.name.split("(")[0].trim().toUpperCase();
+
+      g.appendChild(circle);
+      g.appendChild(text);
+
+      g.addEventListener("mouseenter", (e) => this.showTooltipForRegion(reg, e));
+      g.addEventListener("mouseleave", () => this.hideTooltip());
+      g.addEventListener("click", (e) => {
+        e.stopPropagation();
+        audio.playProvinceSelect();
+        const targetProvId = (reg.provinces && reg.provinces.length > 0) ? reg.provinces[0] : null;
+        store.setSelectedProvince(targetProvId);
+      });
+
+      this.labelsGroup.appendChild(g);
+    });
+
+    // 2. Granular Province Cities (Detail Zoom)
+    sortedProvs.forEach((prov) => {
+      if (!prov.center) return;
+      const [cx, cy] = prov.center;
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.classList.add("province-city-marker");
+      if (prov.is_capital) g.classList.add("capital");
+      g.setAttribute("data-prov-id", prov.id);
+      g.setAttribute("data-cx", cx.toString());
+      g.setAttribute("data-cy", cy.toString());
+
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", cx);
+      circle.setAttribute("cy", cy);
+      circle.setAttribute("r", prov.is_capital ? "2.6" : "1.8");
+      circle.classList.add("province-city-dot");
+      if (prov.is_capital) circle.classList.add("capital");
+
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", cx + (prov.is_capital ? 4.5 : 3.5));
+      text.setAttribute("y", cy + 2.2);
+      text.classList.add("province-city-label");
+      if (prov.is_capital) text.classList.add("capital");
+      text.textContent = prov.name;
+
+      g.appendChild(circle);
+      g.appendChild(text);
+
+      g.addEventListener("mouseenter", (e) => this.showTooltipForProvince(prov, e));
+      g.addEventListener("mouseleave", () => this.hideTooltip());
+      g.addEventListener("click", (e) => {
+        e.stopPropagation();
+        audio.playProvinceSelect();
+        store.setSelectedProvince(prov.id);
+      });
+
+      this.labelsGroup.appendChild(g);
+    });
   }
 
   renderSeaLabels() {
@@ -640,6 +849,9 @@ export class MapEngine {
     this.regionsGroup.querySelectorAll(".region-path.region-selected").forEach((el) => {
       el.classList.remove("region-selected");
     });
+    this.labelsGroup.querySelectorAll(".province-city-marker.selected").forEach((el) => {
+      el.classList.remove("selected");
+    });
 
     if (prov) {
       const provPath = document.getElementById(`svg-prov-${prov.id}`);
@@ -653,6 +865,13 @@ export class MapEngine {
         if (regPath) {
           regPath.classList.add("region-selected");
         }
+      }
+
+      const cityMarker = this.labelsGroup.querySelector(`.province-city-marker[data-prov-id="${prov.id}"]`);
+      if (cityMarker) {
+        cityMarker.classList.add("selected");
+        const label = cityMarker.querySelector(".province-city-label");
+        if (label) label.style.display = "block";
       }
     }
   }

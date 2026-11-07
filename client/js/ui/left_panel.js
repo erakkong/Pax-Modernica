@@ -90,10 +90,12 @@ export class LeftPanelController {
   }
 
   onMapModeChanged(mode) {
-    if (mode === "terrain" || mode === "growth_rate" || mode === "economy") {
-      this.panel.classList.remove("collapsed");
-      this.activeTab = mode;
-      this.render();
+    // Only re-render if left panel is already open by user choice
+    if (!this.panel.classList.contains("collapsed")) {
+      if (mode === "terrain" || mode === "growth_rate" || mode === "economy") {
+        this.activeTab = mode;
+        this.render();
+      }
     }
   }
 

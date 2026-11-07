@@ -137,3 +137,125 @@ svg#europe-map-svg {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
   transition: opacity 0.2s ease;
 }
+
+/* =========================================================================
+   VICTORIA 3 CITY SETTLEMENT MARKERS & LOD
+   ========================================================================= */
+.province-city-marker {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.province-city-dot {
+  fill: #fdfbf7;
+  stroke: #0a0f18;
+  stroke-width: 0.9px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+
+.province-city-marker:hover .province-city-dot {
+  fill: #38bdf8;
+  stroke: #ffffff;
+  r: 3.2px;
+}
+
+.province-city-dot.capital {
+  fill: #fde047;
+  stroke: #78350f;
+  stroke-width: 1.2px;
+  filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.8));
+}
+
+.province-city-label {
+  fill: #f8fafc;
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-anchor: start;
+  pointer-events: auto;
+  stroke: rgba(10, 15, 22, 0.95);
+  stroke-width: 2.2px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+  user-select: none;
+  transition: fill 0.15s ease;
+}
+
+.province-city-label.capital {
+  fill: #fef08a;
+  font-weight: 700;
+  font-size: 9px;
+}
+
+.province-city-marker:hover .province-city-label,
+.province-city-marker.hovered .province-city-label {
+  fill: #fde047 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 6px rgba(253, 224, 71, 0.9);
+}
+
+.province-city-marker.hovered .province-city-dot {
+  fill: #fde047;
+  stroke: #ffffff;
+  stroke-width: 1.5px;
+  r: 3.6px;
+  filter: drop-shadow(0 0 6px #fde047);
+}
+
+.province-city-marker.selected .province-city-dot {
+  fill: #38bdf8;
+  stroke: #ffffff;
+  stroke-width: 1.5px;
+  r: 3.5px;
+  filter: drop-shadow(0 0 4px #38bdf8);
+}
+
+.province-city-marker.selected .province-city-label {
+  fill: #38bdf8;
+  font-weight: 700;
+}
+
+/* Regional Capital Markers (Medium Zoom) */
+.region-capital-marker {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.region-capital-dot {
+  fill: #fde047;
+  stroke: #0f172a;
+  stroke-width: 1px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+
+.region-capital-marker:hover .region-capital-dot {
+  fill: #38bdf8;
+  stroke: #ffffff;
+  r: 4.2px;
+}
+
+.region-capital-label {
+  fill: #fef08a;
+  font-family: var(--font-serif);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-anchor: start;
+  pointer-events: auto;
+  stroke: rgba(10, 15, 22, 0.95);
+  stroke-width: 2.6px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85));
+  user-select: none;
+  transition: fill 0.15s ease;
+}
+
+.region-capital-marker:hover .region-capital-label {
+  fill: #38bdf8;
+}
