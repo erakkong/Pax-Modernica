@@ -10,6 +10,7 @@ import { ProvincePanelController } from "./ui/province_panel.js";
 import { LeftPanelController } from "./ui/left_panel.js";
 import { RightPanelController } from "./ui/right_panel.js";
 import { ModalController } from "./ui/settings_modal.js";
+import { techTreeController } from "./ui/tech_tree.js";
 import { audio } from "./ui/audio_controller.js";
 
 class PaxApp {
@@ -23,7 +24,7 @@ class PaxApp {
   }
 
   init() {
-    console.log("Pax Modernica Client startet...");
+    console.log("Pax Modernica Client startet (Victoria 3 Interface)...");
 
     const viewportEl = document.getElementById("map-viewport");
     this.mapEngine = new MapEngine(viewportEl);
@@ -35,6 +36,7 @@ class PaxApp {
 
     this.bindMapModes();
     this.bindKeyboardShortcuts();
+    this.bindBottomDock();
 
     // Check saved auth token
     this.checkStoredAuth();
@@ -52,14 +54,41 @@ class PaxApp {
         document.querySelectorAll(".map-mode-btn").forEach((b) => b.classList.remove("active"));
         e.currentTarget.classList.add("active");
         const mode = e.currentTarget.getAttribute("data-mode");
-        store.setMapMode(mode);
+        store.setActiveMapMode(mode);
+      });
+    });
+  }
+
+  bindBottomDock() {
+    document.querySelectorAll(".v3-round-brass-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        audio.playClick();
+        const action = e.currentTarget.getAttribute("data-action");
+        const leftPanelEl = document.getElementById("left-panel");
+
+        if (action === "laws") {
+          leftPanelEl?.classList.remove("collapsed");
+          this.leftPanel.activeTab = "politics";
+          this.leftPanel.render();
+        } else if (action === "production") {
+          leftPanelEl?.classList.remove("collapsed");
+          this.leftPanel.activeTab = "economy";
+          this.leftPanel.render();
+        } else if (action === "diplomacy") {
+          leftPanelEl?.classList.remove("collapsed");
+          this.leftPanel.activeTab = "diplomacy";
+          this.leftPanel.render();
+        } else if (action === "military") {
+          leftPanelEl?.classList.remove("collapsed");
+          this.leftPanel.activeTab = "military";
+          this.leftPanel.render();
+        }
       });
     });
   }
 
   bindKeyboardShortcuts() {
     window.addEventListener("keydown", (e) => {
-      // Don't intercept if user is typing in input
       if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
 
       if (e.code === "Space") {
@@ -70,10 +99,18 @@ class PaxApp {
         wsClient.send({ type: "SET_SPEED", speed: 1.0 });
       } else if (e.key === "2") {
         wsClient.send({ type: "SET_SPEED", speed: 2.0 });
-      } else if (e.key === "3" || e.key === "5") {
+      } else if (e.key === "3") {
+        wsClient.send({ type: "SET_SPEED", speed: 3.0 });
+      } else if (e.key === "4") {
+        wsClient.send({ type: "SET_SPEED", speed: 4.0 });
+      } else if (e.key === "5") {
         wsClient.send({ type: "SET_SPEED", speed: 5.0 });
+      } else if (e.key.toLowerCase() === "t") {
+        // 'T' shortcut to toggle Technikbaum
+        techTreeController.show();
       } else if (e.key === "Escape") {
         store.setSelectedProvince(null);
+        techTreeController.hide();
         this.modals.close();
       }
     });
@@ -99,7 +136,7 @@ class PaxApp {
   }
 }
 
-// Boot application when DOM is ready
+// Bootstrap
 window.addEventListener("DOMContentLoaded", () => {
   const app = new PaxApp();
   app.init();

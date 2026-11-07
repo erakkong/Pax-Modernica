@@ -1,5 +1,5 @@
 /**
- * Pax Modernica - Right Panel (Pax Gazette / Chronicle) Controller
+ * Pax Modernica - Right Panel (Victoria 3 Outliner & Gazette) Controller
  */
 
 import { store } from "../state/game_state.js";
@@ -9,7 +9,6 @@ export class RightPanelController {
   constructor() {
     this.panel = document.getElementById("right-panel");
     this.toggleBtn = document.getElementById("btn-toggle-right-panel");
-    this.chronicleList = document.getElementById("chronicle-list");
 
     this.bindEvents();
     this.setupStoreListeners();
@@ -20,31 +19,27 @@ export class RightPanelController {
       audio.playClick();
       this.panel.classList.toggle("collapsed");
     });
+
+    // Accordion expand/collapse
+    this.panel?.querySelectorAll(".outliner-section-head").forEach((head) => {
+      head.addEventListener("click", (e) => {
+        const body = e.currentTarget.nextElementSibling;
+        if (body) {
+          const isClosed = body.style.display === "none";
+          body.style.display = isClosed ? "flex" : "none";
+          const chev = e.currentTarget.querySelector(".chevron");
+          if (chev) chev.textContent = isClosed ? "▼" : "▶";
+        }
+      });
+    });
   }
 
   setupStoreListeners() {
-    store.subscribe("chronicle_updated", (events) => this.render(events));
-    store.subscribe("world_loaded", () => this.render(store.chronicle));
+    store.subscribe("chronicle_updated", () => this.render());
+    store.subscribe("world_loaded", () => this.render());
   }
 
-  render(events) {
-    if (!this.chronicleList) return;
-    const list = events || store.chronicle || [];
-
-    if (list.length === 0) {
-      this.chronicleList.innerHTML = `<div style="color:var(--text-dim); padding:10px;">Keine Meldungen vorhanden.</div>`;
-      return;
-    }
-
-    this.chronicleList.innerHTML = list.map((evt) => `
-      <div class="chronicle-card">
-        <div class="chronicle-meta">
-          <span class="chronicle-tag">${evt.category || "DEPÈCHE"}</span>
-          <span>${evt.date_str || ""}</span>
-        </div>
-        <div class="chronicle-headline">${evt.headline}</div>
-        <div class="chronicle-body">${evt.body}</div>
-      </div>
-    `).join("");
+  render() {
+    // Dynamic outliner updates when data changes
   }
 }

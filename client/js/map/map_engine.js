@@ -1,8 +1,8 @@
 /**
- * Pax Modernica - Pure Vector Map Engine
+ * Pax Modernica - Victoria 3 Pure Vector Map Engine
  * Features pure mathematical vector topology (Albers Conic 2000x1350 viewBox),
  * hardware-accelerated transform matrix panning/zooming, dynamic LOD typography,
- * and 10 strategic Grand-Strategy map modes.
+ * spatial occlusion & collision avoidance, and 10 strategic Grand-Strategy map modes.
  */
 
 import { store } from "../state/game_state.js";
@@ -15,6 +15,7 @@ export class MapEngine {
     this.worldGroup = document.getElementById("map-world");
     this.provincesGroup = document.getElementById("provinces-layer");
     this.bordersGroup = document.getElementById("borders-layer");
+    this.armiesGroup = document.getElementById("armies-layer");
     this.labelsGroup = document.getElementById("labels-layer");
 
     // Dynamic Transform Matrix State (Pan & Zoom in SVG coordinate space)
@@ -28,6 +29,9 @@ export class MapEngine {
     // Pinch zoom for touch
     this.initialPinchDistance = null;
     this.pinchCenter = null;
+
+    // Label registry for collision avoidance
+    this.registeredLabels = [];
 
     this.bindEvents();
     this.setupStoreListeners();
@@ -75,7 +79,7 @@ export class MapEngine {
     this.viewport.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-      const newScale = Math.max(0.6, Math.min(6.0, this.scale * zoomFactor));
+      const newScale = Math.max(0.65, Math.min(6.5, this.scale * zoomFactor));
       if (newScale === this.scale) return;
 
       // Obtain cursor position inside SVG viewBox coordinate frame
@@ -134,7 +138,7 @@ export class MapEngine {
           e.touches[0].clientY - e.touches[1].clientY
         );
         const factor = currentDistance / this.initialPinchDistance;
-        const newScale = Math.max(0.6, Math.min(6.0, this.scale * factor));
+        const newScale = Math.max(0.65, Math.min(6.5, this.scale * factor));
 
         if (this.pinchCenter) {
           const pt = this.svg.createSVGPoint();
@@ -192,31 +196,81 @@ export class MapEngine {
     this.updateZoomLOD();
   }
 
+  /**
+   * Level of Detail (LOD) & Collision Handling:
+   * Prevents text overlap and displays only readable labels at current zoom.
+   */
   updateZoomLOD() {
     if (!this.labelsGroup) return;
 
-    // LOD Level 1: Sovereign Macro Names (scale < 1.25)
-    const showMacro = this.scale < 1.25;
+    // Macro nation labels: Visible at lower zoom (overview)
+    const showMacro = this.scale < 1.35;
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
       el.style.display = showMacro ? "block" : "none";
     });
 
-    // LOD Level 2: Province Names (scale >= 1.15)
-    const showProvinces = this.scale >= 1.15;
+    // Province labels: Visible at medium to high zoom
+    const showProvinces = this.scale >= 1.25;
     this.labelsGroup.querySelectorAll(".province-label").forEach((el) => {
       el.style.display = showProvinces ? "block" : "none";
     });
 
-    // LOD Level 3: City Nodes & Settlement Details (scale >= 2.0)
+    // City nodes & names: Visible at high zoom
     const showCities = this.scale >= 2.0;
     this.labelsGroup.querySelectorAll(".province-node, .city-label").forEach((el) => {
       el.style.display = showCities ? "block" : "none";
     });
+
+    // Perform Spatial Occlusion / Collision Resolution
+    if (showProvinces || showCities) {
+      this.resolveLabelCollisions();
+    }
+  }
+
+  /**
+   * Spatial Collision Detection:
+   * Hides overlapping labels so the map remains clear and readable.
+   */
+  resolveLabelCollisions() {
+    const visibleElements = [];
+    const minDistance = 24 / this.scale; // Minimum allowed distance between label anchors in world units
+
+    const labels = Array.from(this.labelsGroup.querySelectorAll(".province-label, .city-label"));
+    
+    // Sort by priority (high tax revenue / capital provinces first)
+    labels.sort((a, b) => {
+      const pA = parseFloat(a.getAttribute("data-priority") || "0");
+      const pB = parseFloat(b.getAttribute("data-priority") || "0");
+      return pB - pA;
+    });
+
+    labels.forEach((label) => {
+      if (label.style.display === "none") return;
+
+      const x = parseFloat(label.getAttribute("x"));
+      const y = parseFloat(label.getAttribute("y"));
+
+      // Check collision against all higher-priority visible elements
+      let collides = false;
+      for (const item of visibleElements) {
+        const dx = x - item.x;
+        const dy = y - item.y;
+        if (Math.hypot(dx, dy) < minDistance) {
+          collides = true;
+          break;
+        }
+      }
+
+      if (collides) {
+        label.style.display = "none";
+      } else {
+        visibleElements.push({ x, y });
+      }
+    });
   }
 
   zoom(factor) {
-    const newScale = Math.max(0.6, Math.min(6.0, this.scale * factor));
-    // Center of standard 2000x1350 viewBox
+    const newScale = Math.max(0.65, Math.min(6.5, this.scale * factor));
     const centerX = 1000;
     const centerY = 675;
 
@@ -239,8 +293,7 @@ export class MapEngine {
   centerOnProvince(provinceId) {
     const prov = store.provinces[provinceId];
     if (!prov || !prov.center) return;
-    this.scale = 2.0;
-    // Center target coordinates on (1000, 675)
+    this.scale = 2.2;
     this.translateX = 1000 - prov.center[0] * this.scale;
     this.translateY = 675 - prov.center[1] * this.scale;
     this.applyTransform();
@@ -251,16 +304,21 @@ export class MapEngine {
 
     this.provincesGroup.innerHTML = "";
     this.labelsGroup.innerHTML = "";
+    this.registeredLabels = [];
 
     const provinces = Object.values(store.provinces);
 
-    // 1. Render Pure Vector Province Polygons
+    // 1. Render Sea Labels (Authentic Victoria 3 nautical typography)
+    this.renderSeaLabels();
+
+    // 2. Render Pure Vector Province Polygons
     provinces.forEach((prov) => {
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", prov.svg_path);
       path.setAttribute("id", `svg-prov-${prov.id}`);
       path.classList.add("province-path");
       path.setAttribute("data-province-id", prov.id);
+      path.setAttribute("vector-effect", "non-scaling-stroke");
       path.style.fill = this.getProvinceColor(prov);
 
       const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
@@ -275,63 +333,126 @@ export class MapEngine {
 
       this.provincesGroup.appendChild(path);
 
-      // 2. City Node & Province Label
+      // 3. City Node & Province Labels with Priority Data
       if (prov.center && prov.center.length === 2) {
+        const priority = (prov.tax_revenue || 50) + (prov.population ? prov.population / 50000 : 0);
+
+        // Heraldic city node
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", prov.center[0]);
         circle.setAttribute("cy", prov.center[1]);
-        circle.setAttribute("r", "3.5");
+        circle.setAttribute("r", "4");
+        circle.setAttribute("vector-effect", "non-scaling-stroke");
         circle.classList.add("province-node");
         this.labelsGroup.appendChild(circle);
 
+        // Province Name Label
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", prov.center[0]);
         text.setAttribute("y", prov.center[1] - 8);
+        text.setAttribute("data-priority", priority.toFixed(1));
         text.classList.add("province-label");
-        const shortName = prov.name.split("(")[0].trim();
-        text.textContent = shortName;
+        const cleanName = prov.name.split("(")[0].trim();
+        text.textContent = cleanName;
         this.labelsGroup.appendChild(text);
+
+        // City Name Label (High Zoom)
+        if (prov.city) {
+          const cityText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          cityText.setAttribute("x", prov.center[0]);
+          cityText.setAttribute("y", prov.center[1] + 12);
+          cityText.setAttribute("data-priority", (priority + 20).toFixed(1));
+          cityText.classList.add("city-label");
+          cityText.textContent = prov.city;
+          this.labelsGroup.appendChild(cityText);
+        }
       }
     });
 
-    // 3. Dynamically Calculate & Render Macro Nation Labels
+    // 4. Dynamically Calculate & Render Sovereign Macro Nation Labels
     this.renderMacroNationLabels();
     this.applyTransform();
 
-    console.log(`Pax Modernica: ${provinces.length} reine Vektorprovinzen erfolgreich gerendert.`);
+    console.log(`Pax Modernica: ${provinces.length} detailreiche historische Vektorprovinzen gerendert.`);
   }
 
   /**
-   * Calculates sovereign territory centroids dynamically without hardcoded pixel offsets.
+   * Renders Victoria 3 style maritime labels directly onto the ocean expanses.
+   */
+  renderSeaLabels() {
+    const seaZones = [
+      { name: "Nordsee (North Sea)", x: 670, y: 560, rot: -5 },
+      { name: "Ostsee (Baltic Sea)", x: 1010, y: 550, rot: 25 },
+      { name: "Keltische See", x: 380, y: 720, rot: -10 },
+      { name: "Mittelmeer", x: 740, y: 1180, rot: 0 },
+      { name: "Schwarzes Meer (Black Sea)", x: 1420, y: 990, rot: 5 },
+      { name: "Norwegische See", x: 710, y: 280, rot: -20 },
+      { name: "Barentssee", x: 1380, y: 160, rot: 0 },
+    ];
+
+    seaZones.forEach((sea) => {
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", sea.x);
+      text.setAttribute("y", sea.y);
+      if (sea.rot) {
+        text.setAttribute("transform", `rotate(${sea.rot}, ${sea.x}, ${sea.y})`);
+      }
+      text.classList.add("sea-label");
+      text.textContent = sea.name;
+      this.labelsGroup.appendChild(text);
+    });
+  }
+
+  /**
+   * Calculates sovereign territory centroids dynamically,
+   * weighted by population to anchor the empire's name in its heartland.
    */
   renderMacroNationLabels() {
-    const nationCenters = {};
-    const nationCounts = {};
+    const nationClusters = {};
 
     Object.values(store.provinces).forEach((prov) => {
       if (!prov.center) return;
       const nid = prov.owner_id;
-      if (!nationCenters[nid]) {
-        nationCenters[nid] = [0, 0];
-        nationCounts[nid] = 0;
+      if (!nationClusters[nid]) {
+        nationClusters[nid] = { sumX: 0, sumY: 0, totalWeight: 0 };
       }
-      nationCenters[nid][0] += prov.center[0];
-      nationCenters[nid][1] += prov.center[1];
-      nationCounts[nid]++;
+      const weight = (prov.population || 500000) / 100000;
+      nationClusters[nid].sumX += prov.center[0] * weight;
+      nationClusters[nid].sumY += prov.center[1] * weight;
+      nationClusters[nid].totalWeight += weight;
     });
 
-    Object.entries(nationCenters).forEach(([nid, sum]) => {
-      const count = nationCounts[nid];
-      const cx = sum[0] / count;
-      const cy = sum[1] / count;
-      const nat = store.nations[nid];
-      const name = nat ? nat.name.toUpperCase() : nid.replace("nation_", "").toUpperCase();
+    // Curated historic sovereignty titles
+    const sovereignTitles = {
+      "nation_prussia": "PREUSSEN",
+      "nation_france": "FRANKREICH",
+      "nation_austria": "ÖSTERREICH",
+      "nation_england": "GROSSBRITANNIEN",
+      "nation_russia": "RUSSLAND",
+      "nation_ottoman": "OSMANISCHES REICH",
+      "nation_spain": "SPANIEN",
+      "nation_sweden": "SCHWEDEN",
+      "nation_poland": "POLEN-LITAUEN",
+      "nation_denmark": "DÄNEMARK",
+      "nation_netherlands": "NIEDERLANDE",
+      "nation_portugal": "PORTUGAL",
+      "nation_switzerland": "SCHWEIZ",
+      "nation_bavaria": "BAYERN",
+      "nation_venice": "VENEDIG",
+      "nation_papal": "KIRCHENSTAAT"
+    };
+
+    Object.entries(nationClusters).forEach(([nid, cluster]) => {
+      if (cluster.totalWeight === 0) return;
+      const cx = cluster.sumX / cluster.totalWeight;
+      const cy = cluster.sumY / cluster.totalWeight;
+      const title = sovereignTitles[nid] || nid.replace("nation_", "").toUpperCase();
 
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
       text.setAttribute("x", Math.round(cx));
       text.setAttribute("y", Math.round(cy));
       text.classList.add("nation-macro-label");
-      text.textContent = name;
+      text.textContent = title;
       this.labelsGroup.appendChild(text);
     });
   }
@@ -348,26 +469,42 @@ export class MapEngine {
   }
 
   /**
-   * Distinct, harmonious Grand-Strategy colors for all 10 toggleable map modes.
+   * Harmonious Grand-Strategy colors matching Victoria 3 for all 10 toggleable map modes.
    */
   getProvinceColor(prov) {
     const mode = store.activeMapMode || "political";
 
-    // 1. POLITIK: Sovereign nation heraldic colors
+    // 1. POLITIK: Sovereign nation heraldic colors (Direct Victoria 3 Palette)
     if (mode === "political") {
-      const nat = store.nations[prov.owner_id];
-      if (!nat) return "#334155";
-      return nat.color || "#3b82f6";
+      const nationPalette = {
+        "nation_prussia": "#4a708b",     // Prussian Blue / Steel
+        "nation_france": "#3852a4",      // French Royal Blue
+        "nation_austria": "#e5dfd5",     // Imperial Habsburg Off-White / Silver
+        "nation_england": "#b8474d",     // British Red / Crimson
+        "nation_russia": "#558e57",      // Russian Imperial Green
+        "nation_ottoman": "#7d9e6e",     // Ottoman Sage Green
+        "nation_spain": "#cc9f3d",       // Spanish Ochre / Gold
+        "nation_sweden": "#5b92ba",      // Baltic Soft Blue
+        "nation_poland": "#9e4c6c",      // Polish Magenta-Crimson
+        "nation_denmark": "#b54444",     // Dannebrog Coral Red
+        "nation_netherlands": "#bd7433", // Orange-Nassau
+        "nation_portugal": "#3b7a8c",    // Portuguese Sea Blue
+        "nation_switzerland": "#9e4740", // Swiss Cross Crimson / Terracotta
+        "nation_bavaria": "#4a85b5",     // Bavarian Sky Blue
+        "nation_venice": "#388f8d",      // Venetian Lagoon Teal
+        "nation_papal": "#ded8b8"        // Papal Parchment Cream
+      };
+      return nationPalette[prov.owner_id] || "#475569";
     }
 
     // 2. TERRAIN: Natural geographic biome tones
     if (mode === "terrain") {
       switch (prov.terrain) {
-        case "plains": return "#2e4732";     // Fertile European Plains
-        case "hills": return "#473e2d";      // Highlands & Rolling Hills
-        case "mountains": return "#45423f";  // Alpine Massifs
-        case "forest": return "#203823";     // Dense Boreal/Deciduous Forests
-        case "marsh": return "#26363d";      // River Estuaries & Marshes
+        case "plains": return "#324d35";     // Fertile European Plains
+        case "hills": return "#4d4230";      // Highlands & Rolling Hills
+        case "mountains": return "#4a4643";  // Alpine Massifs
+        case "forest": return "#233d26";     // Dense Boreal/Deciduous Forests
+        case "marsh": return "#2a3c42";      // River Estuaries & Marshes
         default: return "#334155";
       }
     }
@@ -375,11 +512,11 @@ export class MapEngine {
     // 3. RELIEF: Shaded elevation contours
     if (mode === "relief") {
       switch (prov.terrain) {
-        case "plains": return "#334a35";
-        case "hills": return "#5e4d2e";
-        case "mountains": return "#524d4b";
-        case "forest": return "#28442c";
-        case "marsh": return "#2a3d47";
+        case "plains": return "#38523a";
+        case "hills": return "#635231";
+        case "mountains": return "#575250";
+        case "forest": return "#2b4a30";
+        case "marsh": return "#2d424d";
         default: return "#3b4252";
       }
     }
@@ -387,8 +524,8 @@ export class MapEngine {
     // 4. WIRTSCHAFT (Economy): Fiscal yield and trade prosperity
     if (mode === "economy") {
       const tax = prov.tax_revenue || 50;
-      if (tax >= 180) return "#d4af37";  // Imperial Metropolis Gold
-      if (tax >= 120) return "#b38227";  // Prosperous Merchant Center
+      if (tax >= 160) return "#d4af37";  // Imperial Metropolis Gold
+      if (tax >= 110) return "#b38227";  // Prosperous Merchant Center
       if (tax >= 75)  return "#855420";  // Established Province
       return "#5e381b";                  // Developing Countryside
     }
@@ -396,10 +533,10 @@ export class MapEngine {
     // 5. BEVÖLKERUNG (Population): Demographic density
     if (mode === "population") {
       const pop = prov.population || 500000;
-      if (pop >= 4000000) return "#9e2d2d"; // Metropolis Crimson
-      if (pop >= 2500000) return "#8c4423"; // High Density
-      if (pop >= 1200000) return "#66552a"; // Settled
-      return "#3b4d2d";                    // Rural
+      if (pop >= 1500000) return "#9e2d2d"; // Metropolis Crimson
+      if (pop >= 1000000) return "#8c4423"; // High Density
+      if (pop >= 600000)  return "#66552a"; // Settled
+      return "#3b4d2d";                     // Rural
     }
 
     // 6. RELIGION: European historic confessions
@@ -411,6 +548,7 @@ export class MapEngine {
         case "Orthodox": return "#5e388f";      // Eastern Orthodox Purple
         case "Anglikanisch": return "#8f2e3e";   // Anglican Crimson
         case "Sunnitisch": return "#2e7d58";     // Sunni Emerald
+        case "Kalvinistisch": return "#8a4923";
         default: return "#475569";
       }
     }
@@ -418,7 +556,7 @@ export class MapEngine {
     // 7. INFRASTRUKTUR: Postal roads & transit connectivity
     if (mode === "infrastructure") {
       const lvl = prov.infrastructure_level || 1;
-      if (lvl >= 3) return "#2b82b8";  // Royal Macadam Highway
+      if (lvl >= 3) return "#2b82b8";  // Royal Highway
       if (lvl === 2) return "#2b668f"; // Paved Post Road
       return "#384554";                // Regional Dirt Track
     }
@@ -426,7 +564,7 @@ export class MapEngine {
     // 8. MILITÄR: Fortress bastions & garrison strength
     if (mode === "military") {
       const fort = prov.fortification_level || 0;
-      if (fort >= 3) return "#b82838";  // Vauban Star Fortress
+      if (fort >= 3) return "#b82838";  // Star Fortress (Vauban)
       if (fort >= 2) return "#943828";  // Bastioned Citadel
       if (fort >= 1) return "#785023";  // Border Redoubt
       return "#364250";                // Open Countryside
@@ -440,15 +578,15 @@ export class MapEngine {
       return "#384552";   // Foreign Sovereign States
     }
 
-    // 10. HANDEL (Trade): Key strategic commodities
+    // 10. HANDEL (Trade): Strategic commodities
     if (mode === "trade") {
       const goods = prov.goods_produced || "";
       if (goods.includes("Waffen") || goods.includes("Eisen")) return "#8f2828";
-      if (goods.includes("Gold") || goods.includes("Silber") || goods.includes("Finanzen")) return "#a8882b";
-      if (goods.includes("Tuch") || goods.includes("Textilien") || goods.includes("Seide")) return "#663878";
-      if (goods.includes("Getreide") || goods.includes("Wein")) return "#4d6e2e";
-      if (goods.includes("Holz") || goods.includes("Pelze")) return "#4d3b26";
-      return "#2b6678"; // Maritime & General Trade Goods
+      if (goods.includes("Gold") || goods.includes("Silber") || goods.includes("Finanzen") || goods.includes("Bernstein")) return "#a8882b";
+      if (goods.includes("Tuch") || goods.includes("Textilien") || goods.includes("Seide") || goods.includes("Leinen")) return "#663878";
+      if (goods.includes("Getreide") || goods.includes("Wein") || goods.includes("Weizen")) return "#4d6e2e";
+      if (goods.includes("Holz") || goods.includes("Pelze") || goods.includes("Teer")) return "#4d3b26";
+      return "#2b6678";
     }
 
     return "#334155";

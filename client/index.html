@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pax Modernica – Grand-Strategy-Simulation (1700–1930)</title>
   
-  <!-- Fonts -->
+  <!-- Fonts: Cinzel & Playfair for Victorian Regal Serifs, Inter for High-Legibility Stats -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Styles -->
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -20,89 +20,149 @@
 <body>
   <div id="app-container">
     
-    <!-- TOP BAR (OVERLAY: z-index 100) -->
+    <!-- =========================================================================
+         TOP BAR: VICTORIA 3 STATUS & RESOURCE STRIP (z-index: 100)
+         ========================================================================= -->
     <header id="top-bar">
-      <!-- Left: Date & Time controls -->
+      <!-- Left: Sovereign Crest & National Resources -->
       <div class="top-bar-left">
-        <div class="date-container">
-          <div>
-            <div id="game-date-display" class="game-date-display">Jahr 0, 1. Januar</div>
-            <div id="ref-year-display" class="ref-year">(Ref: 1700)</div>
+        <!-- Nation Shield Crest & Rank Badge -->
+        <div id="btn-switch-nation" class="nation-crest-container" title="Klicken, um Nation zu wechseln">
+          <div class="nation-shield-crest">
+            <div id="player-crest-flag" class="crest-flag">PR</div>
+          </div>
+          <div id="player-rank-badge" class="rank-badge" title="Machtrang">1</div>
+          <div class="nation-title-box">
+            <div id="player-nation-name" class="nation-title">Preußen</div>
+            <div id="player-ruler-name" class="ruler-title">Friedrich I. (Hohenzollern)</div>
           </div>
         </div>
 
-        <div class="speed-btn-group">
-          <button id="btn-pause" class="speed-btn active">Pause</button>
-          <button id="btn-speed-1" class="speed-btn">1×</button>
-          <button id="btn-speed-2" class="speed-btn">2×</button>
-          <button id="btn-speed-5" class="speed-btn">5×</button>
-        </div>
+        <!-- Victoria 3 Dual-Row Resource Strip -->
+        <div class="v3-resource-strip">
+          <!-- Row 1: Strategic Imperial Capacities -->
+          <div class="resource-row-primary">
+            <!-- Bürokratie -->
+            <div class="resource-pill" title="Bürokratiekapazität">
+              <span class="v3-icon icon-bureaucracy">📜</span>
+              <span id="stat-bureaucracy" class="res-val positive">+138</span>
+            </div>
+            <!-- Autorität -->
+            <div class="resource-pill" title="Monarchische Autorität">
+              <span class="v3-icon icon-authority">👑</span>
+              <span id="stat-authority" class="res-val alert">+17.5</span>
+            </div>
+            <!-- Einfluss -->
+            <div class="resource-pill" title="Diplomatischer Einfluss">
+              <span class="v3-icon icon-influence">🕊️</span>
+              <span id="stat-influence" class="res-val info">+775</span>
+            </div>
+            <!-- Staatsschatz & Monatssaldo -->
+            <div class="resource-pill gold-pill" title="Staatsschatz (Taler) und Monatssaldo">
+              <span class="v3-icon icon-gold">🪙</span>
+              <span id="stat-gold-val" class="res-val gold">1.93K</span>
+              <span id="stat-gold-income" class="res-sub positive">+24.8/Mo</span>
+            </div>
+          </div>
 
-        <button id="btn-toggle-left-panel" class="btn-regal" title="Reichskabinett öffnen">
-          Reichskabinett
-        </button>
-      </div>
-
-      <!-- Center: National Resources & Ruler Info -->
-      <div class="top-bar-center">
-        <!-- Nation Banner -->
-        <div class="stat-badge" style="border-color:var(--brass-border); cursor:pointer;" id="btn-switch-nation" title="Klicken, um Nation zu wechseln">
-          <div>
-            <div id="player-nation-name" style="font-weight:700; color:var(--brass-light); font-size:12px; font-family:var(--font-serif); letter-spacing:1px;">Preußen</div>
-            <div id="player-ruler-name" style="font-size:10px; color:var(--text-dim);">Friedrich III.</div>
+          <!-- Row 2: Population, Economy & Stability Metrics -->
+          <div class="resource-row-secondary">
+            <span class="metric-item" title="Gesamtbevölkerung">
+              <span class="mini-icon">👥</span>
+              <span id="stat-pop-val">3.40M</span>
+            </span>
+            <span class="metric-divider">|</span>
+            <span class="metric-item" title="Alphabetisierungsgrad">
+              <span class="mini-icon">📖</span>
+              <span id="stat-literacy-val">56.6%</span>
+            </span>
+            <span class="metric-divider">|</span>
+            <span class="metric-item" title="Lebensstandard (Durchschnitt)">
+              <span class="mini-icon">🍞</span>
+              <span id="stat-sol-val">11.8 (Verarmt)</span>
+            </span>
+            <span class="metric-divider">|</span>
+            <span class="metric-item" title="Bruttoinlandsprodukt (BIP)">
+              <span class="mini-icon">🏭</span>
+              <span id="stat-gdp-val">4.82M</span>
+            </span>
+            <span class="metric-divider">|</span>
+            <span class="metric-item" title="Loyalisten vs. Radikale">
+              <span class="mini-icon positive">🤝</span>
+              <span id="stat-loyalists" class="positive">142K</span>
+              <span class="mini-icon negative" style="margin-left:4px;">🔥</span>
+              <span id="stat-radicals" class="negative">48K</span>
+            </span>
+            <span class="metric-divider">|</span>
+            <span class="metric-item" title="Verrufenheit / Infamie">
+              <span class="infamy-circle" id="stat-infamy-val">3</span>
+            </span>
           </div>
         </div>
-
-        <!-- Treasury -->
-        <div class="stat-badge" title="Staatsschatz (Taler)">
-          <span class="stat-icon" style="font-family:var(--font-serif); font-weight:700; color:var(--brass-light); font-size:11px;">G</span>
-          <span id="stat-gold-val" class="stat-value">1.200</span>
-          <span id="stat-gold-income" class="stat-sub">+18.4/Mo</span>
-        </div>
-
-        <!-- Manpower -->
-        <div class="stat-badge" title="Rekrutenreserve">
-          <span class="stat-icon" style="font-family:var(--font-serif); font-weight:700; color:var(--brass-light); font-size:10px;">MP</span>
-          <span id="stat-manpower-val" class="stat-value">25.000</span>
-        </div>
-
-        <!-- Prestige -->
-        <div class="stat-badge" title="Monarchisches Prestige">
-          <span class="stat-icon" style="font-family:var(--font-serif); font-weight:700; color:var(--brass-light); font-size:10px;">PST</span>
-          <span id="stat-prestige-val" class="stat-value">65</span>
-        </div>
-
-        <!-- Stability -->
-        <div class="stat-badge" title="Innere Stabilität">
-          <span class="stat-icon" style="font-family:var(--font-serif); font-weight:700; color:var(--brass-light); font-size:10px;">STB</span>
-          <span id="stat-stability-val" class="stat-value">85%</span>
-        </div>
       </div>
 
-      <!-- Right: Actions, Chronicle & Auth -->
+      <!-- Right: Vintage Clockwork Time Controls & Construction Queue -->
       <div class="top-bar-right">
-        <button id="btn-save-game" class="btn-regal">Speichern</button>
-        <button id="btn-load-game" class="btn-regal">Laden</button>
-        <button id="btn-toggle-right-panel" class="btn-regal" title="Pax Gazette & Chronik">
-          Chronik
-        </button>
-        <button id="btn-toggle-sound" class="btn-regal" title="Ton umschalten">Ton: An</button>
-        <button id="btn-open-settings" class="btn-regal" title="Einstellungen">Optionen</button>
-        <button id="btn-account-login" class="btn-regal primary">Anmelden</button>
+        <!-- Construction Queue Mini-Widget -->
+        <div class="construction-queue-widget" title="Bauwarteschlange (Aktiv / Kapazität)">
+          <span class="queue-icon">🏗️</span>
+          <div class="queue-counts">
+            <span class="queue-val">0 / 13</span>
+            <span class="queue-sub">Kein aktiver Bau</span>
+          </div>
+        </div>
+
+        <!-- Victorian Brass Clockwork Dial -->
+        <div class="v3-clockwork-panel">
+          <div class="date-dial-box">
+            <div id="game-date-display" class="v3-date-text">Jahr 0, 1. Januar</div>
+            <div class="v3-weekday-ref">
+              <span id="game-weekday">Montag</span> · <span id="ref-year-display">Ref: 1700</span>
+            </div>
+          </div>
+
+          <!-- Time Speed Controls -->
+          <div class="clockwork-controls">
+            <button id="btn-pause" class="v3-brass-btn pause-btn" title="Pause [Leertaste]">
+              <span id="pause-icon">⏸</span>
+            </button>
+            <div class="speed-dots-group">
+              <button id="btn-speed-1" class="speed-pip active" data-speed="1" title="Geschwindigkeit 1">I</button>
+              <button id="btn-speed-2" class="speed-pip" data-speed="2" title="Geschwindigkeit 2">II</button>
+              <button id="btn-speed-3" class="speed-pip" data-speed="3" title="Geschwindigkeit 3">III</button>
+              <button id="btn-speed-4" class="speed-pip" data-speed="4" title="Geschwindigkeit 4">IV</button>
+              <button id="btn-speed-5" class="speed-pip" data-speed="5" title="Geschwindigkeit 5">V</button>
+            </div>
+            <!-- Brass Gear Animation Widget -->
+            <div id="clockwork-gear" class="clockwork-gear" title="Uhrwerk der Simulation">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="8" stroke="#c4a35a" stroke-width="2" stroke-dasharray="2 3" />
+                <circle cx="12" cy="12" r="3" fill="#c4a35a" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- System & Options Menu -->
+        <div class="top-bar-system-btns">
+          <button id="btn-toggle-sound" class="v3-icon-btn" title="Ton umschalten">🔊</button>
+          <button id="btn-open-settings" class="v3-icon-btn" title="Optionen & Grafik">⚙️</button>
+          <button id="btn-account-login" class="v3-brass-pill-btn">Anmelden</button>
+        </div>
       </div>
     </header>
 
-    <!-- MAIN WORKSPACE: Responsive 100% Canvas & Overlay Structure -->
+    <!-- =========================================================================
+         WORKSPACE: RESPONSIVE CANVAS & VICTORIA 3 INTERFACE DOCKS
+         ========================================================================= -->
     <main id="workspace">
 
       <!-- PURE VECTOR MAP VIEWPORT (z-index: 10, pointer-events: auto) -->
       <section id="map-viewport">
         <div id="map-svg-container">
           <svg id="europe-map-svg" viewBox="0 0 2000 1350" preserveAspectRatio="xMidYMid meet">
-            <!-- Authentic Nautical Sea Background -->
             <rect width="100%" height="100%" class="sea-bg" />
             
-            <!-- Dynamic Vector World Group (Pan & Zoom via Matrix/Transform) -->
             <g id="map-world">
               <g id="rivers-layer"></g>
               <g id="provinces-layer"></g>
@@ -117,7 +177,43 @@
       <!-- UI OVERLAY CONTAINER (pointer-events: none; wraps all floating UI panels) -->
       <div id="ui-overlay-container">
 
-        <!-- Floating Map Modes Bar (10 Modes) -->
+        <!-- VICTORIA 3 VERTICAL NAVIGATION DOCK (FAR LEFT, z-index: 60) -->
+        <nav id="v3-left-dock" class="ui-interactive">
+          <button class="v3-dock-btn" data-panel="politics" title="Politik & Regierung">
+            <span class="dock-icon">🏛️</span>
+            <span class="dock-tooltip">Politik</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="tech" title="Technologie & Technikbaum">
+            <span class="dock-icon">💡</span>
+            <span class="dock-tooltip">Technik</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="production" title="Produktion & Gebäude">
+            <span class="dock-icon">🏭</span>
+            <span class="dock-tooltip">Gebäude</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="trade" title="Handel & Märkte">
+            <span class="dock-icon">⚖️</span>
+            <span class="dock-tooltip">Märkte</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="military" title="Militär & Flotte">
+            <span class="dock-icon">⚔️</span>
+            <span class="dock-tooltip">Militär</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="diplomacy" title="Diplomatie & Verträge">
+            <span class="dock-icon">📜</span>
+            <span class="dock-tooltip">Diplomatie</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="population" title="Bevölkerung & Kulturen">
+            <span class="dock-icon">👥</span>
+            <span class="dock-tooltip">Bevölkerung</span>
+          </button>
+          <button class="v3-dock-btn" data-panel="journal" title="Journal & Missionen">
+            <span class="dock-icon">📖</span>
+            <span class="dock-tooltip">Journal</span>
+          </button>
+        </nav>
+
+        <!-- FLOATING MAP MODES BAR (10 MODES, TOP CENTER, z-index: 50) -->
         <nav id="map-modes-bar" class="ui-interactive">
           <button class="map-mode-btn active" data-mode="political">Politik</button>
           <button class="map-mode-btn" data-mode="terrain">Terrain</button>
@@ -131,18 +227,18 @@
           <button class="map-mode-btn" data-mode="trade">Handel</button>
         </nav>
 
-        <!-- Floating Zoom & Reset Controls -->
+        <!-- FLOATING ZOOM & RESET CONTROLS (BOTTOM RIGHT, z-index: 50) -->
         <div id="map-controls" class="ui-interactive">
           <button id="btn-zoom-in" class="map-ctrl-btn" title="Heranzoomen">+</button>
           <button id="btn-zoom-out" class="map-ctrl-btn" title="Herauszoomen">−</button>
           <button id="btn-zoom-reset" class="map-ctrl-btn" title="Ansicht zentrieren">⟲</button>
         </div>
 
-        <!-- LEFT DRAWER: REICHSMINISTERIUM -->
+        <!-- LEFT DRAWER: REICHSKABINETT (z-index: 55) -->
         <aside id="left-panel" class="ui-interactive collapsed">
-          <div class="panel-header">
-            <span>Reichsministerium</span>
-            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-serif);">1700–1930</span>
+          <div class="panel-header v3-burgundy-header">
+            <span id="left-panel-title">Reichskabinett</span>
+            <button id="btn-close-left-panel" class="v3-close-btn">✕</button>
           </div>
           <nav class="left-nav-bar">
             <button class="left-nav-btn active" data-tab="monarch">Krone</button>
@@ -157,56 +253,234 @@
           </div>
         </aside>
 
-        <!-- PROVINCE INSPECTOR POPUP -->
+        <!-- =========================================================================
+             DETAIL-PANEL: PROVINCE / STATE INSPECTOR (SCREENSHOT 1 "OST-SCHWEIZ" STIL)
+             ========================================================================= -->
         <aside id="province-inspector" class="ui-interactive">
-          <div class="inspector-header">
-            <div>
-              <div id="inspector-province-name" class="inspector-title">Provinz</div>
-              <div id="inspector-region-owner" class="inspector-subtitle">Region | Hoheit</div>
+          <!-- Ornate Burgundy Arch Header Banner -->
+          <div class="v3-state-header">
+            <div class="v3-header-nav-arrows">
+              <button id="btn-prev-province" class="v3-arrow-btn" title="Vorherige Provinz">◀</button>
             </div>
-            <button id="btn-close-inspector" style="color:var(--text-dim); font-size:16px;">✕</button>
-          </div>
-          
-          <div id="inspector-grid" class="inspector-grid">
-            <!-- Dynamically filled with population, terrain, taxes, infrastructure -->
+            <div class="v3-state-title-group">
+              <div id="inspector-province-name" class="v3-state-title">OST-SCHWEIZ</div>
+              <div id="inspector-region-owner" class="v3-state-subtitle">
+                Staat <span id="inspector-owner-flag" class="mini-flag">🇨🇭</span> in der Schweiz
+              </div>
+            </div>
+            <div class="v3-header-controls">
+              <button id="btn-next-province" class="v3-arrow-btn" title="Nächste Provinz">▶</button>
+              <button id="btn-close-inspector" class="v3-close-btn" title="Schließen">✕</button>
+            </div>
           </div>
 
-          <div class="buildings-container">
-            <div class="buildings-title">Bauwerke & Infrastruktur</div>
-            <div id="inspector-buildings-list" class="buildings-list">
-              <!-- Interactive building construction cards -->
-            </div>
+          <!-- Horizontal Victoria 3 State Tabs -->
+          <nav class="v3-state-tabs">
+            <button class="v3-state-tab" data-tab="overview">Übersicht</button>
+            <button class="v3-state-tab" data-tab="buildings">Gebäude</button>
+            <button class="v3-state-tab active" data-tab="population">Bevölkerung</button>
+            <button class="v3-state-tab" data-tab="prices">Ortspreise</button>
+            <button class="v3-state-tab" data-tab="info">Information</button>
+          </nav>
+
+          <!-- State Tab Body Content Container -->
+          <div id="inspector-tab-content" class="v3-state-body">
+            <!-- Dynamically rendered based on selected tab -->
           </div>
         </aside>
 
-        <!-- RIGHT DRAWER: PAX GAZETTE / CHRONICLE -->
-        <aside id="right-panel" class="ui-interactive collapsed">
-          <div class="panel-header">
-            <span>Pax Gazette</span>
-            <span style="font-size:10px; color:#4ade80; letter-spacing:1px; font-weight:700;">CHRONIK</span>
+        <!-- =========================================================================
+             RIGHT OUTLINER: VICTORIA 3 COLLAPSIBLE LIST (z-index: 50)
+             ========================================================================= -->
+        <aside id="right-panel" class="ui-interactive">
+          <!-- Outliner Header -->
+          <div class="v3-outliner-header">
+            <span>Outliner</span>
+            <button id="btn-toggle-right-panel" class="v3-pin-btn" title="Outliner ein-/ausklappen">📌</button>
           </div>
-          <div id="chronicle-list" style="flex:1; overflow-y:auto; padding:12px;">
-            <!-- Dynamically populated with chronicle cards -->
+
+          <div id="v3-outliner-accordion" class="v3-outliner-scroll">
+            <!-- 1. Active Journal Entries -->
+            <div class="outliner-section">
+              <div class="outliner-section-head">
+                <span>Aktive Journaleinträge (2 abgepinnt)</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="outliner-section-body">
+                <div class="journal-entry-card">
+                  <div class="journal-title">Wald der Bajonette</div>
+                  <div class="journal-sub">Wird in 22 Jahre, 9 Monate ablaufen</div>
+                  <div class="v3-progress-bar">
+                    <div class="v3-progress-fill" style="width: 45%;"></div>
+                  </div>
+                </div>
+                <div class="journal-entry-card">
+                  <div class="journal-title">Regierungspetition</div>
+                  <div class="journal-sub">Die IG „Grundbesitzer“ beantragt Gesetz</div>
+                  <div class="v3-progress-bar">
+                    <div class="v3-progress-fill alert" style="width: 70%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Märkte & Handel -->
+            <div class="outliner-section">
+              <div class="outliner-section-head">
+                <span>Märkte</span>
+                <span class="head-badge">1 ★</span>
+              </div>
+              <div class="outliner-section-body">
+                <div class="market-entry-row">
+                  <span class="market-flag">🇩🇪</span>
+                  <span class="market-name">Preußischer Markt</span>
+                  <div class="market-good-icons">
+                    <span title="Getreide">🌾</span>
+                    <span title="Holz">🪵</span>
+                    <span title="Eisen">⛏️</span>
+                    <span title="Tuch">🧵</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Interessengruppen -->
+            <div class="outliner-section">
+              <div class="outliner-section-head">
+                <span>Interessengruppen</span>
+                <span class="head-badge">6</span>
+              </div>
+              <div class="outliner-section-body">
+                <div class="ig-row">
+                  <span>Landvolk</span>
+                  <span class="positive">18.9% (+2)</span>
+                </div>
+                <div class="ig-row">
+                  <span>Grundbesitzer</span>
+                  <span class="positive">14.8% (+5)</span>
+                </div>
+                <div class="ig-row">
+                  <span>Streitkräfte</span>
+                  <span class="info">8.2% (0)</span>
+                </div>
+                <div class="ig-row">
+                  <span>Klerus</span>
+                  <span class="negative">7.4% (-1)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Militär & Armeen -->
+            <div class="outliner-section">
+              <div class="outliner-section-head">
+                <span>Armee & Flotte</span>
+                <span class="head-badge">2 ★</span>
+              </div>
+              <div class="outliner-section-body">
+                <div class="army-entry-row">
+                  <span>1. Preußische Garde-Armee</span>
+                  <span class="badge-soldiers">25K ⚔️</span>
+                </div>
+                <div class="army-entry-row">
+                  <span>2. Pommersche Linien-Division</span>
+                  <span class="badge-soldiers">15K ⚔️</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </aside>
 
+        <!-- VICTORIA 3 BOTTOM CENTER QUICK DOCK (z-index: 55) -->
+        <div id="v3-bottom-quick-dock" class="ui-interactive">
+          <button class="v3-round-brass-btn" data-action="production" title="Bau- & Produktionssektor">
+            <span class="quick-icon">🏗️</span>
+          </button>
+          <button class="v3-round-brass-btn" data-action="laws" title="Gesetze & Verfassung">
+            <span class="quick-icon">⚖️</span>
+          </button>
+          <button class="v3-round-brass-btn" data-action="diplomacy" title="Diplomatisches Korps">
+            <span class="quick-icon">🕊️</span>
+          </button>
+          <button class="v3-round-brass-btn" data-action="military" title="Oberkommando & Manöver">
+            <span class="quick-icon">⚔️</span>
+          </button>
+        </div>
+
+        <!-- VICTORIA 3 NOTIFICATION TOASTS (BOTTOM RIGHT, z-index: 55) -->
+        <div id="v3-toast-container" class="ui-interactive">
+          <div class="v3-toast-pill">
+            <span class="toast-flag">🇳🇱</span>
+            <span class="toast-text">Niederlande erhöhte Einschränkungen für Straße</span>
+            <span class="toast-time">Heute</span>
+          </div>
+          <div class="v3-toast-pill">
+            <span class="toast-flag">🏛️</span>
+            <span class="toast-text">Gesetzesentwurf: Merkantilistisches Zollwesen eingereicht</span>
+            <span class="toast-time">Gestern</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =========================================================================
+           TECHNIKBAUM MODAL: VICTORIA 3 TECH TREE (SCREENSHOT 2 STIL)
+           ========================================================================= -->
+      <div id="tech-tree-modal" class="modal-overlay">
+        <div class="tech-tree-window">
+          <!-- Ornate Burgundy Arch Banner Header -->
+          <div class="tech-tree-banner">
+            <div class="tech-banner-decor-left"></div>
+            <div class="tech-tree-title">TECHNIKBAUM</div>
+            <div class="tech-banner-decor-right"></div>
+            <button id="btn-close-tech-modal" class="v3-close-btn" title="Schließen">✕</button>
+          </div>
+
+          <!-- Active Research Banner -->
+          <div class="tech-active-research-box">
+            <div class="active-tech-icon-box">
+              <span class="active-tech-icon">🔬</span>
+              <span class="active-tech-tier">Tier I</span>
+            </div>
+            <div class="active-tech-details">
+              <div class="active-tech-name-row">
+                <span id="active-tech-name" class="active-tech-name">Steinschloss-Muskete</span>
+                <span id="active-tech-time" class="active-tech-time">18 Monate verbleibend</span>
+              </div>
+              <div class="v3-tech-progress-bar">
+                <div id="active-tech-bar-fill" class="v3-tech-progress-fill" style="width: 35%;"></div>
+              </div>
+              <div class="active-tech-stats-row">
+                <span id="active-tech-pts">3.36K / 10.0K</span>
+                <span class="tech-innovation-rate">Wöchentliche Innovation: <strong class="positive">+51</strong></span>
+                <span class="tech-spread-rate">Technikverbreitung: <strong>32 – 98</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tech Tree Category Navigation & Search -->
+          <div class="tech-tree-nav-bar">
+            <div class="tech-category-tabs">
+              <button class="tech-cat-btn" data-cat="production">Produktion</button>
+              <button class="tech-cat-btn active" data-cat="military">Militär</button>
+              <button class="tech-cat-btn" data-cat="society">Gesellschaft</button>
+            </div>
+            <div class="tech-search-box">
+              <input type="text" id="tech-search-input" placeholder="Suche..." />
+              <span class="search-icon">🔍</span>
+            </div>
+          </div>
+
+          <!-- Interactive Node Canvas / Branch View -->
+          <div id="tech-tree-canvas" class="tech-tree-canvas">
+            <!-- Dynamically populated with era columns, connection lines & tech nodes -->
+          </div>
+        </div>
       </div>
 
     </main>
 
-    <!-- BOTTOM BAR (OVERLAY: z-index 100) -->
-    <footer id="bottom-bar">
-      <div>
-        <span>Status: </span>
-        <span style="color:#4ade80;">Server-Simulation Aktiv (1s = 2min)</span>
-        <span style="margin-left:14px; color:var(--text-dim);">Tipp: [Leertaste] Pause | [1, 2, 3] Tempo | Klick auf Provinz für Inspektion</span>
-      </div>
-      <div>
-        <span>Pax Modernica – Vektor-Topologie (Albers Equal-Area Conic)</span>
-      </div>
-    </footer>
-
-    <!-- MODAL OVERLAY CONTAINER (z-index 200) -->
+    <!-- MODAL OVERLAY CONTAINER (z-index: 200) -->
     <div id="modal-overlay" class="modal-overlay">
       <div class="modal-dialog">
         <div class="panel-header">
@@ -214,7 +488,7 @@
           <button id="btn-close-modal" style="color:var(--text-dim); font-size:16px;">✕</button>
         </div>
         <div id="modal-body" class="modal-body">
-          <!-- Modal content injected dynamically -->
+          <!-- Dynamic modal body -->
         </div>
       </div>
     </div>

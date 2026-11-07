@@ -1,6 +1,6 @@
 /* ==========================================================================
-   PAX MODERNICA – STRUKTUR- & LAYOUT-SYSTEM (VEKTORKARTEN-ARCHITEKTUR)
-   Vollständig responsiv: Map-Canvas füllt 100% des Bildschirms; Overlays entkoppelt
+   PAX MODERNICA – VICTORIA 3 IMMERSIVE CABINET INTERFACE LAYOUT
+   Responsive Full-Screen Vector Canvas & Authentic 19th-Century Overlays
    ========================================================================== */
 
 #app-container {
@@ -11,40 +11,378 @@
   overflow: hidden;
   position: relative;
   background-color: var(--bg-ocean);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
 }
 
-/* --- OBERE STATUSLEISTE (TOP BAR) – Z-INDEX: 100 --- */
+/* ==========================================================================
+   1. TOP BAR: VICTORIA 3 STATUS & RESOURCE STRIP (z-index: 100)
+   ========================================================================== */
 #top-bar {
-  height: 48px;
-  min-height: 48px;
-  background: var(--bg-panel-solid);
-  border-bottom: var(--brass-hairline);
+  height: 58px;
+  min-height: 58px;
+  background: linear-gradient(180deg, #1b222d 0%, #10151f 100%);
+  border-bottom: 1.5px solid var(--brass-border);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 14px;
   z-index: 100;
   pointer-events: auto;
+  user-select: none;
+}
+
+.top-bar-left, .top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* --- Sovereign Shield Crest & Rank Badge --- */
+.nation-crest-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.nation-crest-container:hover {
+  background: rgba(196, 163, 90, 0.08);
+  border-color: var(--brass-border);
+}
+
+.nation-shield-crest {
+  width: 38px;
+  height: 44px;
+  background: linear-gradient(135deg, #2a3848 0%, #151e28 100%);
+  border: 1.5px solid var(--brass-accent);
+  border-radius: 4px 4px 19px 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.crest-flag {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--brass-light);
+  letter-spacing: 1px;
+}
+
+.rank-badge {
+  position: relative;
+  left: -18px;
+  top: 14px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #c4a35a;
+  color: #10151f;
+  font-family: var(--font-serif);
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.nation-title-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.nation-title {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brass-light);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.ruler-title {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* --- Victoria 3 Dual-Row Resource Strip --- */
+.v3-resource-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.resource-row-primary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.resource-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(12, 17, 25, 0.7);
+  border: 1px solid rgba(196, 163, 90, 0.2);
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+
+.resource-pill.gold-pill {
+  border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(30, 24, 12, 0.75);
+}
+
+.v3-icon {
+  font-size: 12px;
+}
+
+.res-val {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.res-val.positive { color: #4ade80; }
+.res-val.alert { color: #f59e0b; }
+.res-val.info { color: #38bdf8; }
+.res-val.gold { color: #fbbf24; }
+
+.res-sub {
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+.res-sub.positive { color: #4ade80; }
+.res-sub.negative { color: #f87171; }
+
+.resource-row-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.mini-icon {
+  font-size: 10px;
+}
+
+.metric-divider {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.infamy-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #991b1b;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* --- Top-Bar Right: Vintage Clockwork Dial --- */
+.construction-queue-widget {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(12, 17, 25, 0.7);
+  border: 1px solid var(--brass-border);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.queue-icon {
+  font-size: 14px;
+}
+
+.queue-counts {
+  display: flex;
+  flex-direction: column;
+}
+
+.queue-val {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-accent);
+}
+
+.queue-sub {
+  font-size: 8.5px;
+  color: var(--text-muted);
+}
+
+.v3-clockwork-panel {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(180deg, #241c14 0%, #15110d 100%);
+  border: 1.5px solid var(--brass-accent);
+  border-radius: 6px;
+  padding: 4px 10px;
+  gap: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-.top-bar-left, .top-bar-center, .top-bar-right {
+.date-dial-box {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  min-width: 140px;
 }
 
-/* --- HAUPTBEREICH (WORKSPACE) --- */
+.v3-date-text {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brass-light);
+  letter-spacing: 0.5px;
+}
+
+.v3-weekday-ref {
+  font-size: 9.5px;
+  color: var(--text-secondary);
+}
+
+.clockwork-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.v3-brass-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #c4a35a 0%, #876d33 100%);
+  border: 1px solid #dfc68b;
+  color: #10151f;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.v3-brass-btn:hover {
+  filter: brightness(1.2);
+}
+
+.speed-dots-group {
+  display: flex;
+  gap: 2px;
+}
+
+.speed-pip {
+  padding: 2px 5px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--brass-border);
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.speed-pip.active {
+  background: var(--brass-accent);
+  color: #10151f;
+  border-color: #fff;
+}
+
+.clockwork-gear {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: gear-spin 12s linear infinite;
+}
+
+@keyframes gear-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.top-bar-system-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.v3-icon-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--brass-border);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.v3-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--brass-light);
+}
+
+.v3-brass-pill-btn {
+  padding: 4px 10px;
+  background: rgba(196, 163, 90, 0.15);
+  border: 1px solid var(--brass-accent);
+  color: var(--brass-light);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.v3-brass-pill-btn:hover {
+  background: var(--brass-accent);
+  color: #10151f;
+}
+
+/* ==========================================================================
+   2. WORKSPACE & MAP VIEWPORT
+   ========================================================================== */
 #workspace {
   flex: 1;
   width: 100%;
-  height: calc(100vh - 48px - 28px);
+  height: calc(100vh - 58px);
   position: relative;
   overflow: hidden;
   background: var(--bg-ocean);
 }
 
-/* --- PURE VECTOR MAP VIEWPORT – Z-INDEX: 10 (NIMMT 100% EIN) --- */
 #map-viewport {
   position: absolute;
   inset: 0;
@@ -61,22 +399,6 @@
   cursor: grabbing;
 }
 
-#map-svg-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-svg#europe-map-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  user-select: none;
-}
-
-/* --- UI-OVERLAYS CONTAINER – Z-INDEX: 30 (POINTER-EVENTS: NONE) --- */
 #ui-overlay-container {
   position: absolute;
   inset: 0;
@@ -86,37 +408,112 @@ svg#europe-map-svg {
   z-index: 30;
 }
 
-/* Interaktive Steuerelemente im Overlay */
 .ui-interactive {
   pointer-events: auto;
 }
 
-/* --- KARTENMODI-LEISTE – Z-INDEX: 50 --- */
+/* ==========================================================================
+   3. VICTORIA 3 VERTICAL NAVIGATION DOCK (FAR LEFT, z-index: 60)
+   ========================================================================== */
+#v3-left-dock {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: linear-gradient(180deg, rgba(20, 26, 36, 0.95) 0%, rgba(12, 16, 24, 0.95) 100%);
+  border: 1.5px solid var(--brass-border);
+  border-radius: 24px;
+  padding: 8px 5px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 60;
+}
+
+.v3-dock-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #242f40 0%, #151c27 100%);
+  border: 1px solid rgba(196, 163, 90, 0.3);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.v3-dock-btn:hover {
+  border-color: var(--brass-accent);
+  transform: scale(1.08);
+  box-shadow: 0 0 10px rgba(196, 163, 90, 0.4);
+}
+
+.v3-dock-btn.active {
+  background: linear-gradient(145deg, #c4a35a 0%, #876d33 100%);
+  border-color: #fff;
+}
+
+.dock-icon {
+  font-size: 16px;
+}
+
+.dock-tooltip {
+  position: absolute;
+  left: 48px;
+  background: #111722;
+  border: 1px solid var(--brass-border);
+  color: var(--brass-light);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.v3-dock-btn:hover .dock-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ==========================================================================
+   4. MAP MODES BAR & ZOOM CONTROLS
+   ========================================================================== */
 #map-modes-bar {
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  background: rgba(14, 20, 30, 0.92);
-  border: var(--brass-hairline);
-  border-radius: var(--border-radius-sm);
-  padding: 3px 6px;
-  gap: 4px;
+  background: rgba(14, 20, 30, 0.94);
+  border: 1px solid var(--brass-border);
+  border-radius: 20px;
+  padding: 3px 8px;
+  gap: 3px;
   z-index: 50;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
 }
 
 .map-mode-btn {
   padding: 4px 10px;
   font-family: var(--font-sans);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text-secondary);
   border: none;
   background: transparent;
-  border-radius: var(--border-radius-sm);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
@@ -124,20 +521,19 @@ svg#europe-map-svg {
 
 .map-mode-btn:hover {
   color: var(--text-accent);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .map-mode-btn.active {
-  background: rgba(196, 163, 90, 0.22);
+  background: rgba(196, 163, 90, 0.25);
   color: var(--text-accent);
   border: 1px solid var(--brass-border);
 }
 
-/* --- KARTEN-STEUERUNG (ZOOM & RESET) – Z-INDEX: 50 --- */
 #map-controls {
   position: absolute;
   bottom: 25px;
-  right: 16px;
+  right: 330px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -148,7 +544,7 @@ svg#europe-map-svg {
   width: 32px;
   height: 32px;
   background: rgba(16, 22, 32, 0.9);
-  border: var(--brass-hairline);
+  border: 1px solid var(--brass-border);
   color: var(--text-secondary);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -156,7 +552,7 @@ svg#europe-map-svg {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--border-radius-sm);
+  border-radius: 4px;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   transition: all 0.15s;
@@ -168,143 +564,579 @@ svg#europe-map-svg {
   background: rgba(26, 36, 52, 0.95);
 }
 
-/* --- LINKES MINISTERIAL-PANEL – Z-INDEX: 40 --- */
-#left-panel {
+/* ==========================================================================
+   5. DETAIL-PANEL: STATE / PROVINCE INSPECTOR (SCREENSHOT 1 "OST-SCHWEIZ")
+   ========================================================================== */
+#province-inspector {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 14px;
+  left: 68px;
   bottom: 25px;
-  width: 360px;
-  background: var(--bg-panel);
-  border: var(--brass-hairline);
-  box-shadow: var(--shadow-subtle);
-  z-index: 40;
-  display: flex;
+  width: 440px;
+  background: linear-gradient(180deg, rgba(18, 23, 33, 0.96) 0%, rgba(12, 16, 24, 0.98) 100%);
+  border: 1.5px solid var(--brass-accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  z-index: 55;
+  border-radius: 4px;
+  backdrop-filter: blur(14px);
+  display: none;
   flex-direction: column;
-  border-radius: var(--border-radius-sm);
-  backdrop-filter: blur(10px);
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-#left-panel.collapsed {
-  transform: translateX(-385px);
+#province-inspector.visible {
+  display: flex;
 }
 
-.panel-header {
+/* Ornate Burgundy Arch Banner Header (Victoria 3 Original Style) */
+.v3-state-header {
+  background: linear-gradient(180deg, #4a121a 0%, #280a0e 100%);
+  border-bottom: 2px solid var(--brass-accent);
   padding: 10px 14px;
-  border-bottom: var(--brass-hairline);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(14, 18, 26, 0.95);
+  position: relative;
+  box-shadow: inset 0 -1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.v3-state-header::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: rgba(196, 163, 90, 0.4);
+}
+
+.v3-state-title-group {
+  text-align: center;
+  flex: 1;
+}
+
+.v3-state-title {
   font-family: var(--font-serif);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--brass-light);
-  letter-spacing: 0.5px;
-}
-
-.left-nav-bar {
-  display: flex;
-  background: rgba(10, 14, 20, 0.9);
-  border-bottom: var(--brass-hairline);
-  overflow-x: auto;
-}
-
-.left-nav-btn {
-  padding: 8px 12px;
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fef08a;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  border: none;
-  background: transparent;
-  border-bottom: 2px solid transparent;
-  transition: all 0.15s;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.v3-state-subtitle {
+  font-size: 11px;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.v3-header-controls, .v3-header-nav-arrows {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.v3-arrow-btn, .v3-close-btn {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(196, 163, 90, 0.4);
+  color: var(--brass-light);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  white-space: nowrap;
+  font-size: 10px;
+  transition: all 0.15s;
 }
 
-.left-nav-btn:hover {
-  color: var(--text-accent);
+.v3-arrow-btn:hover, .v3-close-btn:hover {
+  background: var(--brass-accent);
+  color: #10151f;
+  border-color: #fff;
 }
 
-.left-nav-btn.active {
-  color: var(--text-accent);
+/* Horizontal Victoria 3 State Tabs */
+.v3-state-tabs {
+  display: flex;
+  background: #111722;
+  border-bottom: 1px solid var(--brass-border);
+}
+
+.v3-state-tab {
+  flex: 1;
+  padding: 8px 4px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.v3-state-tab:hover {
+  color: var(--brass-light);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.v3-state-tab.active {
+  color: var(--brass-light);
   border-bottom-color: var(--brass-accent);
-  background: rgba(196, 163, 90, 0.08);
+  background: rgba(196, 163, 90, 0.1);
+  font-weight: 700;
 }
 
-.left-panel-content {
+.v3-state-body {
   flex: 1;
   overflow-y: auto;
   padding: 14px;
-}
-
-/* --- RECHTES CHRONIK-PANEL – Z-INDEX: 40 --- */
-#right-panel {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 330px;
-  max-height: calc(100% - 35px);
-  background: var(--bg-panel);
-  border: var(--brass-hairline);
-  box-shadow: var(--shadow-subtle);
-  z-index: 40;
   display: flex;
   flex-direction: column;
-  border-radius: var(--border-radius-sm);
-  backdrop-filter: blur(10px);
+  gap: 14px;
+}
+
+/* ==========================================================================
+   6. RIGHT OUTLINER: VICTORIA 3 COLLAPSIBLE LIST (z-index: 50)
+   ========================================================================== */
+#right-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 300px;
+  max-height: calc(100% - 35px);
+  background: linear-gradient(180deg, rgba(18, 24, 34, 0.96) 0%, rgba(11, 15, 22, 0.98) 100%);
+  border: 1.5px solid var(--brass-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65);
+  border-radius: 4px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #right-panel.collapsed {
-  transform: translateX(355px);
+  transform: translateX(315px);
 }
 
-/* --- PROVINZINSPEKTOR POPUP – Z-INDEX: 45 --- */
-#province-inspector {
-  position: absolute;
-  bottom: 25px;
-  left: 385px;
-  width: 360px;
-  background: var(--bg-panel);
-  border: 1px solid var(--brass-accent);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  z-index: 45;
-  border-radius: var(--border-radius-sm);
-  backdrop-filter: blur(12px);
-  display: none;
-}
-
-#province-inspector.visible {
-  display: block;
-}
-
-/* --- UNTERE STATUSLEISTE (BOTTOM BAR) – Z-INDEX: 100 --- */
-#bottom-bar {
-  height: 28px;
-  background: var(--bg-panel-solid);
-  border-top: var(--brass-hairline);
+.v3-outliner-header {
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #242c3b 0%, #171d27 100%);
+  border-bottom: 1px solid var(--brass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   font-size: 11px;
+  font-weight: 700;
+  color: var(--brass-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.v3-pin-btn {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
   color: var(--text-muted);
-  z-index: 100;
+}
+
+.v3-outliner-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.outliner-section {
+  background: rgba(22, 30, 44, 0.55);
+  border: 1px solid rgba(196, 163, 90, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.outliner-section-head {
+  padding: 6px 10px;
+  background: rgba(14, 20, 30, 0.8);
+  border-bottom: 1px solid rgba(196, 163, 90, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--brass-light);
+  cursor: pointer;
+}
+
+.head-badge {
+  background: rgba(196, 163, 90, 0.2);
+  color: var(--brass-light);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.outliner-section-body {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.journal-entry-card {
+  background: rgba(12, 16, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  border-radius: 3px;
+}
+
+.journal-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.journal-sub {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.v3-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.v3-progress-fill {
+  height: 100%;
+  background: #38bdf8;
+  border-radius: 2px;
+}
+
+.v3-progress-fill.alert {
+  background: #f59e0b;
+}
+
+.market-entry-row, .army-entry-row, .ig-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  padding: 3px 0;
+}
+
+.badge-soldiers {
+  color: #f87171;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   7. VICTORIA 3 BOTTOM QUICK DOCK & NOTIFICATION TOASTS
+   ========================================================================== */
+#v3-bottom-quick-dock {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 55;
+}
+
+.v3-round-brass-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #5a4722 0%, #291e0a 100%);
+  border: 2px solid var(--brass-accent);
+  color: var(--brass-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 0 6px rgba(0, 0, 0, 0.8);
+  transition: all 0.18s ease;
+}
+
+.v3-round-brass-btn:hover {
+  transform: translateY(-3px) scale(1.08);
+  border-color: #fef08a;
+  box-shadow: 0 6px 16px rgba(196, 163, 90, 0.5);
+}
+
+.quick-icon {
+  font-size: 18px;
+}
+
+#v3-toast-container {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 55;
   pointer-events: auto;
 }
 
-/* Responsive Verhalten */
-@media (max-width: 1024px) {
-  #province-inspector {
-    left: 15px;
-    bottom: 35px;
-    width: calc(100% - 30px);
-    max-width: 380px;
-  }
+.v3-toast-pill {
+  background: linear-gradient(90deg, rgba(20, 26, 38, 0.95) 0%, rgba(12, 16, 24, 0.95) 100%);
+  border: 1px solid var(--brass-border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #e2e8f0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  animation: toast-fade-in 0.3s ease;
+}
+
+@keyframes toast-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.toast-time {
+  font-size: 8.5px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   8. TECHNIKBAUM MODAL: VICTORIA 3 TECH TREE (SCREENSHOT 2 STIL)
+   ========================================================================== */
+.tech-tree-window {
+  width: 90vw;
+  max-width: 1100px;
+  height: 85vh;
+  background: linear-gradient(180deg, #18202c 0%, #0e141d 100%);
+  border: 2px solid var(--brass-accent);
+  border-radius: 6px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.tech-tree-banner {
+  background: linear-gradient(180deg, #4a121a 0%, #280a0e 100%);
+  border-bottom: 2px solid var(--brass-accent);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tech-tree-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: #fef08a;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.tech-active-research-box {
+  background: rgba(14, 18, 26, 0.9);
+  border-bottom: 1px solid var(--brass-border);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.active-tech-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: #2a1f10;
+  border: 1.5px solid var(--brass-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.active-tech-icon { font-size: 18px; }
+.active-tech-tier { font-size: 8px; color: var(--brass-light); }
+
+.active-tech-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.active-tech-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.active-tech-name {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.active-tech-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.v3-tech-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.v3-tech-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #0284c7 100%);
+  border-radius: 3px;
+}
+
+.active-tech-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.tech-tree-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px;
+  background: #111722;
+  border-bottom: 1px solid var(--brass-border);
+}
+
+.tech-category-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tech-cat-btn {
+  padding: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--brass-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tech-cat-btn:hover {
+  color: var(--brass-light);
+  border-color: var(--brass-accent);
+}
+
+.tech-cat-btn.active {
+  background: var(--brass-accent);
+  color: #10151f;
+  font-weight: 700;
+}
+
+.tech-search-box {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--brass-border);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.tech-search-box input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  outline: none;
+  width: 120px;
+}
+
+.tech-tree-canvas {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  gap: 32px;
+  background: radial-gradient(circle at 50% 50%, #151d29 0%, #0b0f15 100%);
+}
+
+.tech-era-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 200px;
+}
+
+.tech-era-header {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brass-light);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--brass-border);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tech-card {
+  background: rgba(20, 27, 38, 0.85);
+  border: 1px solid var(--brass-border);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.tech-card:hover {
+  border-color: var(--brass-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 163, 90, 0.3);
+}
+
+.tech-card.researched {
+  border-color: #4ade80;
+  background: rgba(20, 38, 25, 0.85);
+}
+
+.tech-card.researching {
+  border-color: #38bdf8;
+  background: rgba(20, 32, 48, 0.95);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
