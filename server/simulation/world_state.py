@@ -14,6 +14,7 @@ class WorldState:
     """Authoritative in-memory simulation world state."""
 
     def __init__(self):
+        self.regions: Dict[str, Dict[str, Any]] = {}
         self.provinces: Dict[str, Dict[str, Any]] = {}
         self.nations: Dict[str, Dict[str, Any]] = {}
         self.active_players: Dict[str, str] = {}  # account_id -> nation_id
@@ -47,6 +48,12 @@ class WorldState:
             nat["monthly_income"] = 0
             nat["monthly_expense"] = 0
             nat["player_account_id"] = None
+
+        # Initialize regions
+        self.regions = {}
+        for reg in map_data.get("regions", []):
+            rid = reg["id"]
+            self.regions[rid] = copy.deepcopy(reg)
 
         # Initialize provinces
         for prov in map_data.get("provinces", []):
@@ -159,6 +166,7 @@ class WorldState:
         return {
             "scenario": self.scenario_meta,
             "nations": self.nations,
+            "regions": self.regions,
             "provinces": self.provinces,
             "chronicle": self.chronicle[:20]
         }
@@ -167,6 +175,8 @@ class WorldState:
         """Restores world state from dictionary."""
         if "nations" in data:
             self.nations = data["nations"]
+        if "regions" in data:
+            self.regions = data["regions"]
         if "provinces" in data:
             self.provinces = data["provinces"]
         if "chronicle" in data:

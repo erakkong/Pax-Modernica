@@ -89,6 +89,7 @@ async def get_game_state():
         "clock": engine.clock.to_dict(),
         "world": engine.world.to_dict(),
         "nations": engine.world.nations,
+        "regions": engine.world.regions,
         "provinces": engine.world.provinces
     }
 

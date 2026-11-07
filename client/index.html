@@ -160,11 +160,11 @@
       <!-- PURE VECTOR MAP VIEWPORT (z-index: 10, pointer-events: auto) -->
       <section id="map-viewport">
         <div id="map-svg-container">
-          <svg id="europe-map-svg" viewBox="0 0 2000 1350" preserveAspectRatio="xMidYMid meet">
+          <svg id="europe-map-svg" viewBox="0 0 1024 928" preserveAspectRatio="xMidYMid meet">
             <rect width="100%" height="100%" class="sea-bg" />
             
             <g id="map-world">
-              <g id="rivers-layer"></g>
+              <g id="regions-layer"></g>
               <g id="provinces-layer"></g>
               <g id="borders-layer"></g>
               <g id="armies-layer"></g>
@@ -216,6 +216,8 @@
         <!-- FLOATING MAP MODES BAR (10 MODES, TOP CENTER, z-index: 50) -->
         <nav id="map-modes-bar" class="ui-interactive">
           <button class="map-mode-btn active" data-mode="political">Politik</button>
+          <button class="map-mode-btn" data-mode="regions">Regionen</button>
+          <button class="map-mode-btn" data-mode="provinces">Provinzen</button>
           <button class="map-mode-btn" data-mode="terrain">Terrain</button>
           <button class="map-mode-btn" data-mode="relief">Relief</button>
           <button class="map-mode-btn" data-mode="economy">Wirtschaft</button>

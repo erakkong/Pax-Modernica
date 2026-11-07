@@ -1,6 +1,6 @@
 /* ==========================================================================
    PAX MODERNICA – VICTORIA 3 PURE VECTOR MAP STYLING
-   Pure vector topology, high-contrast hierarchical typography & border styling
+   Two-Tier Vector Topology (Regions from Image 2, Granular Provinces from Image 1)
    ========================================================================== */
 
 #map-svg-container {
@@ -18,54 +18,76 @@ svg#europe-map-svg {
   background-color: #0b1118;
 }
 
-/* Deep nautical ocean background with soft vignette */
+/* Deep nautical ocean background */
 .sea-bg {
   fill: #0c131c;
 }
 
 /* Sea Labels (Victoria 3 Nautical Typography) */
 .sea-label {
-  fill: rgba(148, 175, 200, 0.35);
+  fill: rgba(148, 175, 200, 0.32);
   font-family: var(--font-serif);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-style: italic;
-  letter-spacing: 4px;
+  letter-spacing: 5px;
   text-anchor: middle;
   pointer-events: none;
   text-transform: uppercase;
   user-select: none;
 }
 
-/* Dynamic Province Polygons */
-.province-path {
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 0.8px;
+/* Tier 1: Overarching Regional States (Image 2 - 248 States) */
+.region-path {
+  stroke: rgba(20, 26, 35, 0.65);
+  stroke-width: 1.2px;
   stroke-linejoin: round;
   stroke-linecap: round;
   cursor: pointer;
-  transition: fill 0.18s ease, stroke 0.15s ease, filter 0.15s ease;
+  transition: fill 0.18s ease, stroke 0.15s ease;
+}
+
+.region-path:hover {
+  stroke: var(--brass-light);
+  stroke-width: 2.0px;
+}
+
+.region-path.region-selected {
+  stroke: #fde047;
+  stroke-width: 2.8px;
+  filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.45));
+}
+
+/* Tier 2: Granular Internal Provinces (Image 1 - 976 Provinces) */
+.province-path {
+  stroke: rgba(0, 0, 0, 0.26);
+  stroke-width: 0.6px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  cursor: pointer;
+  transition: fill 0.15s ease, stroke 0.15s ease;
 }
 
 .province-path:hover {
-  stroke: var(--brass-light);
-  stroke-width: 2.4px;
-  filter: brightness(1.28);
+  stroke: #fcd34d;
+  stroke-width: 1.8px;
+  fill: rgba(252, 211, 77, 0.22) !important;
 }
 
 .province-path.selected {
   stroke: #fef08a;
-  stroke-width: 3.2px;
-  filter: brightness(1.35) drop-shadow(0 0 8px rgba(254, 240, 138, 0.6));
+  stroke-width: 2.6px;
+  fill: rgba(254, 240, 138, 0.3) !important;
+  filter: brightness(1.3) drop-shadow(0 0 6px rgba(254, 240, 138, 0.5));
 }
 
-/* Sovereign Macro Labels (Victoria 3 Grand Strategy Style) */
+/* Sovereign Macro Empire Labels (Visible at lower zoom) */
 .nation-macro-label {
   fill: #f8fafc;
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: 7px;
+  letter-spacing: 6px;
   text-anchor: middle;
   pointer-events: none;
   text-transform: uppercase;
@@ -78,20 +100,38 @@ svg#europe-map-svg {
   transition: opacity 0.25s ease;
 }
 
-/* Granular Province Labels */
-.province-label {
-  fill: #f1f5f9;
+/* Regional State Labels (Visible at intermediate zoom) */
+.region-label {
+  fill: #e2e8f0;
   font-family: var(--font-serif);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.2px;
   text-anchor: middle;
   pointer-events: none;
   stroke: rgba(11, 17, 24, 0.9);
-  stroke-width: 3px;
+  stroke-width: 2.5px;
   stroke-linejoin: round;
   paint-order: stroke fill;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85));
+  user-select: none;
+  transition: opacity 0.25s ease;
+}
+
+/* Granular Province Labels (Visible at high zoom) */
+.province-label {
+  fill: #f1f5f9;
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-anchor: middle;
+  pointer-events: none;
+  stroke: rgba(11, 17, 24, 0.9);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
   user-select: none;
   transition: opacity 0.25s ease;
 }
@@ -100,26 +140,8 @@ svg#europe-map-svg {
 .province-node {
   fill: var(--brass-light);
   stroke: #0a0e14;
-  stroke-width: 1.5px;
+  stroke-width: 1.2px;
   pointer-events: none;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
   transition: opacity 0.2s ease;
-}
-
-/* City Hub Name Labels */
-.city-label {
-  fill: #fef08a;
-  font-family: var(--font-sans);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-anchor: middle;
-  pointer-events: none;
-  stroke: rgba(11, 17, 24, 0.9);
-  stroke-width: 2.5px;
-  stroke-linejoin: round;
-  paint-order: stroke fill;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
-  user-select: none;
-  transition: opacity 0.25s ease;
 }

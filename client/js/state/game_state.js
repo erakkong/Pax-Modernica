@@ -15,6 +15,7 @@ export class GameState {
       is_paused: false
     };
     this.nations = {};
+    this.regions = {};
     this.provinces = {};
     this.chronicle = [];
     this.scenario = {};
@@ -59,6 +60,7 @@ export class GameState {
 
   setInitialWorld(worldData) {
     this.nations = worldData.nations || {};
+    this.regions = worldData.regions || {};
     this.provinces = worldData.provinces || {};
     this.chronicle = worldData.chronicle || [];
     this.scenario = worldData.scenario || {};

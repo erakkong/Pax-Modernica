@@ -41,6 +41,9 @@ class PaxApp {
     // Check saved auth token
     this.checkStoredAuth();
 
+    // Instant HTTP state load fallback for zero-latency initial render
+    this.fetchInitialState();
+
     // Connect to Server-Authoritative WebSocket
     wsClient.connect();
 
@@ -114,6 +117,25 @@ class PaxApp {
         this.modals.close();
       }
     });
+  }
+
+  async fetchInitialState() {
+    try {
+      const resp = await fetch("/api/game/state");
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.clock) store.setClock(data.clock);
+        if (data.world) {
+          store.setInitialWorld({
+            ...data.world,
+            regions: data.regions || data.world.regions,
+            provinces: data.provinces || data.world.provinces
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Initial state fetch error, waiting for WS:", e);
+    }
   }
 
   async checkStoredAuth() {

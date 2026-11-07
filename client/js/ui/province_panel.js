@@ -76,12 +76,13 @@ export class ProvincePanelController {
     this.currentProvince = prov;
     this.panel.classList.add("visible");
 
+    const reg = store.regions[prov.region_id] || null;
     const owner = store.nations[prov.owner_id] || { name: "Unabhängig", color: "#666" };
     
     // Set Header Title & Flag
     if (this.titleEl) {
-      const cleanName = prov.name.toUpperCase();
-      this.titleEl.textContent = cleanName;
+      const displayName = reg ? reg.name : prov.name;
+      this.titleEl.textContent = displayName.toUpperCase();
     }
     if (this.subtitleEl) {
       const nationName = owner.name.replace("Königreich ", "").replace("Erzherzogtum ", "").replace("Kurfürstentum ", "");
@@ -257,6 +258,26 @@ export class ProvincePanelController {
    * State Overview Tab
    */
   renderOverviewTab(prov, owner) {
+    const reg = store.regions[prov.region_id] || null;
+    const subprovincesHtml = reg && reg.provinces && reg.provinces.length > 0 ? `
+      <div style="margin-top:12px; background:rgba(18,24,34,0.7); border:1px solid rgba(196,163,90,0.2); border-radius:4px; padding:10px;">
+        <div style="font-size:11px; font-weight:700; color:var(--brass-light); margin-bottom:6px; display:flex; justify-content:space-between;">
+          <span>Teilprovinzen dieser Region (${reg.provinces.length})</span>
+          <span style="font-size:10px; color:var(--text-muted);">Auswahl zur Inspektion</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:4px; max-height:100px; overflow-y:auto;">
+          ${reg.provinces.map((pid) => {
+            const p = store.provinces[pid];
+            if (!p) return "";
+            const isSel = p.id === prov.id;
+            return `<button class="v3-subprov-btn ${isSel ? 'active' : ''}" data-pid="${p.id}" style="padding:2px 6px; font-size:9.5px; background:${isSel ? 'var(--brass-dark)' : 'rgba(30,41,59,0.7)'}; border:1px solid ${isSel ? 'var(--brass-light)' : 'rgba(196,163,90,0.25)'}; color:${isSel ? '#fff' : 'var(--text-secondary)'}; border-radius:3px; cursor:pointer;">
+              ${p.name}
+            </button>`;
+          }).join("")}
+        </div>
+      </div>
+    ` : "";
+
     this.tabContentEl.innerHTML = `
       <div class="overview-stats-grid">
         <div class="v3-stat-card">
@@ -292,7 +313,16 @@ export class ProvincePanelController {
           Die Landesherrschaft liegt bei der Krone von <strong style="color:${owner.color};">${owner.name}</strong>.
         </div>
       </div>
+      ${subprovincesHtml}
     `;
+
+    this.tabContentEl.querySelectorAll(".v3-subprov-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const pid = e.currentTarget.getAttribute("data-pid");
+        audio.playClick();
+        store.setSelectedProvince(pid);
+      });
+    });
   }
 
   /**
