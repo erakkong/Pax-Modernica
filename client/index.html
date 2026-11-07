@@ -58,7 +58,7 @@
               <span id="stat-influence" class="res-val info">+775</span>
             </div>
             <!-- Staatsschatz & Monatssaldo -->
-            <div class="resource-pill gold-pill" title="Staatsschatz (Taler) und Monatssaldo">
+            <div class="resource-pill gold-pill" id="btn-open-budget" style="cursor:pointer;" title="Staatsschatz (Taler) und Reichshaushalt (Klicken für Finanzetat & Rankings)">
               <span class="v3-icon icon-gold">🪙</span>
               <span id="stat-gold-val" class="res-val gold">1.93K</span>
               <span id="stat-gold-income" class="res-sub positive">+24.8/Mo</span>
@@ -229,15 +229,13 @@
           <button class="map-mode-btn active" data-mode="political">Politik</button>
           <button class="map-mode-btn" data-mode="regions">Regionen</button>
           <button class="map-mode-btn" data-mode="provinces">Provinzen</button>
-          <button class="map-mode-btn" data-mode="terrain">Terrain</button>
-          <button class="map-mode-btn" data-mode="relief">Relief</button>
+          <button class="map-mode-btn" data-mode="terrain">Terraintyp</button>
+          <button class="map-mode-btn" data-mode="growth_rate">Wachstumsrate</button>
           <button class="map-mode-btn" data-mode="economy">Wirtschaft</button>
           <button class="map-mode-btn" data-mode="population">Bevölkerung</button>
+          <button class="map-mode-btn" data-mode="satisfaction">Zufriedenheit</button>
           <button class="map-mode-btn" data-mode="religion">Religion</button>
-          <button class="map-mode-btn" data-mode="infrastructure">Infrastruktur</button>
           <button class="map-mode-btn" data-mode="military">Militär</button>
-          <button class="map-mode-btn" data-mode="diplomacy">Diplomatie</button>
-          <button class="map-mode-btn" data-mode="trade">Handel</button>
         </nav>
 
         <!-- FLOATING ZOOM & RESET CONTROLS (BOTTOM RIGHT, z-index: 50) -->
@@ -502,6 +500,119 @@
           <!-- Interactive Node Canvas / Branch View -->
           <div id="tech-tree-canvas" class="tech-tree-canvas">
             <!-- Dynamically populated with era columns, connection lines & tech nodes -->
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           HAUSHALT & REICHSSTATISTIK MODAL (SCREENSHOT 4 STIL)
+           ========================================================================= -->
+      <div id="budget-modal" class="modal-overlay">
+        <div class="budget-window">
+          <div class="budget-banner">
+            <div class="budget-title-group">
+              <span class="budget-title">REICHSHAUSHALT & STATISTIKEN</span>
+              <span id="budget-nation-subtitle" class="budget-subtitle">Finanzen & Europäischer Machtvergleich (1700)</span>
+            </div>
+            <button id="btn-close-budget-modal" class="v3-close-btn" title="Schließen">✕</button>
+          </div>
+
+          <div class="budget-body">
+            <!-- Left Column: Fiscal Policy & Budget Allocations -->
+            <div class="budget-left-col">
+              <!-- Tax Policy Slider -->
+              <div class="budget-card">
+                <div class="budget-card-header">
+                  <span>STEUER- & ABGABENSATZ</span>
+                  <span id="budget-tax-label" class="budget-pill-badge">Normal (100%)</span>
+                </div>
+                <div class="slider-row">
+                  <input type="range" id="slider-tax-rate" min="0.5" max="1.5" step="0.1" value="1.0" class="v3-slider" />
+                  <div class="slider-ticks">
+                    <span>Sehr niedrig (50%)</span>
+                    <span>Mittel (100%)</span>
+                    <span>Sehr hoch (150%)</span>
+                  </div>
+                </div>
+                <div class="budget-card-footer">
+                  <span id="tax-effect-info">Auswirkung: Einnahmen 100% · Zufriedenheit +0%</span>
+                </div>
+              </div>
+
+              <!-- Budget Spending Sliders -->
+              <div class="budget-card">
+                <div class="budget-card-header">
+                  <span>STAATLICHE AUSGABEN-BUDGETIERUNG</span>
+                </div>
+                
+                <div class="spending-item">
+                  <div class="spending-item-head">
+                    <span>🌾 Konsumgüter & Marktsubventionen</span>
+                    <span id="val-spending-goods">100%</span>
+                  </div>
+                  <input type="range" id="slider-spending-goods" min="0.5" max="1.5" step="0.1" value="1.0" class="v3-slider" />
+                </div>
+
+                <div class="spending-item">
+                  <div class="spending-item-head">
+                    <span>💡 Forschung & Akademien (Innovation)</span>
+                    <span id="val-spending-research">100%</span>
+                  </div>
+                  <input type="range" id="slider-spending-research" min="0.5" max="1.5" step="0.1" value="1.0" class="v3-slider" />
+                </div>
+
+                <div class="spending-item">
+                  <div class="spending-item-head">
+                    <span>🏗️ Investitionen & Bauwesen</span>
+                    <span id="val-spending-investments">100%</span>
+                  </div>
+                  <input type="range" id="slider-spending-investments" min="0.5" max="1.5" step="0.1" value="1.0" class="v3-slider" />
+                </div>
+
+                <div class="spending-item">
+                  <div class="spending-item-head">
+                    <span>⚔️ Heer & Flottenunterhalt</span>
+                    <span id="val-spending-military">100%</span>
+                  </div>
+                  <input type="range" id="slider-spending-military" min="0.5" max="1.5" step="0.1" value="1.0" class="v3-slider" />
+                </div>
+              </div>
+
+              <!-- Financial Balance Sheet -->
+              <div class="budget-card financial-summary-card">
+                <div class="budget-card-header">
+                  <span>MONATLICHE BILANZ</span>
+                  <span id="budget-net-balance-badge" class="net-balance-pill positive">+1 999 £/Mo</span>
+                </div>
+                <div class="fin-breakdown-grid">
+                  <div class="fin-col">
+                    <strong class="fin-col-title positive">EINNAHMEN</strong>
+                    <div class="fin-row"><span>Direkte Steuern:</span> <span id="fin-taxes">+2 840 £</span></div>
+                    <div class="fin-row"><span>Handelszölle:</span> <span id="fin-tariffs">+640 £</span></div>
+                    <div class="fin-row fin-total"><span>Gesamt:</span> <span id="fin-total-income">+3 480 £</span></div>
+                  </div>
+                  <div class="fin-col">
+                    <strong class="fin-col-title negative">AUSGABEN</strong>
+                    <div class="fin-row"><span>Militärunterhalt:</span> <span id="fin-military">-520 £</span></div>
+                    <div class="fin-row"><span>Hof & Verwaltung:</span> <span id="fin-admin">-310 £</span></div>
+                    <div class="fin-row"><span>Forschungsförderung:</span> <span id="fin-research">-280 £</span></div>
+                    <div class="fin-row"><span>Investitionen:</span> <span id="fin-investments">-371 £</span></div>
+                    <div class="fin-row fin-total"><span>Gesamt:</span> <span id="fin-total-expense">-1 481 £</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: International Rankings (Wirtschaftsranking & Bevölkerungsranking) -->
+            <div class="budget-right-col">
+              <div class="rankings-header-tabs">
+                <button id="btn-rank-economy" class="rank-tab-btn active">Wirtschaftsranking (BIP)</button>
+                <button id="btn-rank-population" class="rank-tab-btn">Bevölkerungsranking</button>
+              </div>
+              <div id="rankings-list-container" class="rankings-list-scroll">
+                <!-- Dynamically populated 16 nations with bar graphs and flags -->
+              </div>
+            </div>
           </div>
         </div>
       </div>

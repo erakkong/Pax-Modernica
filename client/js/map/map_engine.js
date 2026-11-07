@@ -13,21 +13,21 @@ import { audio } from "../ui/audio_controller.js";
 // Curated, non-overlapping historical nation label positions (Victoria 3 & HoI4 style)
 const NATION_LABEL_CONFIG = {
   nation_prussia:     { title: "PREUSSEN",          x: 540, y: 468, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_france:      { title: "FRANKREICH",        x: 395, y: 595, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
+  nation_france:      { title: "FRANKREICH",        x: 395, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
   nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
   nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_russia:      { title: "RUSSLAND",          x: 840, y: 330, minScale: 0.65, maxScale: 1.6, fontSize: 22, letterSpacing: 7 },
+  nation_russia:      { title: "RUSSLAND",          x: 840, y: 340, minScale: 0.65, maxScale: 1.6, fontSize: 22, letterSpacing: 7 },
   nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
   nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
   nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
   nation_poland:      { title: "POLEN-LITAUEN",     x: 670, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
-  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 405, minScale: 0.95, maxScale: 2.0, fontSize: 14, letterSpacing: 4 },
-  nation_netherlands: { title: "NIEDERLANDE",       x: 425, y: 478, minScale: 1.25, maxScale: 2.4, fontSize: 12, letterSpacing: 3 },
-  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 2.0, fontSize: 14, letterSpacing: 4 },
-  nation_switzerland: { title: "SCHWEIZ",           x: 485, y: 615, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 },
-  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 },
-  nation_venice:      { title: "VENEDIG",           x: 535, y: 625, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 },
-  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 710, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 }
+  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 405, minScale: 0.95, maxScale: 1.8, fontSize: 14, letterSpacing: 4 },
+  nation_netherlands: { title: "NIEDERLANDE",       x: 420, y: 475, minScale: 1.25, maxScale: 2.2, fontSize: 12, letterSpacing: 3 },
+  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 1.8, fontSize: 14, letterSpacing: 4 },
+  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 615, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 },
+  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 },
+  nation_venice:      { title: "VENEDIG",           x: 535, y: 625, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 },
+  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 710, minScale: 1.35, maxScale: 2.2, fontSize: 11, letterSpacing: 2 }
 };
 
 export class MapEngine {
@@ -231,7 +231,14 @@ export class MapEngine {
       this.hoverOwnerName.style.color = owner.color || "#fef08a";
     }
     if (this.hoverTerrainInfo) this.hoverTerrainInfo.textContent = prov.terrain || "Ebene";
-    if (this.hoverGoodsInfo) this.hoverGoodsInfo.textContent = prov.goods_produced || "Agrargüter";
+    const mode = store.activeMapMode || "political";
+    let extraInfo = prov.goods_produced || "Agrargüter";
+    if (mode === "growth_rate") {
+      extraInfo = `Wachstumsrate: ${prov.growth_rate || 55}% · ${(prov.population || 40000).toLocaleString()} 👤`;
+    } else if (mode === "economy" || mode === "trade") {
+      extraInfo = `Wirtschaft: ${(prov.economy || 4000).toLocaleString()} £ (Steuer: ${prov.tax_revenue || 12} £)`;
+    }
+    if (this.hoverGoodsInfo) this.hoverGoodsInfo.textContent = extraInfo;
 
     let x = e.clientX + 16;
     let y = e.clientY + 16;
@@ -552,17 +559,74 @@ export class MapEngine {
 
     if (mode === "provinces") {
       const hash = ((prov.area || 100) * 31 + parseInt(prov.id.replace(/\D/g, "") || "1") * 17) % 360;
-      return `hsla(${hash}, 35%, 40%, 0.75)`;
+      return `hsla(${hash}, 40%, 35%, 0.85)`;
     }
 
-    if (mode === "terrain") {
+    // Natural Biome Colors (Ref: Screenshot media_1794050901484_b4bc393d.jpg)
+    if (mode === "terrain" || mode === "relief") {
       switch (prov.terrain) {
-        case "plains": return "#324d35";
-        case "hills": return "#4d4230";
-        case "mountains": return "#4a4643";
-        case "forest": return "#233d26";
-        case "marsh": return "#2a3c42";
+        case "forest": return "#1f3a22";      // Wald (Tiefgrün)
+        case "plains": return "#355237";      // Ebene (Mittelgrün)
+        case "hills": return "#4d422e";       // Hügel (Ockerbraun)
+        case "mountains": return "#4c4845";   // Berge (Schiefergrau)
+        case "taiga": return "#1b2a22";       // Taiga (Dunkles Nadelgrün)
+        case "steppe": return "#5c5034";      // Steppen (Sonnengelbes Steppenbraun)
+        case "tundra": return "#64748b";      // Tundra (Kaltes Schieferblau)
+        case "marsh": return "#2b3b3f";       // Sumpf (Moosgrau)
         default: return "#334155";
+      }
+    }
+
+    // Heatmap Growth Rate: Yellow (low) to Crimson Red (high) (Ref: media_1794050893491_fa222b7c.jpg)
+    if (mode === "growth_rate") {
+      const rate = prov.growth_rate || 55;
+      // Normalize 45% -> 0.0, 95% -> 1.0
+      const t = Math.max(0, Math.min(1, (rate - 45) / 50));
+      if (t < 0.3) return "#fef08a";       // Pastel Yellow
+      if (t < 0.55) return "#f59e0b";      // Amber
+      if (t < 0.75) return "#ea580c";      // Warm Orange
+      if (t < 0.9) return "#dc2626";       // Vivid Vermilion
+      return "#7f1d1d";                    // Deep Dark Crimson
+    }
+
+    // Economy Mode: Warm Parchment to Rich Gold & Terracotta (Ref: media_1794050907725_abbe5f11.jpg)
+    if (mode === "economy" || mode === "trade") {
+      const econ = prov.economy || 4000;
+      // Range 3000 -> 12000
+      const t = Math.max(0, Math.min(1, (econ - 3000) / 9000));
+      if (t < 0.25) return "#f5deb3";      // Wheat / Cream Parchment
+      if (t < 0.5) return "#eab308";       // Golden Sand
+      if (t < 0.75) return "#d97706";      // Rich Ochre
+      return "#b45309";                    // Deep Amber
+    }
+
+    // Public Satisfaction / Loyalty Heatmap
+    if (mode === "satisfaction") {
+      const sat = prov.growth_rate || 75; // correlated proxy
+      if (sat >= 75) return "#15803d";    // Content Green
+      if (sat >= 60) return "#d97706";    // Moderate Orange
+      return "#b91c1c";                   // Restless Red
+    }
+
+    // Population Density Mode
+    if (mode === "population") {
+      const pop = prov.population || 40000;
+      if (pop > 100000) return "#831843";  // Dense
+      if (pop > 60000) return "#9f1239";
+      if (pop > 35000) return "#b45309";
+      return "#047857";
+    }
+
+    // Religion Mode
+    if (mode === "religion") {
+      switch (prov.religion) {
+        case "Protestantisch": return "#2563eb";
+        case "Kalvinistisch":
+        case "Reformiert": return "#0284c7";
+        case "Katholisch": return "#d97706";
+        case "Orthodox": return "#7c3aed";
+        case "Sunnitisch": return "#16a34a";
+        default: return "#64748b";
       }
     }
 

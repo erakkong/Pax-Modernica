@@ -166,8 +166,35 @@ export class TopBarController {
       this.popDisplay.textContent = pop >= 1000000 ? `${(pop / 1000000).toFixed(2)}M` : `${Math.round(pop / 1000)}K`;
     }
     if (this.gdpDisplay) {
-      const gdp = (nation.total_population || 1000000) * 1.42;
-      this.gdpDisplay.textContent = `${(gdp / 1000000).toFixed(2)}M`;
+      const gdp = nation.gdp || (nation.total_population || 1000000) * 1.42;
+      this.gdpDisplay.textContent = gdp >= 1000000 ? `${(gdp / 1000000).toFixed(2)}M` : `${(gdp / 1000).toFixed(1)}k`;
+    }
+    if (this.literacyDisplay) {
+      this.literacyDisplay.textContent = `${nation.literacy || 56.6}%`;
+    }
+    if (this.solDisplay) {
+      const sat = nation.satisfaction !== undefined ? nation.satisfaction : 82;
+      if (sat >= 75) this.solDisplay.textContent = "12.6 (Wohlhabend)";
+      else if (sat >= 50) this.solDisplay.textContent = "11.4 (Leidlich)";
+      else this.solDisplay.textContent = "9.5 (Verarmt)";
+    }
+    if (this.loyalistsDisplay) {
+      const sat = (nation.satisfaction !== undefined ? nation.satisfaction : 82) / 100;
+      const pop = nation.total_population || 3400000;
+      const loy = Math.max(10, Math.round((pop * sat * 0.05) / 1000));
+      this.loyalistsDisplay.textContent = `${loy}K`;
+    }
+    if (this.radicalsDisplay) {
+      const sat = (nation.satisfaction !== undefined ? nation.satisfaction : 82) / 100;
+      const pop = nation.total_population || 3400000;
+      const rad = Math.max(5, Math.round((pop * (1 - sat) * 0.05) / 1000));
+      this.radicalsDisplay.textContent = `${rad}K`;
+    }
+    if (this.rankBadgeDisplay && store.rankings?.economy?.length > 0) {
+      const myRank = store.rankings.economy.find((r) => r.id === store.playerNationId);
+      if (myRank) {
+        this.rankBadgeDisplay.textContent = myRank.rank.toString();
+      }
     }
   }
 

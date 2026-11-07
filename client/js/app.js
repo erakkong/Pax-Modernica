@@ -11,6 +11,7 @@ import { LeftPanelController } from "./ui/left_panel.js";
 import { RightPanelController } from "./ui/right_panel.js";
 import { ModalController } from "./ui/settings_modal.js";
 import { techTreeController } from "./ui/tech_tree.js";
+import { budgetModalController } from "./ui/budget_modal.js";
 import { audio } from "./ui/audio_controller.js";
 
 class PaxApp {
@@ -111,9 +112,13 @@ class PaxApp {
       } else if (e.key.toLowerCase() === "t") {
         // 'T' shortcut to toggle Technikbaum
         techTreeController.show();
+      } else if (e.key.toLowerCase() === "b" || e.key.toLowerCase() === "h") {
+        // 'B' or 'H' shortcut to toggle Haushalt / Budget
+        budgetModalController.show();
       } else if (e.key === "Escape") {
         store.setSelectedProvince(null);
         techTreeController.hide();
+        budgetModalController.hide();
         this.modals.close();
       }
     });

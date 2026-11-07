@@ -73,6 +73,12 @@ export class WebSocketClient {
         if (msg.updated_nation) {
           store.nations[msg.updated_nation.id] = msg.updated_nation;
           store.emit("nations_updated", store.nations);
+          if (msg.updated_nation.id === store.playerNationId) {
+            store.emit("player_nation_changed", store.nations[store.playerNationId]);
+          }
+        }
+        if (msg.rankings) {
+          store.setRankings(msg.rankings);
         }
         store.emit("action_success", msg);
         break;

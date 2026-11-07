@@ -19,6 +19,7 @@ export class GameState {
     this.provinces = {};
     this.chronicle = [];
     this.scenario = {};
+    this.rankings = { economy: [], population: [] };
 
     // Current player context
     this.playerNationId = "nation_prussia"; // Default starting monarch
@@ -64,7 +65,25 @@ export class GameState {
     this.provinces = worldData.provinces || {};
     this.chronicle = worldData.chronicle || [];
     this.scenario = worldData.scenario || {};
+    this.rankings = worldData.rankings || { economy: [], population: [] };
     this.emit("world_loaded", this);
+  }
+
+  setRankings(rankings) {
+    if (rankings) {
+      this.rankings = rankings;
+      this.emit("rankings_updated", this.rankings);
+    }
+  }
+
+  updateNation(nationData) {
+    if (nationData && nationData.id) {
+      this.nations[nationData.id] = { ...this.nations[nationData.id], ...nationData };
+      this.emit("nations_updated", this.nations);
+      if (nationData.id === this.playerNationId) {
+        this.emit("player_nation_changed", this.nations[this.playerNationId]);
+      }
+    }
   }
 
   applyTickDeltas(deltas) {

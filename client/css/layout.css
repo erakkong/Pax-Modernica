@@ -1302,3 +1302,375 @@
   background: rgba(20, 32, 48, 0.95);
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
+
+/* ==========================================================================
+   9. HAUSHALT & REICHSSTATISTIK MODAL (SCREENSHOT 4 STIL)
+   ========================================================================== */
+.budget-window {
+  width: 92vw;
+  max-width: 1060px;
+  max-height: 86vh;
+  background: linear-gradient(180deg, #18202c 0%, #0e141d 100%);
+  border: 2px solid var(--brass-accent);
+  border-radius: 6px;
+  box-shadow: 0 16px 52px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.budget-banner {
+  background: linear-gradient(180deg, #4a121a 0%, #280a0e 100%);
+  border-bottom: 2px solid var(--brass-accent);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.budget-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 800;
+  color: #fef08a;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.budget-subtitle {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.budget-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 16px 20px;
+  overflow-y: auto;
+  max-height: calc(86vh - 65px);
+}
+
+.budget-card {
+  background: rgba(20, 27, 38, 0.88);
+  border: 1px solid var(--brass-border);
+  border-radius: 5px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.budget-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-serif);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--brass-light);
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.budget-pill-badge {
+  background: rgba(196, 163, 90, 0.2);
+  border: 1px solid var(--brass-accent);
+  color: #fef08a;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+}
+
+.v3-slider {
+  width: 100%;
+  accent-color: #c4a35a;
+  cursor: pointer;
+}
+
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.budget-card-footer {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.spending-item {
+  margin-bottom: 10px;
+}
+
+.spending-item-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.net-balance-pill {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.net-balance-pill.positive {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid #4ade80;
+  color: #4ade80;
+}
+
+.net-balance-pill.negative {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #f87171;
+  color: #f87171;
+}
+
+.fin-breakdown-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.fin-col-title {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.fin-col-title.positive { color: #4ade80; }
+.fin-col-title.negative { color: #f87171; }
+
+.fin-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.fin-total {
+  font-weight: 700;
+  color: #f1f5f9;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+/* Rankings on Right Column */
+.rankings-header-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--brass-border);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.rank-tab-btn {
+  flex: 1;
+  padding: 7px 10px;
+  background: rgba(14, 20, 30, 0.85);
+  border: 1px solid var(--brass-border);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rank-tab-btn.active {
+  background: rgba(196, 163, 90, 0.25);
+  border-color: var(--brass-accent);
+  color: #fef08a;
+}
+
+.rankings-list-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.ranking-row {
+  background: rgba(18, 24, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s;
+}
+
+.ranking-row:hover {
+  background: rgba(26, 36, 52, 0.95);
+  border-color: var(--brass-border);
+}
+
+.ranking-row.player-row {
+  border-color: var(--brass-accent);
+  background: rgba(196, 163, 90, 0.12);
+}
+
+.rank-pos {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brass-light);
+  min-width: 26px;
+}
+
+.rank-flag-badge {
+  width: 26px;
+  height: 18px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.rank-details {
+  flex: 1;
+}
+
+.rank-name-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.rank-nation-name {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.rank-metric-val {
+  font-weight: 700;
+  color: var(--brass-light);
+}
+
+.rank-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* ==========================================================================
+   10. DYNAMIC ANSICHTEN / LEFT DRAWER MAP MODE LISTS
+   ========================================================================== */
+.terrain-stat-row {
+  background: rgba(18, 24, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s;
+}
+
+.terrain-stat-row:hover {
+  background: rgba(28, 38, 54, 0.95);
+  border-color: var(--brass-border);
+}
+
+.terrain-icon-box {
+  font-size: 16px;
+}
+
+.terrain-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.terrain-count-badge {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brass-light);
+}
+
+.ansicht-meta-header {
+  border-bottom: 1px solid var(--brass-border);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.ansicht-provinces-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.province-rank-item {
+  background: rgba(18, 24, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.province-rank-item:hover {
+  background: rgba(30, 42, 60, 0.95);
+  border-color: var(--brass-accent);
+}
+
+.flag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.prov-name-text {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.prov-growth-pct {
+  font-weight: 700;
+}
+
+.prov-pop-text, .prov-pct-text {
+  color: var(--text-secondary);
+  font-size: 10.5px;
+}

@@ -86,6 +86,15 @@ export class LeftPanelController {
     store.subscribe("player_nation_changed", () => this.render());
     store.subscribe("nations_updated", () => this.render());
     store.subscribe("world_loaded", () => this.render());
+    store.subscribe("map_mode_changed", (mode) => this.onMapModeChanged(mode));
+  }
+
+  onMapModeChanged(mode) {
+    if (mode === "terrain" || mode === "growth_rate" || mode === "economy") {
+      this.panel.classList.remove("collapsed");
+      this.activeTab = mode;
+      this.render();
+    }
   }
 
   render() {
@@ -93,6 +102,21 @@ export class LeftPanelController {
     const nation = store.getPlayerNation();
     if (!nation) {
       this.contentEl.innerHTML = `<div style="color:var(--text-dim); padding:10px;">Lade Reichsdaten...</div>`;
+      return;
+    }
+
+    if (this.activeTab === "terrain") {
+      this.renderTerrainAnsicht();
+      return;
+    }
+
+    if (this.activeTab === "growth_rate") {
+      this.renderGrowthRateAnsicht(nation);
+      return;
+    }
+
+    if (this.activeTab === "economy" && store.activeMapMode === "economy") {
+      this.renderEconomyAnsicht(nation);
       return;
     }
 
@@ -122,6 +146,144 @@ export class LeftPanelController {
       default:
         this.renderMonarchTab(nation);
     }
+  }
+
+  renderTerrainAnsicht() {
+    if (this.titleEl) this.titleEl.textContent = "Terrain";
+    const provinces = Object.values(store.provinces || {});
+
+    // Count biomes
+    const counts = {
+      "Wald": 0,
+      "Ebene": 0,
+      "Hügel": 0,
+      "Berge": 0,
+      "Taiga": 0,
+      "Steppen": 0,
+      "Tundra": 0,
+      "Sumpf": 0
+    };
+
+    const terrainNames = {
+      "forest": "Wald",
+      "plains": "Ebene",
+      "hills": "Hügel",
+      "mountains": "Berge",
+      "taiga": "Taiga",
+      "steppe": "Steppen",
+      "tundra": "Tundra",
+      "marsh": "Sumpf"
+    };
+
+    const terrainIcons = {
+      "Wald": "🌲",
+      "Ebene": "🌾",
+      "Hügel": "⛰️",
+      "Berge": "🏔️",
+      "Taiga": "🌲",
+      "Steppen": "🏜️",
+      "Tundra": "❄️",
+      "Sumpf": "🌿"
+    };
+
+    provinces.forEach((p) => {
+      const deName = terrainNames[p.terrain] || "Ebene";
+      if (counts[deName] !== undefined) counts[deName]++;
+      else counts["Ebene"]++;
+    });
+
+    this.contentEl.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${Object.entries(counts).map(([name, count]) => `
+          <div class="terrain-stat-row">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="terrain-icon-box">${terrainIcons[name] || '🌲'}</span>
+              <span class="terrain-name">${name}</span>
+            </div>
+            <span class="terrain-count-badge">${count}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  renderGrowthRateAnsicht(nation) {
+    if (this.titleEl) this.titleEl.textContent = nation.name;
+    const provList = (nation.provinces || [])
+      .map((pid) => store.provinces[pid])
+      .filter(Boolean)
+      .sort((a, b) => (b.growth_rate || 50) - (a.growth_rate || 50));
+
+    const avgGrowth = provList.length > 0 
+      ? Math.round(provList.reduce((acc, p) => acc + (p.growth_rate || 50), 0) / provList.length)
+      : 54;
+
+    this.contentEl.innerHTML = `
+      <div class="ansicht-meta-header">
+        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">
+          Durchschnittliche Wachstumsrate: <strong style="color:#f59e0b;">${avgGrowth}%</strong>
+        </div>
+      </div>
+      <div class="ansicht-provinces-list">
+        ${provList.map((p) => `
+          <div class="province-rank-item" data-pid="${p.id}">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="flag-dot" style="background:${nation.color};"></span>
+              <span class="prov-name-text">${p.name}</span>
+              <span class="prov-growth-pct" style="color:${(p.growth_rate || 50) >= 70 ? '#f87171' : '#fef08a'};">${p.growth_rate || 50}%</span>
+            </div>
+            <span class="prov-pop-text">${(p.population || 40000).toLocaleString("de-DE")} 👤</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    this.contentEl.querySelectorAll(".province-rank-item").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        const pid = e.currentTarget.getAttribute("data-pid");
+        store.setSelectedProvince(pid);
+      });
+    });
+  }
+
+  renderEconomyAnsicht(nation) {
+    if (this.titleEl) this.titleEl.textContent = nation.name;
+    const totalEcon = nation.gdp || 65791;
+    const provList = (nation.provinces || [])
+      .map((pid) => store.provinces[pid])
+      .filter(Boolean)
+      .sort((a, b) => (b.economy || 4000) - (a.economy || 4000));
+
+    this.contentEl.innerHTML = `
+      <div class="ansicht-meta-header">
+        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">
+          Wirtschaft: <strong style="color:#fbbf24;">${totalEcon.toLocaleString("de-DE")} £</strong>
+        </div>
+      </div>
+      <div class="ansicht-provinces-list">
+        ${provList.map((p) => {
+          const val = p.economy || 4000;
+          const pct = ((val / totalEcon) * 100).toFixed(2);
+          return `
+            <div class="province-rank-item" data-pid="${p.id}">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="flag-dot" style="background:${nation.color};"></span>
+                <span class="prov-name-text">${p.name}</span>
+                <span class="prov-econ-val" style="color:#fbbf24; font-weight:600;">${val.toLocaleString("de-DE")} £</span>
+              </div>
+              <span class="prov-pct-text">${pct}%</span>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+
+    this.contentEl.querySelectorAll(".province-rank-item").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        const pid = e.currentTarget.getAttribute("data-pid");
+        store.setSelectedProvince(pid);
+      });
+    });
   }
 
   renderMonarchTab(nation) {

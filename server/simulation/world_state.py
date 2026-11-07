@@ -47,6 +47,19 @@ class WorldState:
             nat["total_population"] = 0
             nat["monthly_income"] = 0
             nat["monthly_expense"] = 0
+            nat["monthly_balance"] = 0
+            nat["gdp"] = 0
+            nat["tax_rate"] = 1.0          # 0.5 (sehr niedrig) bis 1.5 (sehr hoch)
+            nat["budget_goods"] = 1.0      # Subventionen / Markt
+            nat["budget_research"] = 1.0   # Technik & Innovation
+            nat["budget_investments"] = 1.0# Infrastruktur & Bau
+            nat["budget_military"] = 1.0   # Heer & Flottenunterhalt
+            nat["satisfaction"] = 82       # 0 - 100%
+            nat["literacy"] = nat.get("literacy", 52.0)
+            nat["monthly_income_breakdown"] = {"taxes": 0.0, "tariffs": 0.0, "total": 0.0}
+            nat["monthly_expense_breakdown"] = {
+                "military": 0.0, "admin": 0.0, "research": 0.0, "investments": 0.0, "total": 0.0
+            }
             nat["player_account_id"] = None
 
         # Initialize regions
@@ -79,23 +92,148 @@ class WorldState:
         )
 
     def recalculate_all_national_budgets(self) -> None:
-        """Calculates monthly tax revenue and base expenses for each nation."""
+        """Calculates dynamic monthly tax revenue, expenses, and GDP for each nation."""
         for nat in self.nations.values():
-            nat["monthly_income"] = 0
+            nat["provinces"] = []
             nat["total_population"] = 0
+            nat["gdp"] = 0
+            nat["monthly_income"] = 0
+            nat["monthly_expense"] = 0
 
+        # Aggregate provinces
         for prov in self.provinces.values():
             owner_id = prov.get("owner_id")
             if owner_id and owner_id in self.nations:
-                self.nations[owner_id]["total_population"] += prov.get("population", 0)
-                # Base monthly tax = tax_revenue + infrastructure bonus
-                tax = prov.get("tax_revenue", 10) * (1.0 + 0.1 * prov.get("infrastructure_level", 1))
-                self.nations[owner_id]["monthly_income"] += round(tax, 1)
+                nat = self.nations[owner_id]
+                nat["provinces"].append(prov["id"])
+                nat["total_population"] += prov.get("population", 0)
+                nat["gdp"] += prov.get("economy", 5000)
 
+        # Calculate dynamic budget balances
         for nat in self.nations.values():
-            # Base administrative and court expense
-            base_expense = 20.0 + (len(nat["provinces"]) * 3.5)
-            nat["monthly_expense"] = round(base_expense, 1)
+            p_count = max(1, len(nat["provinces"]))
+            tax_rate = nat.get("tax_rate", 1.0)
+            
+            # 1. Income: Base province tax * tax_rate + foreign trade tariffs
+            base_tax = sum(
+                self.provinces[pid].get("tax_revenue", 12) * (1.0 + 0.1 * self.provinces[pid].get("infrastructure_level", 1))
+                for pid in nat["provinces"]
+            )
+            tax_income = round(base_tax * tax_rate, 1)
+            trade_tariffs = round(p_count * 4.2 + (nat["gdp"] * 0.0003), 1)
+            total_income = round(tax_income + trade_tariffs, 1)
+
+            # 2. Expenses: Military upkeep, Admin/Court, Research, Public Investments
+            b_mil = nat.get("budget_military", 1.0)
+            b_res = nat.get("budget_research", 1.0)
+            b_inv = nat.get("budget_investments", 1.0)
+
+            military_upkeep = round((25.0 + (p_count * 2.8)) * b_mil, 1)
+            court_admin = round(15.0 + (p_count * 1.6), 1)
+            research_spend = round((p_count * 1.4 + 10.0) * b_res, 1)
+            investment_spend = round((p_count * 2.1 + 15.0) * b_inv, 1)
+            total_expense = round(military_upkeep + court_admin + research_spend + investment_spend, 1)
+
+            net_balance = round(total_income - total_expense, 1)
+
+            nat["monthly_income"] = total_income
+            nat["monthly_expense"] = total_expense
+            nat["monthly_balance"] = net_balance
+            nat["monthly_income_breakdown"] = {
+                "taxes": tax_income,
+                "tariffs": trade_tariffs,
+                "total": total_income
+            }
+            nat["monthly_expense_breakdown"] = {
+                "military": military_upkeep,
+                "admin": court_admin,
+                "research": research_spend,
+                "investments": investment_spend,
+                "total": total_expense
+            }
+
+            # Tax rate impact on public satisfaction and stability
+            # Neutral tax_rate is 1.0. Lower tax increases satisfaction; higher tax lowers it.
+            satisfaction = round(85.0 - (tax_rate - 1.0) * 40.0)
+            nat["satisfaction"] = max(10, min(100, satisfaction))
+
+    def get_national_rankings(self) -> Dict[str, Any]:
+        """Computes comparative rankings for GDP and Population across all European nations."""
+        nat_list = list(self.nations.values())
+        
+        # 1. Economy / GDP Ranking
+        sorted_by_gdp = sorted(nat_list, key=lambda n: n.get("gdp", 0), reverse=True)
+        max_gdp = max((n.get("gdp", 1) for n in sorted_by_gdp), default=1)
+        economy_rankings = []
+        for rank, n in enumerate(sorted_by_gdp, start=1):
+            gdp_val = n.get("gdp", 0)
+            economy_rankings.append({
+                "rank": rank,
+                "id": n["id"],
+                "name": n["name"],
+                "color": n["color"],
+                "gdp": gdp_val,
+                "formatted": f"{gdp_val / 1000:.1f}k" if gdp_val >= 1000 else str(gdp_val),
+                "bar_pct": round((gdp_val / max_gdp) * 100, 1)
+            })
+
+        # 2. Population Ranking
+        sorted_by_pop = sorted(nat_list, key=lambda n: n.get("total_population", 0), reverse=True)
+        max_pop = max((n.get("total_population", 1) for n in sorted_by_pop), default=1)
+        population_rankings = []
+        for rank, n in enumerate(sorted_by_pop, start=1):
+            pop_val = n.get("total_population", 0)
+            population_rankings.append({
+                "rank": rank,
+                "id": n["id"],
+                "name": n["name"],
+                "color": n["color"],
+                "population": pop_val,
+                "formatted": f"{pop_val / 1000000:.2f}M" if pop_val >= 1000000 else f"{pop_val // 1000}k",
+                "bar_pct": round((pop_val / max_pop) * 100, 1)
+            })
+
+        return {
+            "economy": economy_rankings,
+            "population": population_rankings
+        }
+
+    def set_nation_budget(self, nation_id: str, budget_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Adjusts economic budget policies for a nation."""
+        nat = self.nations.get(nation_id)
+        if not nat:
+            return {"success": False, "error": "Nation nicht gefunden."}
+
+        if "tax_rate" in budget_data:
+            nat["tax_rate"] = max(0.5, min(1.5, float(budget_data["tax_rate"])))
+        if "budget_goods" in budget_data:
+            nat["budget_goods"] = max(0.5, min(1.5, float(budget_data["budget_goods"])))
+        if "budget_research" in budget_data:
+            nat["budget_research"] = max(0.5, min(1.5, float(budget_data["budget_research"])))
+        if "budget_investments" in budget_data:
+            nat["budget_investments"] = max(0.5, min(1.5, float(budget_data["budget_investments"])))
+        if "budget_military" in budget_data:
+            nat["budget_military"] = max(0.5, min(1.5, float(budget_data["budget_military"])))
+
+        self.recalculate_all_national_budgets()
+        return {
+            "success": True,
+            "nation_id": nation_id,
+            "budget": {
+                "tax_rate": nat["tax_rate"],
+                "budget_goods": nat["budget_goods"],
+                "budget_research": nat["budget_research"],
+                "budget_investments": nat["budget_investments"],
+                "budget_military": nat["budget_military"],
+                "monthly_income": nat["monthly_income"],
+                "monthly_expense": nat["monthly_expense"],
+                "monthly_balance": nat["monthly_balance"],
+                "monthly_income_breakdown": nat["monthly_income_breakdown"],
+                "monthly_expense_breakdown": nat["monthly_expense_breakdown"],
+                "satisfaction": nat["satisfaction"]
+            },
+            "rankings": self.get_national_rankings()
+        }
 
     def add_chronicle_event(
         self,
@@ -168,6 +306,7 @@ class WorldState:
             "nations": self.nations,
             "regions": self.regions,
             "provinces": self.provinces,
+            "rankings": self.get_national_rankings(),
             "chronicle": self.chronicle[:20]
         }
 

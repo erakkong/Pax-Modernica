@@ -39,3 +39,21 @@ def test_building_fails_if_insufficient_gold():
     res = ws.build_in_province("prov_berlin", "castle", "nation_prussia")
     assert res["success"] is False
     assert "Nicht genügend Gold" in res["error"]
+
+def test_national_budget_and_rankings():
+    ws = WorldState()
+    rankings = ws.get_national_rankings()
+    assert "economy" in rankings and len(rankings["economy"]) >= 15
+    assert "population" in rankings and len(rankings["population"]) >= 15
+    assert rankings["economy"][0]["rank"] == 1
+    assert rankings["economy"][0]["gdp"] > 0
+
+    # Test dynamic tax slider
+    pru = ws.nations["nation_prussia"]
+    base_income = pru["monthly_income"]
+    
+    # Increase taxes to 1.4
+    res = ws.set_nation_budget("nation_prussia", {"tax_rate": 1.4})
+    assert res["success"] is True
+    assert ws.nations["nation_prussia"]["monthly_income"] > base_income
+    assert ws.nations["nation_prussia"]["satisfaction"] < 80

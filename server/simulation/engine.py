@@ -182,6 +182,10 @@ class SimulationEngine:
             nation_id = action.get("nation_id")
             return self.world.build_in_province(province_id, building_type, nation_id)
 
+        elif action_type == "SET_BUDGET":
+            nation_id = action.get("nation_id")
+            return self.world.set_nation_budget(nation_id, action)
+
         return {"success": False, "error": f"Unbekannte Aktion '{action_type}'"}
 
 # Singleton engine instance

@@ -43,12 +43,16 @@ async def websocket_endpoint(websocket: WebSocket):
                     "result": result,
                     "clock": engine.clock.to_dict()
                 }
-                # If building, include updated province and nation data
+                # If building or budget, include updated nation data and rankings
                 if data.get("type") == "BUILD":
                     pid = data.get("province_id")
                     nid = data.get("nation_id")
                     broadcast_msg["updated_province"] = engine.world.provinces.get(pid)
                     broadcast_msg["updated_nation"] = engine.world.nations.get(nid)
+                elif data.get("type") == "SET_BUDGET":
+                    nid = data.get("nation_id")
+                    broadcast_msg["updated_nation"] = engine.world.nations.get(nid)
+                    broadcast_msg["rankings"] = engine.world.get_national_rankings()
 
                 await manager.broadcast(broadcast_msg)
             else:
