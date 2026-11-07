@@ -168,6 +168,7 @@ svg#europe-map-svg {
 }
 
 .province-city-label {
+  display: none;
   fill: #f8fafc;
   font-family: var(--font-sans);
   font-size: 8px;
@@ -192,9 +193,16 @@ svg#europe-map-svg {
 
 .province-city-marker:hover .province-city-label,
 .province-city-marker.hovered .province-city-label {
+  display: block !important;
   fill: #fde047 !important;
   font-weight: 800 !important;
   text-shadow: 0 0 6px rgba(253, 224, 71, 0.9);
+}
+
+.province-city-marker.selected .province-city-label {
+  display: block !important;
+  fill: #38bdf8 !important;
+  font-weight: 700;
 }
 
 .province-city-marker.hovered .province-city-dot {
@@ -239,6 +247,7 @@ svg#europe-map-svg {
 }
 
 .region-capital-label {
+  display: none;
   fill: #fef08a;
   font-family: var(--font-serif);
   font-size: 10.5px;
@@ -256,6 +265,43 @@ svg#europe-map-svg {
   transition: fill 0.15s ease;
 }
 
-.region-capital-marker:hover .region-capital-label {
-  fill: #38bdf8;
+.region-capital-marker:hover .region-capital-label,
+.region-capital-marker.hovered .region-capital-label,
+.region-capital-marker.selected .region-capital-label {
+  display: block !important;
+  fill: #38bdf8 !important;
+}
+
+/* Victoria 3 / Grand Strategy Army Markers */
+.army-marker {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.25s linear;
+}
+
+.army-marker:hover circle {
+  stroke: #38bdf8 !important;
+  stroke-width: 2.5px;
+  filter: drop-shadow(0 0 6px #38bdf8);
+}
+
+.army-marker.selected circle {
+  stroke: #38bdf8 !important;
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 8px #38bdf8);
+  animation: army-pulse 1.5s infinite alternate;
+}
+
+.army-marker.marching {
+  animation: army-bob 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes army-pulse {
+  0% { stroke-width: 2px; }
+  100% { stroke-width: 4px; }
+}
+
+@keyframes army-bob {
+  0% { opacity: 0.92; }
+  100% { opacity: 1.0; }
 }

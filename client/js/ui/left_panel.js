@@ -4,6 +4,7 @@
  */
 
 import { store } from "../state/game_state.js";
+import { wsClient } from "../network/ws_client.js";
 import { audio } from "./audio_controller.js";
 import { techTreeController } from "./tech_tree.js";
 
@@ -390,6 +391,9 @@ export class LeftPanelController {
   }
 
   renderMilitaryTab(nation) {
+    const armies = Object.values(store.armies || {}).filter((a) => a.nation_id === nation.id);
+    const totalTroops = armies.reduce((sum, a) => sum + (a.troops || 0), 0);
+
     this.contentEl.innerHTML = `
       <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); padding:14px; border-radius:4px; margin-bottom:12px;">
         <div style="font-size:13px; font-weight:700; color:var(--brass-light); margin-bottom:10px;">Oberkommando & Heeresstamm</div>
@@ -400,28 +404,145 @@ export class LeftPanelController {
             <span class="v3-stat-number" style="color:#f87171;">${(nation.manpower || 25000).toLocaleString("de-DE")}</span>
           </div>
           <div class="v3-stat-card">
-            <span class="v3-stat-label">Heeresbereitschaft</span>
-            <span class="v3-stat-number" style="color:#4ade80;">100%</span>
+            <span class="v3-stat-label">Aktive Soldaten</span>
+            <span class="v3-stat-number" style="color:#4ade80;">${totalTroops.toLocaleString("de-DE")}</span>
           </div>
         </div>
+      </div>
 
-        <div style="margin-top:10px; font-size:11px; color:var(--text-secondary); line-height:1.5;">
-          Regimenter sind in den Festungsstädten garnisoniert. Kasernenbauten in den Provinzen steigern den monatlichen Rekrutennachschub.
-        </div>
+      <div style="margin-bottom:8px; font-size:12px; font-weight:700; color:var(--brass-light);">
+        Aktive Divisionen & Korps (${armies.length})
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${armies.map((a) => {
+          const prov = store.provinces[a.province_id];
+          const provName = prov ? prov.name : a.province_id;
+          const isSelected = store.selectedArmyId === a.id;
+          return `
+            <div class="military-army-card" data-aid="${a.id}" style="background:rgba(30,41,59,0.8); border:1px solid ${isSelected ? '#38bdf8' : 'rgba(217,119,6,0.3)'}; padding:10px; border-radius:4px; cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700; font-size:12px; color:#f8fafc;">⚔️ ${a.name}</span>
+                <span style="font-size:11px; font-weight:700; color:#fbbf24;">${(a.troops || 0).toLocaleString("de-DE")} Mann</span>
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;">
+                Kommandeur: <strong>${a.commander || 'Offizier'}</strong> · Standort: <span style="color:#93c5fd;">${provName}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:10px;">
+                <span style="color:${a.is_moving ? '#38bdf8' : '#94a3b8'};">Status: ${a.is_moving ? 'Marschiert...' : 'Garnison'}</span>
+                <span style="color:#4ade80;">Moral: ${Math.round(a.morale || 100)}%</span>
+              </div>
+            </div>
+          `;
+        }).join("")}
       </div>
     `;
+
+    this.contentEl.querySelectorAll(".military-army-card").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        const aid = e.currentTarget.getAttribute("data-aid");
+        audio.playClick();
+        store.setSelectedArmy(aid);
+      });
+    });
   }
 
   renderDiplomacyTab(nation) {
+    const isPlayer = nation.id === store.playerNationId;
+    const wars = store.diplomacy?.wars || [];
+    const nationalWars = wars.filter((w) => w.attackers?.includes(nation.id) || w.defenders?.includes(nation.id));
+
+    // Foreign nations list
+    const foreignNations = Object.values(store.nations)
+      .filter((n) => n.id !== nation.id)
+      .map((n) => {
+        const pairKey = [nation.id, n.id].sort().join("--");
+        const relData = store.diplomacy?.relations?.[pairKey] || { opinion: 50, treaties: [] };
+        const isAtWar = relData.treaties?.includes("WAR");
+        return {
+          ...n,
+          opinion: relData.opinion ?? 50,
+          treaties: relData.treaties || [],
+          isAtWar
+        };
+      })
+      .sort((a, b) => (a.isAtWar ? -1 : (b.isAtWar ? 1 : b.opinion - a.opinion)));
+
     this.contentEl.innerHTML = `
-      <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); padding:14px; border-radius:4px;">
-        <div style="font-size:13px; font-weight:700; color:var(--brass-light); margin-bottom:10px;">Diplomatischer Status & Verträge</div>
-        <div style="font-size:11px; color:var(--text-secondary); line-height:1.6;">
-          <p><strong>Prestige:</strong> ${nation.prestige || 75} (Großmacht-Status)</p>
-          <p><strong>Aktive Gesandtschaften:</strong> Gesandte am Wiener und Versailler Hof akkreditiert.</p>
-          <p><strong>Bündnisverträge:</strong> Defensivabkommen im Reichsverband.</p>
+      <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); padding:14px; border-radius:4px; margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; color:var(--brass-light); margin-bottom:8px;">Diplomatischer Status & Prestige</div>
+        <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+          <span style="color:var(--text-secondary);">Prestige:</span>
+          <strong style="color:var(--brass-light);">${nation.prestige || 75} (Großmacht)</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:11.5px;">
+          <span style="color:var(--text-secondary);">Laufende Konflikte:</span>
+          <strong style="color:${nationalWars.length > 0 ? '#f87171' : '#4ade80'};">${nationalWars.length > 0 ? `${nationalWars.length} Krieg(e)` : 'Friedenszustand'}</strong>
         </div>
       </div>
+
+      <div style="margin-bottom:8px; font-size:12px; font-weight:700; color:var(--brass-light);">
+        Europäische Mächte & Verträge
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${foreignNations.map((fn) => {
+          const treatyBadges = fn.treaties.map((t) => {
+            if (t === "WAR") return `<span style="background:#dc2626; color:white; padding:1px 5px; border-radius:3px; font-size:9px; font-weight:700;">KRIEG</span>`;
+            if (t === "ALLIANCE") return `<span style="background:#15803d; color:white; padding:1px 5px; border-radius:3px; font-size:9px; font-weight:700;">BÜNDNIS</span>`;
+            if (t === "NON_AGGRESSION") return `<span style="background:#0284c7; color:white; padding:1px 5px; border-radius:3px; font-size:9px; font-weight:700;">NAP</span>`;
+            if (t === "TRADE_PACT") return `<span style="background:#d97706; color:white; padding:1px 5px; border-radius:3px; font-size:9px; font-weight:700;">HANDEL</span>`;
+            return "";
+          }).join(" ");
+
+          return `
+            <div class="dip-nation-row" style="background:rgba(30,41,59,0.8); border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="flag-dot" style="background:${fn.color}; width:10px; height:10px; border-radius:50%;"></span>
+                  <span style="font-weight:700; font-size:12px; color:#f8fafc;">${fn.name}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  ${treatyBadges}
+                  <span style="font-size:11px; font-weight:700; color:${fn.opinion >= 50 ? '#4ade80' : '#f87171'};">${fn.opinion > 0 ? '+' : ''}${fn.opinion}</span>
+                </div>
+              </div>
+
+              ${isPlayer ? `
+                <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                  ${fn.isAtWar ? `
+                    <button class="v3-build-btn btn-dip-action" data-action="SIGN_PEACE" data-target="${fn.id}" style="padding:3px 8px; font-size:10px; background:#16a34a;">Frieden anbieten</button>
+                  ` : `
+                    <button class="v3-build-btn btn-dip-action" data-action="DECLARE_WAR" data-target="${fn.id}" style="padding:3px 8px; font-size:10px; background:#b91c1c;">Krieg erklären</button>
+                    ${!fn.treaties.includes("ALLIANCE") ? `<button class="v3-build-btn btn-dip-action" data-action="SIGN_PACT" data-pact="ALLIANCE" data-target="${fn.id}" style="padding:3px 8px; font-size:10px;">Bündnis</button>` : ''}
+                    ${!fn.treaties.includes("NON_AGGRESSION") ? `<button class="v3-build-btn btn-dip-action" data-action="SIGN_PACT" data-pact="NON_AGGRESSION" data-target="${fn.id}" style="padding:3px 8px; font-size:10px;">NAP</button>` : ''}
+                    ${!fn.treaties.includes("TRADE_PACT") ? `<button class="v3-build-btn btn-dip-action" data-action="SIGN_PACT" data-pact="TRADE_PACT" data-target="${fn.id}" style="padding:3px 8px; font-size:10px;">Handelspakt</button>` : ''}
+                    <button class="v3-build-btn btn-dip-action" data-action="INFLUENCE" data-target="${fn.id}" style="padding:3px 8px; font-size:10px; background:#4338ca;">Einfluss (50 £)</button>
+                  `}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join("")}
+      </div>
     `;
+
+    // Bind diplomacy buttons
+    this.contentEl.querySelectorAll(".btn-dip-action").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const actionType = e.currentTarget.getAttribute("data-action");
+        const targetId = e.currentTarget.getAttribute("data-target");
+        const pactType = e.currentTarget.getAttribute("data-pact");
+
+        audio.playClick();
+        wsClient.send({
+          type: "DIPLOMACY",
+          action_type: actionType,
+          nation_id: store.playerNationId,
+          target_id: targetId,
+          pact_type: pactType
+        });
+      });
+    });
   }
 }

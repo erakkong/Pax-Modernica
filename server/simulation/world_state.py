@@ -8,6 +8,12 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 import copy
 
+from server.simulation.diplomacy import DiplomacyManager
+from server.simulation.technology import TechManager
+from server.simulation.military import MilitaryManager
+from server.simulation.event_system import EventManager
+from server.simulation.ai_director import AIDirector
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 class WorldState:
@@ -20,6 +26,11 @@ class WorldState:
         self.active_players: Dict[str, str] = {}  # account_id -> nation_id
         self.chronicle: List[Dict[str, Any]] = []
         self.scenario_meta: Dict[str, Any] = {}
+        self.diplomacy: Optional[DiplomacyManager] = None
+        self.technology: Optional[TechManager] = None
+        self.military: Optional[MilitaryManager] = None
+        self.events: Optional[EventManager] = None
+        self.ai: Optional[AIDirector] = None
         self.load_initial_data()
 
     def load_initial_data(self) -> None:
@@ -79,6 +90,13 @@ class WorldState:
 
         # Compute initial national budgets
         self.recalculate_all_national_budgets()
+
+        # Initialize modular authoritative systems
+        self.diplomacy = DiplomacyManager(self)
+        self.technology = TechManager(self)
+        self.military = MilitaryManager(self)
+        self.events = EventManager(self)
+        self.ai = AIDirector(self)
 
         # Initial chronicle greeting
         self.add_chronicle_event(
@@ -307,7 +325,14 @@ class WorldState:
             "regions": self.regions,
             "provinces": self.provinces,
             "rankings": self.get_national_rankings(),
-            "chronicle": self.chronicle[:20]
+            "chronicle": self.chronicle[:25],
+            "armies": self.military.to_dict() if self.military else {},
+            "diplomacy": self.diplomacy.to_dict() if self.diplomacy else {},
+            "technology": {
+                nid: self.technology.get_nation_tech_state(nid)
+                for nid in self.nations.keys()
+            } if self.technology else {},
+            "events": self.events.to_dict() if self.events else {}
         }
 
     def from_dict(self, data: Dict[str, Any]) -> None:
@@ -322,4 +347,12 @@ class WorldState:
             self.chronicle = data["chronicle"]
         if "scenario" in data:
             self.scenario_meta = data["scenario"]
+        if "armies" in data and self.military:
+            self.military.from_dict(data["armies"])
+        if "diplomacy" in data and self.diplomacy:
+            self.diplomacy.from_dict(data["diplomacy"])
+        if "technology" in data and self.technology:
+            self.technology.from_dict(data["technology"])
+        if "events" in data and self.events:
+            self.events.from_dict(data["events"])
         self.recalculate_all_national_budgets()

@@ -55,7 +55,7 @@ class SimulationEngine:
                 logger.error(f"Fehler im Simulations-Tick: {e}", exc_info=True)
 
     async def _process_tick(self, tick_result: Dict[str, Any]) -> None:
-        """Processes monthly economic payouts and world changes."""
+        """Processes military maneuvers, monthly economic payouts, tech research, and AI decisions."""
         clock_data = tick_result["clock"]
         new_month = tick_result["new_month"]
         new_year = tick_result["new_year"]
@@ -66,7 +66,30 @@ class SimulationEngine:
             "events": []
         }
 
+        # 1. Real-time military movement & encounter checks
+        mil_events = self.world.military.update_tick(1.0)
+        if mil_events:
+            for me in mil_events:
+                if "event" in me:
+                    deltas["events"].append(me["event"])
+
+        # Broadcast active armies whenever an army is marching
+        has_moving_armies = any(a.get("is_moving") for a in self.world.military.armies.values())
+        if has_moving_armies or mil_events:
+            deltas["armies"] = self.world.military.to_dict()
+
         if new_month:
+            # Advance scientific technology research
+            comp_techs = self.world.technology.advance_monthly_research()
+            for ct in comp_techs:
+                deltas["events"].append(ct["event"])
+
+            # Autonomous bot AI decision loop
+            self.world.ai.monthly_ai_tick()
+
+            # Check dynamic dilemma events
+            dispatched_events = self.world.events.check_periodic_events(clock_data["month"], clock_data["year"])
+
             # Process national budgets: income from taxes - expenses
             for nid, nat in self.world.nations.items():
                 net_change = nat["monthly_income"] - nat["monthly_expense"]
@@ -80,8 +103,15 @@ class SimulationEngine:
                 deltas["nations"][nid] = {
                     "gold": nat["gold"],
                     "total_population": nat["total_population"],
-                    "stability": nat["stability"]
+                    "stability": nat["stability"],
+                    "satisfaction": nat.get("satisfaction", 80),
+                    "manpower": nat.get("manpower", 25000)
                 }
+
+            deltas["armies"] = self.world.military.to_dict()
+            deltas["diplomacy"] = self.world.diplomacy.to_dict()
+            deltas["pending_events"] = self.world.events.to_dict()
+            deltas["rankings"] = self.world.get_national_rankings()
 
             # Periodic Auto-Save every 3 months
             if clock_data["month"] % 3 == 0:
@@ -106,7 +136,7 @@ class SimulationEngine:
                 "type": "TICK",
                 "tick_id": clock_data["tick_id"],
                 "clock": clock_data,
-                "deltas": deltas if new_month or new_year else None
+                "deltas": deltas if new_month or new_year or has_moving_armies or mil_events else None
             })
 
     async def save_state(self, name: str = "manual_save") -> str:
@@ -185,6 +215,52 @@ class SimulationEngine:
         elif action_type == "SET_BUDGET":
             nation_id = action.get("nation_id")
             return self.world.set_nation_budget(nation_id, action)
+
+        elif action_type == "RECRUIT_ARMY":
+            nation_id = action.get("nation_id")
+            province_id = action.get("province_id")
+            count = int(action.get("count", 3000))
+            return self.world.military.recruit_army(nation_id, province_id, count)
+
+        elif action_type == "MOVE_ARMY":
+            army_id = action.get("army_id")
+            target_province_id = action.get("target_province_id")
+            return self.world.military.order_move_army(army_id, target_province_id)
+
+        elif action_type == "START_RESEARCH":
+            nation_id = action.get("nation_id")
+            tech_id = action.get("tech_id")
+            return self.world.technology.start_research(nation_id, tech_id)
+
+        elif action_type == "DIPLOMACY":
+            sub_action = action.get("action_type")
+            nat_a = action.get("nation_id")
+            nat_b = action.get("target_id")
+            pact_type = action.get("pact_type")
+            if sub_action == "DECLARE_WAR":
+                return self.world.diplomacy.declare_war(nat_a, nat_b)
+            elif sub_action == "SIGN_PEACE":
+                return self.world.diplomacy.sign_peace(nat_a, nat_b)
+            elif sub_action == "SIGN_PACT":
+                return self.world.diplomacy.sign_pact(nat_a, nat_b, pact_type)
+            elif sub_action == "BREAK_PACT":
+                return self.world.diplomacy.break_pact(nat_a, nat_b, pact_type)
+            elif sub_action == "INFLUENCE":
+                return self.world.diplomacy.influence_nation(nat_a, nat_b)
+            return {"success": False, "error": f"Unbekannte Diplomatie-Aktion '{sub_action}'"}
+
+        elif action_type == "CHOOSE_EVENT_OPTION":
+            nation_id = action.get("nation_id")
+            instance_id = action.get("instance_id")
+            option_idx = int(action.get("option_index", 0))
+            return self.world.events.choose_option(nation_id, instance_id, option_idx)
+
+        elif action_type == "SET_BOT_CONFIG":
+            if "difficulty" in action:
+                self.world.ai.config["difficulty"] = action["difficulty"]
+            if "aggressiveness" in action:
+                self.world.ai.config["aggressiveness"] = action["aggressiveness"]
+            return {"success": True, "config": self.world.ai.config}
 
         return {"success": False, "error": f"Unbekannte Aktion '{action_type}'"}
 

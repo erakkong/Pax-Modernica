@@ -23,12 +23,14 @@ export class TechTreeController {
       category: "military",
       era: "I",
       progress: 3360,
-      cost: 10000,
-      monthsRemaining: 18,
+      cost: 8000,
+      monthsRemaining: 12,
       weeklyInnovation: 51,
       spreadMin: 32,
       spreadMax: 98
     };
+
+    store.subscribe("technology_updated", (techState) => this.syncServerState(techState));
 
     this.techDatabase = [
       // ==========================================
@@ -325,23 +327,46 @@ export class TechTreeController {
         if (!tech || tech.researched) return;
 
         audio.playClick();
-        this.techDatabase.forEach((t) => t.researching = false);
-        tech.researching = true;
-        this.currentResearch = {
-          id: tech.id,
-          name: tech.name,
-          category: tech.cat,
-          era: tech.era,
-          progress: 500,
-          cost: tech.cost,
-          monthsRemaining: Math.round(tech.cost / (51 * 4)),
-          weeklyInnovation: 51,
-          spreadMin: 32,
-          spreadMax: 98
-        };
-        this.render();
+        wsClient.send({
+          type: "START_RESEARCH",
+          nation_id: store.playerNationId,
+          tech_id: tech.id
+        });
       });
     });
+  }
+
+  syncServerState(techState) {
+    if (!techState) return;
+    const playerTech = techState[store.playerNationId];
+    if (!playerTech) return;
+
+    const researched = new Set(playerTech.researched || []);
+    const active = playerTech.active_research;
+
+    this.techDatabase.forEach((t) => {
+      t.researched = researched.has(t.id);
+      t.researching = active && active.tech_id === t.id;
+    });
+
+    if (active) {
+      const activeTech = this.techDatabase.find((t) => t.id === active.tech_id);
+      this.currentResearch = {
+        id: active.tech_id,
+        name: activeTech ? activeTech.name : "Forschung",
+        category: activeTech ? activeTech.cat : "military",
+        era: activeTech ? activeTech.era : "I",
+        progress: active.points || 0,
+        cost: active.cost || 8000,
+        monthsRemaining: Math.max(1, Math.round(((active.cost || 8000) - (active.points || 0)) / (playerTech.monthly_innovation || 40))),
+        weeklyInnovation: Math.round((playerTech.monthly_innovation || 40) / 4),
+        spreadMin: 32,
+        spreadMax: 98
+      };
+    } else {
+      this.currentResearch = null;
+    }
+    this.render();
   }
 }
 

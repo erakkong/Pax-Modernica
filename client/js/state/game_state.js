@@ -20,6 +20,11 @@ export class GameState {
     this.chronicle = [];
     this.scenario = {};
     this.rankings = { economy: [], population: [] };
+    this.armies = {};
+    this.diplomacy = { relations: {}, wars: [] };
+    this.technology = {};
+    this.pendingEvents = {};
+    this.selectedArmyId = null;
 
     // Current player context
     this.playerNationId = "nation_prussia"; // Default starting monarch
@@ -66,7 +71,17 @@ export class GameState {
     this.chronicle = worldData.chronicle || [];
     this.scenario = worldData.scenario || {};
     this.rankings = worldData.rankings || { economy: [], population: [] };
+    this.armies = worldData.armies || {};
+    this.diplomacy = worldData.diplomacy || { relations: {}, wars: [] };
+    this.technology = worldData.technology || {};
+    this.pendingEvents = worldData.events?.pending_events || {};
     this.emit("world_loaded", this);
+    this.emit("armies_updated", this.armies);
+    this.emit("diplomacy_updated", this.diplomacy);
+    this.emit("technology_updated", this.technology);
+    if (this.pendingEvents[this.playerNationId]) {
+      this.emit("event_triggered", this.pendingEvents[this.playerNationId]);
+    }
   }
 
   setRankings(rankings) {
@@ -96,11 +111,34 @@ export class GameState {
       }
       this.emit("nations_updated", this.nations);
     }
+    if (deltas.armies) {
+      this.armies = deltas.armies;
+      this.emit("armies_updated", this.armies);
+    }
+    if (deltas.diplomacy) {
+      this.diplomacy = deltas.diplomacy;
+      this.emit("diplomacy_updated", this.diplomacy);
+    }
+    if (deltas.pending_events) {
+      this.pendingEvents = deltas.pending_events.pending_events || {};
+      const myEvt = this.pendingEvents[this.playerNationId];
+      if (myEvt) {
+        this.emit("event_triggered", myEvt);
+      }
+    }
+    if (deltas.rankings) {
+      this.setRankings(deltas.rankings);
+    }
     if (deltas.events && deltas.events.length > 0) {
       this.chronicle.unshift(...deltas.events);
       if (this.chronicle.length > 100) this.chronicle = this.chronicle.slice(0, 100);
       this.emit("chronicle_updated", this.chronicle);
     }
+  }
+
+  setSelectedArmy(armyId) {
+    this.selectedArmyId = armyId;
+    this.emit("army_selected", armyId ? this.armies[armyId] : null);
   }
 
   setSelectedProvince(provinceId) {

@@ -436,7 +436,33 @@ export class ProvincePanelController {
           `;
         }).join("")}
       </div>
+
+      ${(buildings.barracks > 0 && isPlayerOwned) ? `
+        <div style="margin-top:16px; padding:12px; background:rgba(30,41,59,0.8); border:1px solid rgba(217,119,6,0.4); border-radius:4px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-weight:700; color:#fbbf24; font-size:12px;">⚔️ Heeresrekrutierung (Kaserne aktiv)</span>
+            <span style="font-size:11px; color:#cbd5e1;">Rekrutenreserve: ${(playerNation?.manpower || 0).toLocaleString("de-DE")}</span>
+          </div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px;">
+            Stelle ein neues Regiment auf oder verstärke die Garnison in dieser Provinz.
+          </div>
+          <button id="btn-recruit-troops" class="v3-build-btn" style="width:100%; background:linear-gradient(180deg, #991b1b, #7f1d1d); border-color:#dc2626;" ${(!playerNation || playerNation.gold < 100 || playerNation.manpower < 3000) ? 'disabled' : ''}>
+            Regiment ausheben (+3.000 Truppen · 100 £)
+          </button>
+        </div>
+      ` : ''}
     `;
+
+    // Bind recruit button
+    this.tabContentEl.querySelector("#btn-recruit-troops")?.addEventListener("click", () => {
+      audio.playClick();
+      wsClient.send({
+        type: "RECRUIT_ARMY",
+        nation_id: store.playerNationId,
+        province_id: prov.id,
+        count: 3000
+      });
+    });
 
     // Bind build buttons
     this.tabContentEl.querySelectorAll(".v3-build-btn").forEach((btn) => {

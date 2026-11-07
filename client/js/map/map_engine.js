@@ -8,6 +8,7 @@
  */
 
 import { store } from "../state/game_state.js";
+import { wsClient } from "../network/ws_client.js";
 import { audio } from "../ui/audio_controller.js";
 
 // Curated, non-overlapping historical nation label positions (Victoria 3 & HoI4 style)
@@ -73,6 +74,8 @@ export class MapEngine {
       this.updateMapColors();
     });
     store.subscribe("province_selected", (prov) => this.highlightSelectedProvince(prov));
+    store.subscribe("armies_updated", (armies) => this.renderArmies(armies));
+    store.subscribe("army_selected", (army) => this.highlightSelectedArmy(army));
   }
 
   bindEvents() {
@@ -285,6 +288,15 @@ export class MapEngine {
 
     this.tooltipEl.classList.add("visible");
     this.tooltipVisible = true;
+
+    // Reveal regional capital city name on hover
+    if (this.labelsGroup) {
+      const regMarker = this.labelsGroup.querySelector(`.region-capital-marker[data-region-id="${reg.id}"]`);
+      if (regMarker) {
+        regMarker.classList.add("hovered");
+        regMarker.style.display = "block";
+      }
+    }
   }
 
   hideTooltip() {
@@ -292,11 +304,18 @@ export class MapEngine {
       this.tooltipEl.classList.remove("visible");
       this.tooltipVisible = false;
     }
-    // Clean up hover highlights on city markers
+    // Clean up hover highlights on province city markers
     if (this.labelsGroup) {
       this.labelsGroup.querySelectorAll(".province-city-marker.hovered").forEach((m) => {
         m.classList.remove("hovered");
-        if (this.scale < 2.2 && !m.classList.contains("selected")) {
+        if (this.scale < 1.80 && !m.classList.contains("selected")) {
+          m.style.display = "none";
+        }
+      });
+      // Clean up hover highlights on region capital markers
+      this.labelsGroup.querySelectorAll(".region-capital-marker.hovered").forEach((m) => {
+        m.classList.remove("hovered");
+        if (this.scale < 1.40 && !m.classList.contains("selected")) {
           m.style.display = "none";
         }
       });
@@ -322,15 +341,11 @@ export class MapEngine {
   /**
    * Hierarchical Level of Detail:
    * 1. scale < 1.40 (Continental Zoom): Macro Great Power sovereign titles
-   * 2. 1.40 <= scale < 2.20 (Regional Zoom): Regional capitals (dot + capital name)
-   * 3. scale >= 2.20 (Detail Zoom): Granular province cities (dot + name)
+   * 2. scale >= 1.40: Settlement dots visible
+   * 3. City names are ONLY displayed when hovering over the province or region (or selected)
    */
   updateZoomLOD() {
     if (!this.labelsGroup) return;
-
-    const isDetailZoom = this.scale >= 2.20;
-    const isRegionalZoom = this.scale >= 1.40 && this.scale < 2.20;
-    const isContinentalZoom = this.scale < 1.40;
 
     // 1. Continental Macro Titles (Shown during overview zoom)
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
@@ -343,94 +358,39 @@ export class MapEngine {
       }
     });
 
-    // 2. Regional Capital Markers (Medium Zoom)
-    const regMarkers = this.labelsGroup.querySelectorAll(".region-capital-marker");
-    if (!isRegionalZoom) {
-      regMarkers.forEach((el) => {
-        el.style.display = "none";
-      });
-    } else {
-      const minDistance = 26 / this.scale;
-      const occupied = [];
+    // 2. Regional Capital Markers - dots visible above 1.4x zoom, labels strictly on hover
+    this.labelsGroup.querySelectorAll(".region-capital-marker").forEach((marker) => {
+      const isHov = marker.classList.contains("hovered");
+      const isSel = marker.classList.contains("selected");
+      const label = marker.querySelector(".region-capital-label");
 
-      regMarkers.forEach((marker) => {
+      if (this.scale >= 1.40 || isHov || isSel) {
         marker.style.display = "block";
-        const rx = parseFloat(marker.getAttribute("data-rx") || "0");
-        const ry = parseFloat(marker.getAttribute("data-ry") || "0");
-        const label = marker.querySelector(".region-capital-label");
-        if (!label) return;
-
-        let collides = false;
-        for (const [ox, oy] of occupied) {
-          const dx = rx - ox;
-          const dy = ry - oy;
-          if (dx * dx + dy * dy < minDistance * minDistance) {
-            collides = true;
-            break;
-          }
+        if (label) {
+          label.style.display = (isHov || isSel) ? "block" : "none";
         }
+      } else {
+        marker.style.display = "none";
+        if (label) label.style.display = "none";
+      }
+    });
 
-        if (collides) {
-          label.style.display = "none";
-        } else {
-          label.style.display = "block";
-          occupied.push([rx, ry]);
-        }
-      });
-    }
+    // 3. Granular Province City Markers - dots visible above 1.8x zoom, labels strictly on hover
+    this.labelsGroup.querySelectorAll(".province-city-marker").forEach((marker) => {
+      const isHov = marker.classList.contains("hovered");
+      const isSel = marker.classList.contains("selected");
+      const label = marker.querySelector(".province-city-label");
 
-    // 3. Granular Province City Markers (High Zoom)
-    const provMarkers = this.labelsGroup.querySelectorAll(".province-city-marker");
-    if (!isDetailZoom) {
-      provMarkers.forEach((el) => {
-        if (!el.classList.contains("selected") && !el.classList.contains("hovered")) {
-          el.style.display = "none";
-        } else {
-          el.style.display = "block";
-        }
-      });
-    } else {
-      // Dynamic collision avoidance for text labels
-      const minDistance = 24 / this.scale;
-      const occupied = [];
-
-      provMarkers.forEach((marker) => {
+      if (this.scale >= 1.80 || isHov || isSel) {
         marker.style.display = "block";
-        const cx = parseFloat(marker.getAttribute("data-cx") || "0");
-        const cy = parseFloat(marker.getAttribute("data-cy") || "0");
-        const isCap = marker.classList.contains("capital");
-        const isSel = marker.classList.contains("selected");
-        const isHov = marker.classList.contains("hovered");
-        const label = marker.querySelector(".province-city-label");
-
-        if (!label) return;
-
-        // Capitals, selected, and hovered cities ALWAYS get full visibility
-        if (isCap || isSel || isHov) {
-          label.style.display = "block";
-          occupied.push([cx, cy]);
-          return;
+        if (label) {
+          label.style.display = (isHov || isSel) ? "block" : "none";
         }
-
-        // Distance collision check against already shown labels
-        let collides = false;
-        for (const [ox, oy] of occupied) {
-          const dx = cx - ox;
-          const dy = cy - oy;
-          if (dx * dx + dy * dy < minDistance * minDistance) {
-            collides = true;
-            break;
-          }
-        }
-
-        if (collides) {
-          label.style.display = "none";
-        } else {
-          label.style.display = "block";
-          occupied.push([cx, cy]);
-        }
-      });
-    }
+      } else {
+        marker.style.display = "none";
+        if (label) label.style.display = "none";
+      }
+    });
   }
 
   zoom(factor) {
@@ -524,6 +484,22 @@ export class MapEngine {
         store.setSelectedProvince(prov.id);
       });
 
+      path.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (store.selectedArmyId) {
+          const army = store.armies[store.selectedArmyId];
+          if (army && army.nation_id === store.playerNationId) {
+            wsClient.send({
+              type: "MOVE_ARMY",
+              army_id: store.selectedArmyId,
+              target_province_id: prov.id
+            });
+            audio.playClick();
+          }
+        }
+      });
+
       this.provincesGroup.appendChild(path);
     });
 
@@ -532,6 +508,9 @@ export class MapEngine {
 
     // 5. Render Sovereign Macro Empire Labels
     this.renderMacroNationLabels();
+
+    // 6. Render Military Armies on Map
+    this.renderArmies(store.armies);
 
     this.applyTransform();
     console.log(`Pax Modernica: Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen mit Victoria-3-Städten).`);
@@ -874,5 +853,81 @@ export class MapEngine {
         if (label) label.style.display = "block";
       }
     }
+  }
+
+  renderArmies(armies) {
+    if (!this.armiesGroup) return;
+    this.armiesGroup.innerHTML = "";
+    if (!armies) return;
+
+    Object.values(armies).forEach((army) => {
+      const prov = store.provinces[army.province_id];
+      if (!prov || !prov.center) return;
+
+      let x = prov.center[0];
+      let y = prov.center[1];
+
+      // Interpolate if moving along path
+      if (army.is_moving && army.path && army.path.length > 0) {
+        const nextProv = store.provinces[army.path[0]];
+        if (nextProv && nextProv.center) {
+          const t = Math.min(1.0, Math.max(0.0, army.movement_progress || 0.0));
+          x = x * (1 - t) + nextProv.center[0] * t;
+          y = y * (1 - t) + nextProv.center[1] * t;
+        }
+      }
+
+      const nation = store.nations[army.nation_id] || { color: "#3b82f6", name: "Armee" };
+      const isSelected = store.selectedArmyId === army.id;
+      const isPlayer = army.nation_id === store.playerNationId;
+
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.classList.add("army-marker");
+      if (isSelected) g.classList.add("selected");
+      if (army.is_moving) g.classList.add("marching");
+      g.setAttribute("data-army-id", army.id);
+      g.setAttribute("transform", `translate(${x.toFixed(1)}, ${y.toFixed(1)})`);
+
+      const troopFormatted = army.troops >= 1000 ? `${Math.round(army.troops / 1000)}k` : army.troops;
+
+      g.innerHTML = `
+        <circle r="13" fill="${nation.color}" stroke="${isSelected ? '#38bdf8' : (isPlayer ? '#fbbf24' : '#0f172a')}" stroke-width="${isSelected ? '2.5' : '1.5'}" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.6))" />
+        <text y="-2" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="bold">⚔️</text>
+        <rect x="-16" y="8" width="32" height="12" rx="3" fill="rgba(15,23,42,0.92)" stroke="${isSelected ? '#38bdf8' : 'rgba(217,119,6,0.6)'}" stroke-width="0.8" />
+        <text x="0" y="17" text-anchor="middle" font-size="8" fill="#f8fafc" font-weight="700" font-family="var(--font-sans)">${troopFormatted}</text>
+      `;
+
+      g.addEventListener("click", (e) => {
+        e.stopPropagation();
+        audio.playClick();
+        store.setSelectedArmy(army.id);
+      });
+
+      g.addEventListener("mouseenter", (e) => {
+        if (!this.tooltipEl) return;
+        if (this.hoverProvName) this.hoverProvName.textContent = army.name;
+        if (this.hoverRegionName) this.hoverRegionName.textContent = `${nation.name} · ${army.commander || 'Kommandeur'}`;
+        if (this.hoverOwnerName) {
+          this.hoverOwnerName.textContent = `${army.troops.toLocaleString("de-DE")} Soldaten (${troopFormatted})`;
+          this.hoverOwnerName.style.color = "#fbbf24";
+        }
+        if (this.hoverGoodsInfo) {
+          this.hoverGoodsInfo.textContent = `Moral: ${Math.round(army.morale)}% · ${army.is_moving ? 'Auf dem Marsch' : 'Garnisoniert'}`;
+        }
+        this.tooltipEl.classList.add("visible");
+      });
+
+      g.addEventListener("mouseleave", () => this.hideTooltip());
+
+      this.armiesGroup.appendChild(g);
+    });
+  }
+
+  highlightSelectedArmy(army) {
+    if (!this.armiesGroup) return;
+    this.armiesGroup.querySelectorAll(".army-marker").forEach((el) => {
+      const aid = el.getAttribute("data-army-id");
+      el.classList.toggle("selected", army && aid === army.id);
+    });
   }
 }

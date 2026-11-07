@@ -12,6 +12,7 @@ import { RightPanelController } from "./ui/right_panel.js";
 import { ModalController } from "./ui/settings_modal.js";
 import { techTreeController } from "./ui/tech_tree.js";
 import { budgetModalController } from "./ui/budget_modal.js";
+import { eventModalController } from "./ui/event_modal.js";
 import { audio } from "./ui/audio_controller.js";
 
 class PaxApp {
