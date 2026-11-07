@@ -15,6 +15,7 @@ export class LeftPanelController {
     this.titleEl = document.getElementById("left-panel-title");
     this.contentEl = document.getElementById("left-panel-content");
     this.activeTab = "monarch";
+    this.militarySubTab = "armies";
 
     this.bindEvents();
     this.setupDockEvents();
@@ -393,57 +394,235 @@ export class LeftPanelController {
   renderMilitaryTab(nation) {
     const armies = Object.values(store.armies || {}).filter((a) => a.nation_id === nation.id);
     const totalTroops = armies.reduce((sum, a) => sum + (a.troops || 0), 0);
+    const primaryArmy = armies[0] || { name: "1. Königliche Armee", troops: 25000, morale: 100 };
 
     this.contentEl.innerHTML = `
-      <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); padding:14px; border-radius:4px; margin-bottom:12px;">
-        <div style="font-size:13px; font-weight:700; color:var(--brass-light); margin-bottom:10px;">Oberkommando & Heeresstamm</div>
-        
-        <div class="overview-stats-grid">
-          <div class="v3-stat-card">
-            <span class="v3-stat-label">Rekrutenreserve</span>
-            <span class="v3-stat-number" style="color:#f87171;">${(nation.manpower || 25000).toLocaleString("de-DE")}</span>
-          </div>
-          <div class="v3-stat-card">
-            <span class="v3-stat-label">Aktive Soldaten</span>
-            <span class="v3-stat-number" style="color:#4ade80;">${totalTroops.toLocaleString("de-DE")}</span>
+      <!-- SUB-NAVIGATION BAR (Screenshot 3 "Armee / Mobilisierung / Marine / Doktrinen") -->
+      <div style="display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid rgba(217,119,6,0.3); padding-bottom:6px;">
+        <button class="v3-subtab-btn ${this.militarySubTab === 'armies' ? 'active' : ''}" data-sub="armies" style="flex:1; padding:5px 8px; font-size:11px; background:${this.militarySubTab === 'armies' ? 'rgba(217,119,6,0.25)' : 'rgba(15,23,42,0.6)'}; border:1px solid ${this.militarySubTab === 'armies' ? '#fbbf24' : 'rgba(255,255,255,0.1)'}; color:#f8fafc; border-radius:3px; cursor:pointer; font-weight:700;">
+          Armee
+        </button>
+        <button class="v3-subtab-btn ${this.militarySubTab === 'mobilization' ? 'active' : ''}" data-sub="mobilization" style="flex:1; padding:5px 8px; font-size:11px; background:${this.militarySubTab === 'mobilization' ? 'rgba(217,119,6,0.25)' : 'rgba(15,23,42,0.6)'}; border:1px solid ${this.militarySubTab === 'mobilization' ? '#fbbf24' : 'rgba(255,255,255,0.1)'}; color:#f8fafc; border-radius:3px; cursor:pointer; font-weight:700;">
+          Mobilisierung
+        </button>
+        <button class="v3-subtab-btn ${this.militarySubTab === 'doctrines' ? 'active' : ''}" data-sub="doctrines" style="flex:1; padding:5px 8px; font-size:11px; background:${this.militarySubTab === 'doctrines' ? 'rgba(217,119,6,0.25)' : 'rgba(15,23,42,0.6)'}; border:1px solid ${this.militarySubTab === 'doctrines' ? '#fbbf24' : 'rgba(255,255,255,0.1)'}; color:#f8fafc; border-radius:3px; cursor:pointer; font-weight:700;">
+          Doktrinen
+        </button>
+      </div>
+
+      ${this.militarySubTab === 'armies' ? `
+        <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); padding:12px; border-radius:4px; margin-bottom:12px;">
+          <div class="overview-stats-grid">
+            <div class="v3-stat-card">
+              <span class="v3-stat-label">Rekrutenreserve</span>
+              <span class="v3-stat-number" style="color:#f87171;">${(nation.manpower || 25000).toLocaleString("de-DE")}</span>
+            </div>
+            <div class="v3-stat-card">
+              <span class="v3-stat-label">Aktive Soldaten</span>
+              <span class="v3-stat-number" style="color:#4ade80;">${totalTroops.toLocaleString("de-DE")}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div style="margin-bottom:8px; font-size:12px; font-weight:700; color:var(--brass-light);">
-        Aktive Divisionen & Korps (${armies.length})
-      </div>
+        <div style="margin-bottom:8px; font-size:12px; font-weight:700; color:var(--brass-light);">
+          Aktive Verbände & Korps (${armies.length})
+        </div>
 
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        ${armies.map((a) => {
-          const prov = store.provinces[a.province_id];
-          const provName = prov ? prov.name : a.province_id;
-          const isSelected = store.selectedArmyId === a.id;
-          return `
-            <div class="military-army-card" data-aid="${a.id}" style="background:rgba(30,41,59,0.8); border:1px solid ${isSelected ? '#38bdf8' : 'rgba(217,119,6,0.3)'}; padding:10px; border-radius:4px; cursor:pointer;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:700; font-size:12px; color:#f8fafc;">⚔️ ${a.name}</span>
-                <span style="font-size:11px; font-weight:700; color:#fbbf24;">${(a.troops || 0).toLocaleString("de-DE")} Mann</span>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${armies.map((a) => {
+            const prov = store.provinces[a.province_id];
+            const provName = prov ? prov.name : a.province_id;
+            const isSelected = store.selectedArmyId === a.id;
+            return `
+              <div class="military-army-card" data-aid="${a.id}" style="background:rgba(30,41,59,0.8); border:1px solid ${isSelected ? '#38bdf8' : 'rgba(217,119,6,0.3)'}; padding:10px; border-radius:4px; cursor:pointer;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-weight:700; font-size:12px; color:#f8fafc;">⚔️ ${a.name}</span>
+                  <span style="font-size:11px; font-weight:700; color:#fbbf24;">${(a.troops || 0).toLocaleString("de-DE")} Mann</span>
+                </div>
+                <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;">
+                  Kommandeur: <strong>${a.commander || 'Offizier'}</strong> · Standort: <span style="color:#93c5fd;">${provName}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:10px;">
+                  <span style="color:${a.is_moving ? '#38bdf8' : '#94a3b8'};">Status: ${a.is_moving ? 'Marschiert...' : 'Garnison'}</span>
+                  <span style="color:#4ade80;">Moral: ${Math.round(a.morale || 100)}%</span>
+                </div>
               </div>
-              <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;">
-                Kommandeur: <strong>${a.commander || 'Offizier'}</strong> · Standort: <span style="color:#93c5fd;">${provName}</span>
+            `;
+          }).join("")}
+        </div>
+      ` : ''}
+
+      ${this.militarySubTab === 'mobilization' ? `
+        <!-- MOBILISIERUNGSDASHBOARD (Exakt nach Screenshot 3) -->
+        <div style="background:rgba(20,26,38,0.9); border:1px solid var(--brass-border); padding:14px; border-radius:4px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="font-size:14px; font-weight:700; color:var(--brass-light); font-family:var(--font-serif);">
+              🛡️ ${primaryArmy.name}
+            </div>
+            <span style="font-size:11px; color:#f87171; font-weight:700;">-${((primaryArmy.troops || 25000) * 0.007).toFixed(2)}K £ / Mo</span>
+          </div>
+
+          <!-- EQUIPMENT SLOTS (Vorräte, Ergänzungen, Transport, Aufklärung, Sanität) -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:3px;">
+              <div style="font-size:10px; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Vorräte</div>
+              <div style="font-size:11px; font-weight:700; color:#f8fafc;">🍞 Proviant & Pulver</div>
+              <div style="font-size:9.5px; color:#4ade80; margin-top:2px;">100% Gedeckt</div>
+            </div>
+            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:3px;">
+              <div style="font-size:10px; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Ergänzungen</div>
+              <div style="font-size:11px; font-weight:700; color:#f8fafc;">⚔️ Flinten & Bajonette</div>
+              <div style="font-size:9.5px; color:#4ade80; margin-top:2px;">Kaiserliche Zeughäuser</div>
+            </div>
+            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:3px;">
+              <div style="font-size:10px; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Transport</div>
+              <div style="font-size:11px; font-weight:700; color:#f8fafc;">🐎 Train & Zugpferde</div>
+              <div style="font-size:9.5px; color:#38bdf8; margin-top:2px;">Hohe Mobilität</div>
+            </div>
+            <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:3px;">
+              <div style="font-size:10px; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Aufklärung</div>
+              <div style="font-size:11px; font-weight:700; color:#f8fafc;">🔭 Leichte Husaren</div>
+              <div style="font-size:9.5px; color:#fbbf24; margin-top:2px;">Späher aktiv</div>
+            </div>
+          </div>
+
+          <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:3px; margin-bottom:12px;">
+            <div style="font-size:10px; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Sanitätsunterstützung</div>
+            <div style="font-size:11px; font-weight:700; color:#f8fafc;">🏥 Feldlazarette & Feldschere</div>
+            <div style="font-size:9.5px; color:#4ade80; margin-top:2px;">-25% Verlustrate durch Seuchen</div>
+          </div>
+
+          <!-- MOBILIZATION METRICS BAR (Screenshot 3) -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.95); padding:8px 12px; border-radius:4px; margin-bottom:12px; border:1px solid var(--brass-border);">
+            <div style="font-size:11px; font-weight:700; color:#f8fafc;">
+              ⚔️ 18 / 42 <span style="font-size:9.5px; color:var(--text-secondary);">Bat.</span>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:#f59e0b;">
+              🔥 100% <span style="font-size:9.5px; color:var(--text-secondary);">Bereitschaft</span>
+            </div>
+            <div style="font-size:11px; font-weight:700; color:#4ade80;">
+              🛡️ 99% <span style="font-size:9.5px; color:var(--text-secondary);">Ordnung</span>
+            </div>
+          </div>
+
+          <button id="btn-mobilize-army" class="v3-build-btn" style="width:100%; padding:10px; font-size:12px; font-weight:700; background:linear-gradient(180deg, #b45309, #78350f); border:1px solid #f59e0b; color:#fef3c7; border-radius:4px; cursor:pointer;">
+            ⚔️ Mobilisieren (Heeresbefehl erteilen)
+          </button>
+        </div>
+      ` : ''}
+
+      ${this.militarySubTab === 'doctrines' ? `
+        <!-- DOKTRINENBAUM (Exakt nach Screenshot 1 - Hearts of Iron IV Grand Battleplan) -->
+        <div style="background:rgba(20,26,38,0.9); border:1px solid var(--brass-border); padding:12px; border-radius:4px; margin-bottom:10px; text-align:center;">
+          <div style="font-size:10px; text-transform:uppercase; color:var(--brass-light); letter-spacing:1px; margin-bottom:2px;">Militärdoktrin</div>
+          <div style="font-size:13px; font-weight:700; color:#f8fafc; font-family:var(--font-serif);">GRAND BATTLEPLAN · SCHLACHTPLANUNG</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <!-- BRANCH 1: INFANTERIE -->
+          <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(217,119,6,0.4); padding:10px; border-radius:4px;">
+            <div style="font-size:11px; font-weight:700; color:var(--brass-light); text-align:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">
+              ♟️ Infanterie
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:10px;">
+              <div style="padding:4px; background:rgba(34,197,94,0.15); border:1px solid #22c55e; border-radius:3px; color:#f8fafc;">
+                <strong>I. Peloton-Feuer</strong> <span style="color:#4ade80;">✓ Aktiv</span>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:10px;">
-                <span style="color:${a.is_moving ? '#38bdf8' : '#94a3b8'};">Status: ${a.is_moving ? 'Marschiert...' : 'Garnison'}</span>
-                <span style="color:#4ade80;">Moral: ${Math.round(a.morale || 100)}%</span>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                II. Bajonett-Sturm
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                III. Tirailleur-Schützen
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                IV. Karree-Formationen
               </div>
             </div>
-          `;
-        }).join("")}
-      </div>
+          </div>
+
+          <!-- BRANCH 2: ARTILLERIE -->
+          <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(217,119,6,0.4); padding:10px; border-radius:4px;">
+            <div style="font-size:11px; font-weight:700; color:var(--brass-light); text-align:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">
+              💣 Artillerie
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:10px;">
+              <div style="padding:4px; background:rgba(34,197,94,0.15); border:1px solid #22c55e; border-radius:3px; color:#f8fafc;">
+                <strong>I. Kalibernormung</strong> <span style="color:#4ade80;">✓ Aktiv</span>
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                II. Kartätschenfeuer
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                III. Belagerungsparks
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                IV. Reitende Batterien
+              </div>
+            </div>
+          </div>
+
+          <!-- BRANCH 3: KAVALLERIE & MANÖVER -->
+          <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(217,119,6,0.4); padding:10px; border-radius:4px;">
+            <div style="font-size:11px; font-weight:700; color:var(--brass-light); text-align:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">
+              🐎 Kavallerie
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:10px;">
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                I. Kürassier-Schock
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                II. Husaren-Flanken
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                III. Verfolgungstaktik
+              </div>
+            </div>
+          </div>
+
+          <!-- BRANCH 4: OPERATIONEN & GENERALSTAB -->
+          <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(217,119,6,0.4); padding:10px; border-radius:4px;">
+            <div style="font-size:11px; font-weight:700; color:var(--brass-light); text-align:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px;">
+              ⭐ Generalstab
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:10px;">
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                I. Kartenwesen & Logistik
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                II. Schnelle Melderreiter
+              </div>
+              <div style="padding:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:3px; color:var(--text-secondary);">
+                III. Zentrale Einsatzleitung
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
     `;
 
+    // Bind subtab buttons
+    this.contentEl.querySelectorAll(".v3-subtab-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const sub = e.currentTarget.getAttribute("data-sub");
+        audio.playClick();
+        this.militarySubTab = sub;
+        this.renderMilitaryTab(nation);
+      });
+    });
+
+    // Bind army card selection
     this.contentEl.querySelectorAll(".military-army-card").forEach((card) => {
       card.addEventListener("click", (e) => {
         const aid = e.currentTarget.getAttribute("data-aid");
         audio.playClick();
         store.setSelectedArmy(aid);
       });
+    });
+
+    // Bind mobilization button
+    this.contentEl.querySelector("#btn-mobilize-army")?.addEventListener("click", () => {
+      audio.playClick();
+      alert("Heeresbefehl: Alle Divisionen der Garde wurden voll mobilisiert und auf Höchstbereitschaft gesetzt!");
     });
   }
 

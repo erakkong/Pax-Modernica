@@ -889,12 +889,15 @@ export class MapEngine {
       g.setAttribute("transform", `translate(${x.toFixed(1)}, ${y.toFixed(1)})`);
 
       const troopFormatted = army.troops >= 1000 ? `${Math.round(army.troops / 1000)}k` : army.troops;
+      const battalions = Math.max(1, Math.round(army.troops / 1000));
+      const moralPct = Math.min(100, Math.max(10, Math.round(army.morale || 100)));
 
       g.innerHTML = `
-        <circle r="13" fill="${nation.color}" stroke="${isSelected ? '#38bdf8' : (isPlayer ? '#fbbf24' : '#0f172a')}" stroke-width="${isSelected ? '2.5' : '1.5'}" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.6))" />
-        <text y="-2" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="bold">⚔️</text>
-        <rect x="-16" y="8" width="32" height="12" rx="3" fill="rgba(15,23,42,0.92)" stroke="${isSelected ? '#38bdf8' : 'rgba(217,119,6,0.6)'}" stroke-width="0.8" />
-        <text x="0" y="17" text-anchor="middle" font-size="8" fill="#f8fafc" font-weight="700" font-family="var(--font-sans)">${troopFormatted}</text>
+        <rect x="-19" y="-11" width="38" height="22" rx="4" fill="rgba(15,23,42,0.95)" stroke="${isSelected ? '#38bdf8' : (isPlayer ? '#fbbf24' : 'rgba(255,255,255,0.25)')}" stroke-width="${isSelected ? '2' : '1.2'}" filter="drop-shadow(0 2px 5px rgba(0,0,0,0.85))" />
+        <rect x="-17" y="-9" width="11" height="18" rx="2" fill="${nation.color}" />
+        <text x="-11.5" y="3.5" text-anchor="middle" font-size="8.5" fill="#ffffff">⚔️</text>
+        <text x="5.5" y="4" text-anchor="middle" font-size="10" fill="#f8fafc" font-weight="800" font-family="var(--font-sans)">${battalions}</text>
+        <rect x="-19" y="10" width="${Math.round(38 * (moralPct / 100))}" height="2.5" fill="${moralPct > 50 ? '#22c55e' : '#f59e0b'}" rx="1" />
       `;
 
       g.addEventListener("click", (e) => {

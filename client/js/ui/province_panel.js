@@ -510,12 +510,121 @@ export class ProvincePanelController {
   }
 
   renderInfoTab(prov, owner) {
+    const pop = prov.population || 40000;
+    const farmers = Math.round(pop * 0.74 / 1000);
+    const gdpPct = owner.gdp ? (((prov.economy || 4000) / owner.gdp) * 100).toFixed(1) : "37.2";
+    const taxRev = ((prov.tax_revenue || 12) * (owner.tax_rate || 1.0)).toFixed(2);
+    const expenses = ((prov.tax_revenue || 12) * 0.92).toFixed(2);
+    const unrest = Math.max(0.2, ((100 - (owner.satisfaction || 82)) * 0.04)).toFixed(1);
+    const infra = prov.infrastructure_level || 3;
+    const literacy = (owner.literacy || 50.1).toFixed(1);
+
     this.tabContentEl.innerHTML = `
-      <div style="font-size:11px; line-height:1.6; color:var(--text-secondary);">
-        <p><strong>Provinz-Kennung:</strong> <code>${prov.id}</code></p>
-        <p><strong>Zugehörigkeit:</strong> ${owner.name}</p>
-        <p><strong>Historischer Kontext:</strong> Die Provinz bildet einen integralen Bestandteil der regionalen Wirtschafts- und Verwaltungsstruktur des 18. Jahrhunderts.</p>
-        <p><strong>Verwaltungssitz:</strong> ${prov.city || "Regionales Zentrum"}</p>
+      <div style="font-size:11px; color:#cbd5e1;">
+        <!-- SECTION 1: RESSOURCENVORKOMMEN (Screenshot 2) -->
+        <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); border-radius:4px; margin-bottom:12px; overflow:hidden;">
+          <div style="background:rgba(15,23,42,0.9); padding:6px 10px; border-bottom:1px solid var(--brass-border); font-size:11px; font-weight:700; color:var(--brass-light); text-transform:uppercase; letter-spacing:0.5px; text-align:center;">
+            Ressourcenvorkommen
+          </div>
+          <div style="padding:10px; display:flex; flex-direction:column; gap:5px;">
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Urbanisierung</span>
+              <strong style="color:#f8fafc;">${Math.round((prov.economy || 4000) / 32)}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Ackerland</span>
+              <strong style="color:#f8fafc;">12 / 35</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">🌾 Bauern</span>
+              <strong style="color:#f8fafc;">${farmers}K</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Alphabetisierung</span>
+              <strong style="color:#f8fafc;">${literacy}%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">BIP-Anteil</span>
+              <strong style="color:#f8fafc;">${gdpPct}%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Besteuerung</span>
+              <strong style="color:#4ade80;">+${taxRev}K £</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Ausgaben</span>
+              <strong style="color:#f87171;">-${expenses}K £</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Aufruhr</span>
+              <strong style="color:#f87171;">${unrest}%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Infrastruktur</span>
+              <strong style="color:#4ade80;">+${infra}</strong>
+            </div>
+
+            <div style="margin-top:6px; font-size:10.5px; display:flex; flex-direction:column; gap:4px;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>🐟 Fischereianleger</span>
+                <span style="color:var(--brass-light);">${prov.is_coastal ? '1/10' : '0/10'}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>🪵 Holzfällerlager</span>
+                <span style="color:var(--brass-light);">${prov.terrain === 'forest' ? '2/6' : '0/6'}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>🌾 Roggen- & Getreidefelder</span>
+                <span style="color:var(--brass-light);">8/20</span>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>🐄 Viehhöfe</span>
+                <span style="color:var(--brass-light);">6/18</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: MODIFIKATOREN (Screenshot 2) -->
+        <div style="background:rgba(20,26,38,0.85); border:1px solid var(--brass-border); border-radius:4px; overflow:hidden;">
+          <div style="background:rgba(15,23,42,0.9); padding:6px 10px; border-bottom:1px solid var(--brass-border); font-size:11px; font-weight:700; color:var(--brass-light); text-transform:uppercase; letter-spacing:0.5px; text-align:center;">
+            Modifikatoren
+          </div>
+          <div style="padding:10px; display:flex; flex-direction:column; gap:5px;">
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Maximal-Zölle auf Importe</span>
+              <strong style="color:#4ade80;">+50%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Maximal-Zölle auf Exporte</span>
+              <strong style="color:#4ade80;">+20%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Maximal-Subventionen auf Importe</span>
+              <strong style="color:#4ade80;">+20%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Maximal-Subventionen auf Exporte</span>
+              <strong style="color:#4ade80;">+50%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Einkommenssteuersatz</span>
+              <strong style="color:#4ade80;">+12.5%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Verbrauchssteuersatz</span>
+              <strong style="color:#4ade80;">+30%</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:3px;">
+              <span style="color:var(--text-secondary);">Kopfsteuer</span>
+              <strong style="color:#f8fafc;">10.85 £</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-secondary);">Bauernsteuer</span>
+              <strong style="color:#f8fafc;">0.42 £</strong>
+            </div>
+          </div>
+        </div>
       </div>
     `;
   }
