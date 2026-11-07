@@ -4,6 +4,7 @@
  * - Tier 1: 248 European Regions (States / Staaten) from Image 2
  * - Tier 2: 976 Granular Provinces from Image 1, affine-mapped into Regions
  * Shared ViewBox: 0 0 1024 928
+ * Interactive: Clean uncluttered map with dynamic cursor-following hover inspector badge.
  */
 
 import { store } from "../state/game_state.js";
@@ -40,6 +41,15 @@ export class MapEngine {
     this.armiesGroup = document.getElementById("armies-layer");
     this.labelsGroup = document.getElementById("labels-layer");
 
+    // Dynamic Hover Tooltip Elements
+    this.tooltipEl = document.getElementById("map-hover-tooltip");
+    this.hoverProvName = document.getElementById("hover-prov-name");
+    this.hoverRegionName = document.getElementById("hover-region-name");
+    this.hoverOwnerName = document.getElementById("hover-owner-name");
+    this.hoverTerrainInfo = document.getElementById("hover-terrain-info");
+    this.hoverGoodsInfo = document.getElementById("hover-goods-info");
+    this.tooltipVisible = false;
+
     // Dynamic Transform Matrix State (Pan & Zoom in SVG coordinate space)
     this.scale = 1.0;
     this.translateX = 0;
@@ -75,22 +85,38 @@ export class MapEngine {
     });
 
     window.addEventListener("mousemove", (e) => {
-      if (!this.isDragging) return;
-      const ctm = this.svg.getScreenCTM();
-      if (!ctm) return;
+      if (this.isDragging) {
+        const ctm = this.svg.getScreenCTM();
+        if (!ctm) return;
 
-      const dx = (e.clientX - this.lastClientX) / ctm.a;
-      const dy = (e.clientY - this.lastClientY) / ctm.d;
-      this.lastClientX = e.clientX;
-      this.lastClientY = e.clientY;
+        const dx = (e.clientX - this.lastClientX) / ctm.a;
+        const dy = (e.clientY - this.lastClientY) / ctm.d;
+        this.lastClientX = e.clientX;
+        this.lastClientY = e.clientY;
 
-      this.translateX += dx;
-      this.translateY += dy;
-      this.applyTransform();
+        this.translateX += dx;
+        this.translateY += dy;
+        this.applyTransform();
+      }
+
+      // Cursor-following hover badge
+      if (this.tooltipVisible && this.tooltipEl) {
+        let x = e.clientX + 16;
+        let y = e.clientY + 16;
+        const maxX = window.innerWidth - 260;
+        const maxY = window.innerHeight - 80;
+        if (x > maxX) x = e.clientX - 260;
+        if (y > maxY) y = e.clientY - 60;
+        this.tooltipEl.style.transform = `translate(${x}px, ${y}px)`;
+      }
     });
 
     window.addEventListener("mouseup", () => {
       this.isDragging = false;
+    });
+
+    this.viewport.addEventListener("mouseleave", () => {
+      this.hideTooltip();
     });
 
     // 2. Mouse Wheel Zoom (Mathematically Anchored to Cursor)
@@ -195,6 +221,61 @@ export class MapEngine {
     });
   }
 
+  showTooltipForProvince(prov, e) {
+    if (!this.tooltipEl) return;
+    const owner = store.nations[prov.owner_id] || { name: "Unbekannt", color: "#cbd5e1" };
+    if (this.hoverProvName) this.hoverProvName.textContent = prov.name;
+    if (this.hoverRegionName) this.hoverRegionName.textContent = prov.region_name || "";
+    if (this.hoverOwnerName) {
+      this.hoverOwnerName.textContent = owner.name;
+      this.hoverOwnerName.style.color = owner.color || "#fef08a";
+    }
+    if (this.hoverTerrainInfo) this.hoverTerrainInfo.textContent = prov.terrain || "Ebene";
+    if (this.hoverGoodsInfo) this.hoverGoodsInfo.textContent = prov.goods_produced || "Agrargüter";
+
+    let x = e.clientX + 16;
+    let y = e.clientY + 16;
+    const maxX = window.innerWidth - 260;
+    const maxY = window.innerHeight - 80;
+    if (x > maxX) x = e.clientX - 260;
+    if (y > maxY) y = e.clientY - 60;
+    this.tooltipEl.style.transform = `translate(${x}px, ${y}px)`;
+
+    this.tooltipEl.classList.add("visible");
+    this.tooltipVisible = true;
+  }
+
+  showTooltipForRegion(reg, e) {
+    if (!this.tooltipEl) return;
+    const owner = store.nations[reg.owner_id] || { name: "Unbekannt", color: "#cbd5e1" };
+    if (this.hoverProvName) this.hoverProvName.textContent = reg.name;
+    if (this.hoverRegionName) this.hoverRegionName.textContent = `${reg.provinces?.length || 0} Teilprovinzen`;
+    if (this.hoverOwnerName) {
+      this.hoverOwnerName.textContent = owner.name;
+      this.hoverOwnerName.style.color = owner.color || "#fef08a";
+    }
+    if (this.hoverTerrainInfo) this.hoverTerrainInfo.textContent = reg.terrain || "Ebene";
+    if (this.hoverGoodsInfo) this.hoverGoodsInfo.textContent = reg.goods_produced || "Handelsgüter";
+
+    let x = e.clientX + 16;
+    let y = e.clientY + 16;
+    const maxX = window.innerWidth - 260;
+    const maxY = window.innerHeight - 80;
+    if (x > maxX) x = e.clientX - 260;
+    if (y > maxY) y = e.clientY - 60;
+    this.tooltipEl.style.transform = `translate(${x}px, ${y}px)`;
+
+    this.tooltipEl.classList.add("visible");
+    this.tooltipVisible = true;
+  }
+
+  hideTooltip() {
+    if (this.tooltipEl) {
+      this.tooltipEl.classList.remove("visible");
+      this.tooltipVisible = false;
+    }
+  }
+
   updateActiveMapModeButton(activeMode) {
     document.querySelectorAll(".map-mode-btn").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-mode") === activeMode);
@@ -212,70 +293,18 @@ export class MapEngine {
   }
 
   /**
-   * Hierarchical Level of Detail (LOD) & Strict Spatial Collision Avoidance:
-   * - scale < 1.4: Curated Macro Empires (Zero Overlap)
-   * - 1.35 <= scale < 2.6: Regional States with Collision Detection
-   * - scale >= 2.1: Granular Provinces & Settlement Nodes
+   * Hierarchical Level of Detail:
+   * Only Macro Great Power empire titles on overview zoom.
+   * Granular province & region names are displayed strictly on mouse hover via the cursor badge!
    */
   updateZoomLOD() {
     if (!this.labelsGroup) return;
 
-    // 1. Sovereign Macro Labels (Controlled by individual minScale and maxScale)
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
       const minS = parseFloat(el.getAttribute("data-min-scale") || "0.65");
       const maxS = parseFloat(el.getAttribute("data-max-scale") || "1.8");
       const visible = this.scale >= minS && this.scale <= maxS;
       el.style.display = visible ? "block" : "none";
-    });
-
-    // 2. Regional State Labels
-    const showRegions = this.scale >= 1.35 && this.scale < 2.7;
-    this.labelsGroup.querySelectorAll(".region-label").forEach((el) => {
-      el.style.display = showRegions ? "block" : "none";
-    });
-
-    // 3. Granular Province Labels & Settlement Nodes
-    const showProvinces = this.scale >= 2.1;
-    this.labelsGroup.querySelectorAll(".province-label, .province-node").forEach((el) => {
-      el.style.display = showProvinces ? "block" : "none";
-    });
-
-    // Spatial collision resolution to guarantee readability
-    if (showRegions || showProvinces) {
-      this.resolveLabelCollisions();
-    }
-  }
-
-  resolveLabelCollisions() {
-    const visibleElements = [];
-    const minDistance = 28 / this.scale;
-
-    const labels = Array.from(this.labelsGroup.querySelectorAll(".region-label, .province-label"));
-    labels.sort((a, b) => {
-      const pA = parseFloat(a.getAttribute("data-priority") || "0");
-      const pB = parseFloat(b.getAttribute("data-priority") || "0");
-      return pB - pA;
-    });
-
-    labels.forEach((label) => {
-      if (label.style.display === "none") return;
-
-      const x = parseFloat(label.getAttribute("x"));
-      const y = parseFloat(label.getAttribute("y"));
-
-      let collides = false;
-      for (const item of visibleElements) {
-        if (Math.hypot(x - item.x, y - item.y) < minDistance) {
-          collides = true;
-          break;
-        }
-      }
-
-      if (collides) {
-        label.style.display = "none";
-      } else {
-        visibleElements.push({ x, y });
-      }
     });
   }
 
@@ -313,6 +342,7 @@ export class MapEngine {
    * Main Two-Tier Render:
    * 1. Regions Layer (Image 2 - 248 States)
    * 2. Provinces Layer (Image 1 - 976 Granular Provinces)
+   * Pristine visual clarity: Province/Region details appear interactively on mouse hover!
    */
   renderMap() {
     if (!this.regionsGroup || !this.provincesGroup || !this.labelsGroup) return;
@@ -337,9 +367,8 @@ export class MapEngine {
       path.setAttribute("vector-effect", "non-scaling-stroke");
       path.style.fill = this.getRegionColor(reg);
 
-      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-      title.textContent = `${reg.name} (${store.nations[reg.owner_id]?.name || "Unbekannt"})`;
-      path.appendChild(title);
+      path.addEventListener("mouseenter", (e) => this.showTooltipForRegion(reg, e));
+      path.addEventListener("mouseleave", () => this.hideTooltip());
 
       path.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -361,9 +390,8 @@ export class MapEngine {
       path.setAttribute("vector-effect", "non-scaling-stroke");
       path.style.fill = this.getProvinceColor(prov);
 
-      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-      title.textContent = `${prov.name} [${prov.region_name || ""}] (${store.nations[prov.owner_id]?.name || "Unbekannt"})`;
-      path.appendChild(title);
+      path.addEventListener("mouseenter", (e) => this.showTooltipForProvince(prov, e));
+      path.addEventListener("mouseleave", () => this.hideTooltip());
 
       path.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -372,35 +400,13 @@ export class MapEngine {
       });
 
       this.provincesGroup.appendChild(path);
-
-      // Settlement Pips for key historical settlements
-      if (prov.center && prov.center.length === 2 && (prov.is_capital || prov.tax_revenue > 25)) {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", prov.center[0]);
-        circle.setAttribute("cy", prov.center[1]);
-        circle.setAttribute("r", prov.is_capital ? "3.2" : "2");
-        circle.setAttribute("vector-effect", "non-scaling-stroke");
-        circle.classList.add("province-node");
-        this.labelsGroup.appendChild(circle);
-
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", prov.center[0]);
-        text.setAttribute("y", prov.center[1] - 5);
-        text.setAttribute("data-priority", prov.is_capital ? "100" : "30");
-        text.classList.add("province-label");
-        text.textContent = prov.name;
-        this.labelsGroup.appendChild(text);
-      }
     });
 
-    // 4. Render Region Labels
-    this.renderRegionLabels();
-
-    // 5. Render Sovereign Macro Empire Labels
+    // 4. Render Sovereign Macro Empire Labels
     this.renderMacroNationLabels();
 
     this.applyTransform();
-    console.log(`Pax Modernica: Zwei-Ebenen-Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen).`);
+    console.log(`Pax Modernica: Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen mit Hover-Inspektor).`);
   }
 
   renderSeaLabels() {
@@ -424,21 +430,6 @@ export class MapEngine {
       }
       text.classList.add("sea-label");
       text.textContent = sea.name.toUpperCase();
-      this.labelsGroup.appendChild(text);
-    });
-  }
-
-  renderRegionLabels() {
-    const regions = Object.values(store.regions || {});
-    regions.forEach((reg) => {
-      if (!reg.center) return;
-      const cleanName = reg.name.split("(")[0].trim();
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", reg.center[0]);
-      text.setAttribute("y", reg.center[1]);
-      text.setAttribute("data-priority", (reg.area || 100).toString());
-      text.classList.add("region-label");
-      text.textContent = cleanName;
       this.labelsGroup.appendChild(text);
     });
   }

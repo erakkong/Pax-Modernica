@@ -1011,6 +1011,81 @@
 }
 
 /* ==========================================================================
+   DYNAMIC MAP HOVER BADGE (FOLLOWS MOUSE)
+   ========================================================================== */
+.map-hover-badge {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10000;
+  background: linear-gradient(180deg, rgba(18, 24, 34, 0.96) 0%, rgba(10, 14, 20, 0.98) 100%);
+  border: 1.5px solid var(--brass-accent);
+  border-radius: 4px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75), 0 0 8px rgba(196, 163, 90, 0.25);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-9999px, -9999px);
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
+}
+
+.map-hover-badge.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hover-badge-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hover-prov-name {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fef08a;
+  letter-spacing: 0.5px;
+}
+
+.hover-region-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--brass-light);
+  background: rgba(196, 163, 90, 0.15);
+  border: 1px solid rgba(196, 163, 90, 0.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.hover-badge-sub {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
+.hover-owner {
+  font-weight: 600;
+}
+
+.hover-dot {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.hover-meta {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+/* ==========================================================================
    8. TECHNIKBAUM MODAL: VICTORIA 3 TECH TREE (SCREENSHOT 2 STIL)
    ========================================================================== */
 .tech-tree-window {
