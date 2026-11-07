@@ -21,6 +21,7 @@ export class ProvincePanelController {
     this.ownerFlagEl = document.getElementById("inspector-owner-flag");
 
     this.activeTab = "population"; // Default to demographic view as in Screenshot 1
+    this.constructionCategory = "buildings";
     this.currentProvince = null;
 
     this.setupEvents();
@@ -403,69 +404,231 @@ export class ProvincePanelController {
   }
 
   /**
-   * Buildings Tab
+   * Buildings & Recruitment Tab (Call of War & Victoria 3 hybrid - Screenshot 4)
    */
   renderBuildingsTab(prov, isPlayerOwned, playerNation) {
     const buildings = prov.buildings || {};
-    const buildingConfigs = [
-      { type: "barracks", name: "Kaserne", cost: 150, desc: "+3.000 Rekrutenreserve & Truppenausbildung" },
-      { type: "fort", name: "Festungsbastion", cost: 250, desc: "+1 Befestigungsstufe nach Vauban-Art" },
-      { type: "port", name: "Handelshafen & Werft", cost: 200, desc: "+25 Steuereinnahmen & Flottenliegeplatz", requiresCoast: true },
-      { type: "castle", name: "Schloss & Verwaltungszentrum", cost: 300, desc: "+Bürokratie & Regionale Kontrolle" },
-      { type: "farm", name: "Gutsherrschaftliche Agrarbetriebe", cost: 120, desc: "+Getreideertrag & Arbeitsplätze" }
-    ];
+    const satisfaction = playerNation ? playerNation.satisfaction || 82 : 82;
+
+    const cat = this.constructionCategory || "buildings";
 
     this.tabContentEl.innerHTML = `
-      <div class="v3-buildings-list">
-        ${buildingConfigs.map((cfg) => {
-          if (cfg.requiresCoast && !prov.is_coastal) return "";
-          const level = buildings[cfg.type] || 0;
-          const canAfford = playerNation && playerNation.gold >= cfg.cost;
-          const disabled = !isPlayerOwned || !canAfford;
-
-          return `
-            <div class="v3-building-card">
-              <div class="bld-info">
-                <div class="bld-name">${cfg.name}</div>
-                <div class="bld-level">Stufe ${level} · ${cfg.desc}</div>
-              </div>
-              <button class="v3-build-btn" data-bld="${cfg.type}" data-cost="${cfg.cost}" ${disabled ? "disabled" : ""}>
-                Ausbauen (${cfg.cost} £)
-              </button>
-            </div>
-          `;
-        }).join("")}
+      <!-- 1. TOP STATUS & QUEUE BAR (Call of War Header) -->
+      <div style="background:rgba(20,26,38,0.92); border:1px solid var(--brass-border); border-radius:4px; padding:10px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:6px;">
+          <span style="color:#fbbf24; font-weight:700;">👥 Moral: ${satisfaction}%</span>
+          <span style="color:#4ade80; font-weight:700;">⏱️ Bauzeit: Normal (+0%)</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:10.5px;">
+          <div style="background:rgba(15,23,42,0.8); border:1px dashed rgba(255,255,255,0.15); padding:6px; border-radius:3px; text-align:center; color:var(--text-secondary);">
+            🔨 Keine Konstruktion
+          </div>
+          <div style="background:rgba(15,23,42,0.8); border:1px dashed rgba(255,255,255,0.15); padding:6px; border-radius:3px; text-align:center; color:var(--text-secondary);">
+            🚜 Keine Produktion
+          </div>
+        </div>
       </div>
 
-      ${(buildings.barracks > 0 && isPlayerOwned) ? `
-        <div style="margin-top:16px; padding:12px; background:rgba(30,41,59,0.8); border:1px solid rgba(217,119,6,0.4); border-radius:4px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-weight:700; color:#fbbf24; font-size:12px;">⚔️ Heeresrekrutierung (Kaserne aktiv)</span>
-            <span style="font-size:11px; color:#cbd5e1;">Rekrutenreserve: ${(playerNation?.manpower || 0).toLocaleString("de-DE")}</span>
+      <!-- 2. CALL OF WAR CATEGORY TABS -->
+      <div style="display:flex; gap:3px; margin-bottom:10px; background:rgba(15,23,42,0.95); padding:4px; border-radius:4px; border:1px solid var(--brass-border); overflow-x:auto;">
+        <button class="cow-tab-btn ${cat === 'buildings' ? 'active' : ''}" data-cat="buildings" style="flex:1; padding:5px 2px; font-size:10px; background:${cat === 'buildings' ? 'linear-gradient(180deg, #d97706, #b45309)' : 'transparent'}; border:none; color:#f8fafc; font-weight:700; border-radius:3px; cursor:pointer; white-space:nowrap;">
+          🏭 Gebäude
+        </button>
+        <button class="cow-tab-btn ${cat === 'infantry' ? 'active' : ''}" data-cat="infantry" style="flex:1; padding:5px 2px; font-size:10px; background:${cat === 'infantry' ? 'linear-gradient(180deg, #d97706, #b45309)' : 'transparent'}; border:none; color:#f8fafc; font-weight:700; border-radius:3px; cursor:pointer; white-space:nowrap;">
+          💂 Infanterie
+        </button>
+        <button class="cow-tab-btn ${cat === 'artillery' ? 'active' : ''}" data-cat="artillery" style="flex:1; padding:5px 2px; font-size:10px; background:${cat === 'artillery' ? 'linear-gradient(180deg, #d97706, #b45309)' : 'transparent'}; border:none; color:#f8fafc; font-weight:700; border-radius:3px; cursor:pointer; white-space:nowrap;">
+          💣 Geschütze
+        </button>
+        <button class="cow-tab-btn ${cat === 'cavalry' ? 'active' : ''}" data-cat="cavalry" style="flex:1; padding:5px 2px; font-size:10px; background:${cat === 'cavalry' ? 'linear-gradient(180deg, #d97706, #b45309)' : 'transparent'}; border:none; color:#f8fafc; font-weight:700; border-radius:3px; cursor:pointer; white-space:nowrap;">
+          🐎 Kavallerie
+        </button>
+        <button class="cow-tab-btn ${cat === 'defense' ? 'active' : ''}" data-cat="defense" style="flex:1; padding:5px 2px; font-size:10px; background:${cat === 'defense' ? 'linear-gradient(180deg, #d97706, #b45309)' : 'transparent'}; border:none; color:#f8fafc; font-weight:700; border-radius:3px; cursor:pointer; white-space:nowrap;">
+          🏰 Festung
+        </button>
+      </div>
+
+      <!-- 3. CATEGORY CONTENT LIST -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${cat === 'buildings' ? `
+          <!-- PROVINZ-ÖKONOMIE -->
+          <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:var(--brass-light); letter-spacing:0.5px; margin-top:2px;">
+            Provinz-Ökonomie & Infrastruktur
           </div>
-          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px;">
-            Stelle ein neues Regiment auf oder verstärke die Garnison in dieser Provinz.
+
+          <!-- Kaserne -->
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                <span style="background:#d97706; color:white; font-size:9px; padding:1px 4px; border-radius:2px; margin-right:4px;">Lvl. ${buildings.barracks || 1}</span>
+                Rekrutierungskaserne
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 150 £ · 👤 3.000 Rekrutenreserve · ⏱️ 12h
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-build" data-bld="barracks" data-cost="150" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #16a34a, #15803d); border:1px solid #22c55e;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 150) ? 'disabled' : ''}>
+              🔨 BAUEN
+            </button>
           </div>
-          <button id="btn-recruit-troops" class="v3-build-btn" style="width:100%; background:linear-gradient(180deg, #991b1b, #7f1d1d); border-color:#dc2626;" ${(!playerNation || playerNation.gold < 100 || playerNation.manpower < 3000) ? 'disabled' : ''}>
-            Regiment ausheben (+3.000 Truppen · 100 £)
-          </button>
-        </div>
-      ` : ''}
+
+          <!-- Manufaktur -->
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                <span style="background:#0284c7; color:white; font-size:9px; padding:1px 4px; border-radius:2px; margin-right:4px;">Lvl. ${buildings.industry || 1}</span>
+                Industriemanufaktur
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 200 £ · +20 Steuern & Werkzeuge · ⏱️ 1 Tag
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-build" data-bld="industry" data-cost="200" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #16a34a, #15803d); border:1px solid #22c55e;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 200) ? 'disabled' : ''}>
+              🔨 BAUEN
+            </button>
+          </div>
+
+          <!-- Universität / Akademie -->
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                <span style="background:#7c3aed; color:white; font-size:9px; padding:1px 4px; border-radius:2px; margin-right:4px;">Lvl. ${buildings.university || 0}</span>
+                Akademie der Wissenschaften
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 400 £ · +25 Forschungspunkte / Monat · ⏱️ 2 Tage
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-build" data-bld="university" data-cost="400" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #16a34a, #15803d); border:1px solid #22c55e;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 400) ? 'disabled' : ''}>
+              🔨 BAUEN
+            </button>
+          </div>
+
+          <!-- Hafen (falls Küste) -->
+          ${prov.is_coastal ? `
+            <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                  <span style="background:#0891b2; color:white; font-size:9px; padding:1px 4px; border-radius:2px; margin-right:4px;">Lvl. ${buildings.port || 0}</span>
+                  Kriegshafen & Werft
+                </div>
+                <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                  💰 200 £ · +25 Zolleinnahmen & Marineausbau
+                </div>
+              </div>
+              <button class="v3-build-btn btn-action-build" data-bld="port" data-cost="200" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #16a34a, #15803d); border:1px solid #22c55e;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 200) ? 'disabled' : ''}>
+                🔨 BAUEN
+              </button>
+            </div>
+          ` : ''}
+        ` : ''}
+
+        ${cat === 'infantry' ? `
+          <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:var(--brass-light); letter-spacing:0.5px; margin-top:2px;">
+            Infanterie-Regimenter
+          </div>
+          <!-- Linieninfanterie -->
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                💂 Linieninfanterie-Bataillon
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 100 £ · 👤 3.000 Rekruten · Hohe Disziplin
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-recruit" data-troops="3000" data-cost="100" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #dc2626, #b91c1c); border:1px solid #ef4444;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 100 || playerNation.manpower < 3000) ? 'disabled' : ''}>
+              ⚔️ AUSBILDEN
+            </button>
+          </div>
+
+          <!-- Garde Grenadiere -->
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                💂 Königliche Garde-Grenadiere
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 220 £ · 👤 2.500 Rekruten · Elite-Schlagkraft
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-recruit" data-troops="2500" data-cost="220" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #dc2626, #b91c1c); border:1px solid #ef4444;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 220 || playerNation.manpower < 2500) ? 'disabled' : ''}>
+              ⚔️ AUSBILDEN
+            </button>
+          </div>
+        ` : ''}
+
+        ${cat === 'artillery' ? `
+          <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:var(--brass-light); letter-spacing:0.5px; margin-top:2px;">
+            Feld- & Belagerungsartillerie
+          </div>
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                💣 6-Pfünder Feldkanonen-Batterie
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 180 £ · 👤 1.000 Rekruten · Hohe Feuerkraft
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-recruit" data-troops="1000" data-cost="180" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #ea580c, #c2410c); border:1px solid #f97316;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 180 || playerNation.manpower < 1000) ? 'disabled' : ''}>
+              💣 BAUEN
+            </button>
+          </div>
+        ` : ''}
+
+        ${cat === 'cavalry' ? `
+          <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:var(--brass-light); letter-spacing:0.5px; margin-top:2px;">
+            Reiterei & Aufklärung
+          </div>
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                🐎 Husaren-Aufklärungsschwadron
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 160 £ · 👤 1.500 Rekruten · Schneller Vorstoß
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-recruit" data-troops="1500" data-cost="160" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #ca8a04, #a16207); border:1px solid #eab308;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 160 || playerNation.manpower < 1500) ? 'disabled' : ''}>
+              🐎 AUSBILDEN
+            </button>
+          </div>
+        ` : ''}
+
+        ${cat === 'defense' ? `
+          <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:var(--brass-light); letter-spacing:0.5px; margin-top:2px;">
+            Verteidigungsbauwerke
+          </div>
+          <div class="cow-build-card" style="background:rgba(20,26,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:11.5px; color:#f8fafc;">
+                🏰 Vauban-Bastion & Festungswall
+              </div>
+              <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
+                💰 250 £ · +1 Festungsverteidigung
+              </div>
+            </div>
+            <button class="v3-build-btn btn-action-build" data-bld="fort" data-cost="250" style="padding:6px 12px; font-size:10.5px; background:linear-gradient(180deg, #16a34a, #15803d); border:1px solid #22c55e;" ${(!isPlayerOwned || !playerNation || playerNation.gold < 250) ? 'disabled' : ''}>
+              🔨 BAUEN
+            </button>
+          </div>
+        ` : ''}
+      </div>
     `;
 
-    // Bind recruit button
-    this.tabContentEl.querySelector("#btn-recruit-troops")?.addEventListener("click", () => {
-      audio.playClick();
-      wsClient.send({
-        type: "RECRUIT_ARMY",
-        nation_id: store.playerNationId,
-        province_id: prov.id,
-        count: 3000
+    // Bind subcategory tab buttons
+    this.tabContentEl.querySelectorAll(".cow-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const targetCat = e.currentTarget.getAttribute("data-cat");
+        audio.playClick();
+        this.constructionCategory = targetCat;
+        this.renderBuildingsTab(prov, isPlayerOwned, playerNation);
       });
     });
 
     // Bind build buttons
-    this.tabContentEl.querySelectorAll(".v3-build-btn").forEach((btn) => {
+    this.tabContentEl.querySelectorAll(".btn-action-build").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const bldType = e.currentTarget.getAttribute("data-bld");
         audio.playClick();
@@ -473,6 +636,20 @@ export class ProvincePanelController {
           type: "BUILD",
           province_id: prov.id,
           building_type: bldType
+        });
+      });
+    });
+
+    // Bind recruit buttons
+    this.tabContentEl.querySelectorAll(".btn-action-recruit").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const count = parseInt(e.currentTarget.getAttribute("data-troops"), 10) || 3000;
+        audio.playClick();
+        wsClient.send({
+          type: "RECRUIT_ARMY",
+          nation_id: store.playerNationId,
+          province_id: prov.id,
+          count: count
         });
       });
     });
