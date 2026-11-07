@@ -9,9 +9,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
 ph = PasswordHasher(
-    time_cost=3,
-    memory_cost=65536,  # 64 MB
-    parallelism=4,
+    time_cost=2,
+    memory_cost=16384,  # 16 MB
+    parallelism=2,
     hash_len=32,
     salt_len=16
 )

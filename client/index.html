@@ -115,9 +115,9 @@
         <!-- Victorian Brass Clockwork Dial -->
         <div class="v3-clockwork-panel">
           <div class="date-dial-box">
-            <div id="game-date-display" class="v3-date-text">Jahr 0, 1. Januar</div>
+            <div id="game-date-display" class="v3-date-text">1. Januar 1700</div>
             <div class="v3-weekday-ref">
-              <span id="game-weekday">Montag</span> · <span id="ref-year-display">Ref: 1700</span>
+              <span id="game-weekday">Montag</span> · <span id="ref-year-display">Jahr 0</span>
             </div>
           </div>
 
@@ -161,7 +161,18 @@
       <section id="map-viewport">
         <div id="map-svg-container">
           <svg id="europe-map-svg" viewBox="0 0 1024 928" preserveAspectRatio="xMidYMid meet">
-            <rect width="100%" height="100%" class="sea-bg" />
+            <defs>
+              <radialGradient id="ocean-gradient" cx="45%" cy="45%" r="75%">
+                <stop offset="0%" stop-color="#182736" />
+                <stop offset="60%" stop-color="#13202d" />
+                <stop offset="100%" stop-color="#0b131c" />
+              </radialGradient>
+              <pattern id="graticule-grid" width="128" height="116" patternUnits="userSpaceOnUse">
+                <path d="M 128 0 L 0 0 0 116" fill="none" stroke="rgba(148, 185, 220, 0.05)" stroke-width="0.75" stroke-dasharray="3 3"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#ocean-gradient)" />
+            <rect width="100%" height="100%" fill="url(#graticule-grid)" />
             
             <g id="map-world">
               <g id="regions-layer"></g>

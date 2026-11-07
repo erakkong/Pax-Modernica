@@ -83,11 +83,15 @@ export class TopBarController {
   }
 
   renderClock(clock) {
+    const histYear = clock.historical_year || (1700 + (clock.year || 0));
+    const day = clock.day || 1;
+    const month = clock.month_name || "Januar";
+
     if (this.dateDisplay) {
-      this.dateDisplay.textContent = clock.formatted_date || `Jahr ${clock.year}, ${clock.day}. ${clock.month_name || "Januar"}`;
+      this.dateDisplay.textContent = `${day}. ${month} ${histYear}`;
     }
     if (this.refYearDisplay) {
-      this.refYearDisplay.textContent = `Ref: ${clock.historical_year || 1700 + clock.year}`;
+      this.refYearDisplay.textContent = `Jahr ${clock.year || 0}`;
     }
 
     // Weekday computation

@@ -9,6 +9,26 @@
 import { store } from "../state/game_state.js";
 import { audio } from "../ui/audio_controller.js";
 
+// Curated, non-overlapping historical nation label positions (Victoria 3 & HoI4 style)
+const NATION_LABEL_CONFIG = {
+  nation_prussia:     { title: "PREUSSEN",          x: 540, y: 468, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
+  nation_france:      { title: "FRANKREICH",        x: 395, y: 595, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
+  nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
+  nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
+  nation_russia:      { title: "RUSSLAND",          x: 840, y: 330, minScale: 0.65, maxScale: 1.6, fontSize: 22, letterSpacing: 7 },
+  nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 1.6, fontSize: 19, letterSpacing: 5 },
+  nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 1.6, fontSize: 20, letterSpacing: 6 },
+  nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
+  nation_poland:      { title: "POLEN-LITAUEN",     x: 670, y: 465, minScale: 0.65, maxScale: 1.6, fontSize: 18, letterSpacing: 5 },
+  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 405, minScale: 0.95, maxScale: 2.0, fontSize: 14, letterSpacing: 4 },
+  nation_netherlands: { title: "NIEDERLANDE",       x: 425, y: 478, minScale: 1.25, maxScale: 2.4, fontSize: 12, letterSpacing: 3 },
+  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 2.0, fontSize: 14, letterSpacing: 4 },
+  nation_switzerland: { title: "SCHWEIZ",           x: 485, y: 615, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 },
+  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 },
+  nation_venice:      { title: "VENEDIG",           x: 535, y: 625, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 },
+  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 710, minScale: 1.35, maxScale: 2.5, fontSize: 11, letterSpacing: 2 }
+};
+
 export class MapEngine {
   constructor(viewportEl) {
     this.viewport = viewportEl;
@@ -48,7 +68,7 @@ export class MapEngine {
   bindEvents() {
     // 1. Mouse Dragging (Smooth Viewport Pan)
     this.viewport.addEventListener("mousedown", (e) => {
-      if (e.button !== 0) return; // Primary left button only
+      if (e.button !== 0) return; // Left click drag
       this.isDragging = true;
       this.lastClientX = e.clientX;
       this.lastClientY = e.clientY;
@@ -192,29 +212,35 @@ export class MapEngine {
   }
 
   /**
-   * Hierarchical Level of Detail (LOD) & Collision Handling:
-   * - scale < 1.35: Macro Empires ("PREUSSEN", "FRANKREICH", "SCHWEIZ")
-   * - 1.15 <= scale < 2.5: Regional States ("Mark Brandenburg", "Ost-Schweiz", "Königsberg")
-   * - scale >= 2.0: Granular Provinces & Settlement Nodes
+   * Hierarchical Level of Detail (LOD) & Strict Spatial Collision Avoidance:
+   * - scale < 1.4: Curated Macro Empires (Zero Overlap)
+   * - 1.35 <= scale < 2.6: Regional States with Collision Detection
+   * - scale >= 2.1: Granular Provinces & Settlement Nodes
    */
   updateZoomLOD() {
     if (!this.labelsGroup) return;
 
-    const showMacro = this.scale < 1.4;
+    // 1. Sovereign Macro Labels (Controlled by individual minScale and maxScale)
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
-      el.style.display = showMacro ? "block" : "none";
+      const minS = parseFloat(el.getAttribute("data-min-scale") || "0.65");
+      const maxS = parseFloat(el.getAttribute("data-max-scale") || "1.8");
+      const visible = this.scale >= minS && this.scale <= maxS;
+      el.style.display = visible ? "block" : "none";
     });
 
-    const showRegions = this.scale >= 1.1 && this.scale < 2.6;
+    // 2. Regional State Labels
+    const showRegions = this.scale >= 1.35 && this.scale < 2.7;
     this.labelsGroup.querySelectorAll(".region-label").forEach((el) => {
       el.style.display = showRegions ? "block" : "none";
     });
 
-    const showProvinces = this.scale >= 2.0;
+    // 3. Granular Province Labels & Settlement Nodes
+    const showProvinces = this.scale >= 2.1;
     this.labelsGroup.querySelectorAll(".province-label, .province-node").forEach((el) => {
       el.style.display = showProvinces ? "block" : "none";
     });
 
+    // Spatial collision resolution to guarantee readability
     if (showRegions || showProvinces) {
       this.resolveLabelCollisions();
     }
@@ -222,7 +248,7 @@ export class MapEngine {
 
   resolveLabelCollisions() {
     const visibleElements = [];
-    const minDistance = 22 / this.scale;
+    const minDistance = 28 / this.scale;
 
     const labels = Array.from(this.labelsGroup.querySelectorAll(".region-label, .province-label"));
     labels.sort((a, b) => {
@@ -298,7 +324,7 @@ export class MapEngine {
     const regions = Object.values(store.regions || {});
     const provinces = Object.values(store.provinces || {});
 
-    // 1. Render Maritime Labels
+    // 1. Maritime Ocean Labels
     this.renderSeaLabels();
 
     // 2. Render Region Polygons (Image 2)
@@ -347,12 +373,12 @@ export class MapEngine {
 
       this.provincesGroup.appendChild(path);
 
-      // Settlement Pips for key settlements
+      // Settlement Pips for key historical settlements
       if (prov.center && prov.center.length === 2 && (prov.is_capital || prov.tax_revenue > 25)) {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", prov.center[0]);
         circle.setAttribute("cy", prov.center[1]);
-        circle.setAttribute("r", prov.is_capital ? "3.5" : "2");
+        circle.setAttribute("r", prov.is_capital ? "3.2" : "2");
         circle.setAttribute("vector-effect", "non-scaling-stroke");
         circle.classList.add("province-node");
         this.labelsGroup.appendChild(circle);
@@ -360,7 +386,7 @@ export class MapEngine {
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", prov.center[0]);
         text.setAttribute("y", prov.center[1] - 5);
-        text.setAttribute("data-priority", prov.is_capital ? "100" : "40");
+        text.setAttribute("data-priority", prov.is_capital ? "100" : "30");
         text.classList.add("province-label");
         text.textContent = prov.name;
         this.labelsGroup.appendChild(text);
@@ -374,19 +400,19 @@ export class MapEngine {
     this.renderMacroNationLabels();
 
     this.applyTransform();
-    console.log(`Pax Modernica: Zwei-Ebenen-Karte gerendert (${regions.length} Regionen aus Bild 2, ${provinces.length} Provinzen aus Bild 1).`);
+    console.log(`Pax Modernica: Zwei-Ebenen-Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen).`);
   }
 
   renderSeaLabels() {
     const seaZones = [
-      { name: "Nordsee", x: 370, y: 370, rot: -5 },
-      { name: "Ostsee", x: 570, y: 340, rot: 20 },
-      { name: "Keltische See", x: 200, y: 540, rot: -10 },
-      { name: "Mittelmeer", x: 450, y: 780, rot: 0 },
-      { name: "Schwarzes Meer", x: 790, y: 680, rot: 5 },
+      { name: "Nordsee", x: 370, y: 380, rot: -5 },
+      { name: "Ostsee", x: 580, y: 345, rot: 20 },
+      { name: "Keltische See", x: 210, y: 560, rot: -10 },
+      { name: "Mittelmeer", x: 460, y: 790, rot: 0 },
+      { name: "Schwarzes Meer", x: 810, y: 680, rot: 5 },
       { name: "Norwegische See", x: 420, y: 200, rot: -15 },
-      { name: "Barentssee", x: 720, y: 80, rot: 0 },
-      { name: "Atlantischer Ozean", x: 100, y: 450, rot: -30 }
+      { name: "Barentssee", x: 740, y: 75, rot: 0 },
+      { name: "Atlantischer Ozean", x: 110, y: 480, rot: -30 }
     ];
 
     seaZones.forEach((sea) => {
@@ -418,51 +444,16 @@ export class MapEngine {
   }
 
   renderMacroNationLabels() {
-    const nationClusters = {};
-    const regions = Object.values(store.regions || {});
-
-    regions.forEach((reg) => {
-      if (!reg.center) return;
-      const nid = reg.owner_id;
-      if (!nationClusters[nid]) {
-        nationClusters[nid] = { sumX: 0, sumY: 0, totalWeight: 0 };
-      }
-      const weight = Math.max(1, (reg.area || 100));
-      nationClusters[nid].sumX += reg.center[0] * weight;
-      nationClusters[nid].sumY += reg.center[1] * weight;
-      nationClusters[nid].totalWeight += weight;
-    });
-
-    const sovereignTitles = {
-      "nation_prussia": "PREUSSEN",
-      "nation_france": "FRANKREICH",
-      "nation_austria": "ÖSTERREICH",
-      "nation_england": "GROSSBRITANNIEN",
-      "nation_russia": "RUSSLAND",
-      "nation_ottoman": "OSMANISCHES REICH",
-      "nation_spain": "SPANIEN",
-      "nation_sweden": "SCHWEDEN",
-      "nation_poland": "POLEN-LITAUEN",
-      "nation_denmark": "DÄNEMARK",
-      "nation_netherlands": "NIEDERLANDE",
-      "nation_portugal": "PORTUGAL",
-      "nation_switzerland": "SCHWEIZ",
-      "nation_bavaria": "BAYERN",
-      "nation_venice": "VENEDIG",
-      "nation_papal": "KIRCHENSTAAT"
-    };
-
-    Object.entries(nationClusters).forEach(([nid, cluster]) => {
-      if (cluster.totalWeight === 0) return;
-      const cx = cluster.sumX / cluster.totalWeight;
-      const cy = cluster.sumY / cluster.totalWeight;
-      const title = sovereignTitles[nid] || nid.replace("nation_", "").toUpperCase();
-
+    Object.entries(NATION_LABEL_CONFIG).forEach(([nid, cfg]) => {
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", Math.round(cx));
-      text.setAttribute("y", Math.round(cy));
+      text.setAttribute("x", cfg.x);
+      text.setAttribute("y", cfg.y);
+      text.setAttribute("data-min-scale", cfg.minScale.toString());
+      text.setAttribute("data-max-scale", cfg.maxScale.toString());
+      text.style.fontSize = `${cfg.fontSize}px`;
+      text.style.letterSpacing = `${cfg.letterSpacing}px`;
       text.classList.add("nation-macro-label");
-      text.textContent = title;
+      text.textContent = cfg.title;
       this.labelsGroup.appendChild(text);
     });
   }
@@ -488,16 +479,15 @@ export class MapEngine {
   getRegionColor(reg) {
     const mode = store.activeMapMode || "political";
 
-    // In granular province view, keep regions subtle
     if (mode === "provinces") {
-      return "rgba(20, 28, 40, 0.4)";
+      return "rgba(22, 32, 45, 0.4)";
     }
 
-    // Sovereign nation colors (Victoria 3 Palette)
+    // Authentic Victoria 3 Diplomatic Palette
     if (mode === "political" || mode === "regions") {
       const nationPalette = {
-        "nation_prussia": "#4a708b",     // Prussian Steel Blue
-        "nation_france": "#3852a4",      // Royal Blue
+        "nation_prussia": "#4a708b",     // Prussian Blue / Steel
+        "nation_france": "#3852a4",      // French Royal Blue
         "nation_austria": "#ded7cb",     // Imperial Habsburg Off-White
         "nation_england": "#b8474d",     // British Redcoat Crimson
         "nation_russia": "#558e57",      // Russian Imperial Green
@@ -565,13 +555,11 @@ export class MapEngine {
   getProvinceColor(prov) {
     const mode = store.activeMapMode || "political";
 
-    // In overarching regions view or political view, provinces are transparent overlays with crisp border vectors
     if (mode === "political" || mode === "regions") {
       return "transparent";
     }
 
     if (mode === "provinces") {
-      // Elegant granular color variation based on province index
       const hash = ((prov.area || 100) * 31 + parseInt(prov.id.replace(/\D/g, "") || "1") * 17) % 360;
       return `hsla(${hash}, 35%, 40%, 0.75)`;
     }
