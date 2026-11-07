@@ -1,7 +1,8 @@
 /**
- * Pax Modernica - Modular Map Engine (SVG Vector & Topo Architecture)
- * Fully calibrated to authentic 1700 A.D. cartography (1024x717 pixels).
- * Features 10 strategic map modes and zoom-dependent level of detail (LOD).
+ * Pax Modernica - Pure Vector Map Engine
+ * Features pure mathematical vector topology (Albers Conic 2000x1350 viewBox),
+ * hardware-accelerated transform matrix panning/zooming, dynamic LOD typography,
+ * and 10 strategic Grand-Strategy map modes.
  */
 
 import { store } from "../state/game_state.js";
@@ -10,23 +11,23 @@ import { audio } from "../ui/audio_controller.js";
 export class MapEngine {
   constructor(viewportEl) {
     this.viewport = viewportEl;
-    this.container = document.getElementById("map-svg-container");
     this.svg = document.getElementById("europe-map-svg");
-    this.bgImage = document.getElementById("map-background-image");
+    this.worldGroup = document.getElementById("map-world");
     this.provincesGroup = document.getElementById("provinces-layer");
     this.bordersGroup = document.getElementById("borders-layer");
     this.labelsGroup = document.getElementById("labels-layer");
 
-    // Transform State (Pan & Zoom)
+    // Dynamic Transform Matrix State (Pan & Zoom in SVG coordinate space)
     this.scale = 1.0;
     this.translateX = 0;
     this.translateY = 0;
     this.isDragging = false;
-    this.startX = 0;
-    this.startY = 0;
+    this.lastClientX = 0;
+    this.lastClientY = 0;
 
     // Pinch zoom for touch
     this.initialPinchDistance = null;
+    this.pinchCenter = null;
 
     this.bindEvents();
     this.setupStoreListeners();
@@ -42,18 +43,27 @@ export class MapEngine {
   }
 
   bindEvents() {
-    // Mouse Dragging (Pan)
+    // 1. Mouse Dragging (Smooth Viewport Pan)
     this.viewport.addEventListener("mousedown", (e) => {
-      if (e.button !== 0) return; // Left click only
+      if (e.button !== 0) return; // Primary left button only
       this.isDragging = true;
-      this.startX = e.clientX - this.translateX;
-      this.startY = e.clientY - this.translateY;
+      this.lastClientX = e.clientX;
+      this.lastClientY = e.clientY;
     });
 
     window.addEventListener("mousemove", (e) => {
       if (!this.isDragging) return;
-      this.translateX = e.clientX - this.startX;
-      this.translateY = e.clientY - this.startY;
+      const ctm = this.svg.getScreenCTM();
+      if (!ctm) return;
+
+      // Project screen delta into unskewed SVG viewBox units
+      const dx = (e.clientX - this.lastClientX) / ctm.a;
+      const dy = (e.clientY - this.lastClientY) / ctm.d;
+      this.lastClientX = e.clientX;
+      this.lastClientY = e.clientY;
+
+      this.translateX += dx;
+      this.translateY += dy;
       this.applyTransform();
     });
 
@@ -61,43 +71,62 @@ export class MapEngine {
       this.isDragging = false;
     });
 
-    // Wheel Zoom centered on cursor
+    // 2. Mouse Wheel Zoom (Mathematically Anchored to Cursor)
     this.viewport.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-      const newScale = Math.max(0.6, Math.min(4.5, this.scale * zoomFactor));
+      const newScale = Math.max(0.6, Math.min(6.0, this.scale * zoomFactor));
+      if (newScale === this.scale) return;
 
-      const rect = this.viewport.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+      // Obtain cursor position inside SVG viewBox coordinate frame
+      const pt = this.svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const ctm = this.svg.getScreenCTM();
+      if (!ctm) return;
+      const svgPt = pt.matrixTransform(ctm.inverse());
 
-      // Adjust translations so zoom focuses on mouse cursor
-      this.translateX = mouseX - (mouseX - this.translateX) * (newScale / this.scale);
-      this.translateY = mouseY - (mouseY - this.translateY) * (newScale / this.scale);
+      // World coordinate under cursor before zoom
+      const worldX = (svgPt.x - this.translateX) / this.scale;
+      const worldY = (svgPt.y - this.translateY) / this.scale;
+
+      // Update scale and translate so world coordinate remains under cursor
       this.scale = newScale;
+      this.translateX = svgPt.x - worldX * this.scale;
+      this.translateY = svgPt.y - worldY * this.scale;
 
       this.applyTransform();
     }, { passive: false });
 
-    // Touch Support (iPad & Mobile)
+    // 3. Touch Gestures (Pan & Pinch-to-Zoom for Tablets & Laptops)
     this.viewport.addEventListener("touchstart", (e) => {
       if (e.touches.length === 1) {
         this.isDragging = true;
-        this.startX = e.touches[0].clientX - this.translateX;
-        this.startY = e.touches[0].clientY - this.translateY;
+        this.lastClientX = e.touches[0].clientX;
+        this.lastClientY = e.touches[0].clientY;
       } else if (e.touches.length === 2) {
         this.isDragging = false;
         this.initialPinchDistance = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
+        this.pinchCenter = {
+          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+        };
       }
     });
 
     this.viewport.addEventListener("touchmove", (e) => {
       if (e.touches.length === 1 && this.isDragging) {
-        this.translateX = e.touches[0].clientX - this.startX;
-        this.translateY = e.touches[0].clientY - this.startY;
+        const ctm = this.svg.getScreenCTM();
+        if (!ctm) return;
+        const dx = (e.touches[0].clientX - this.lastClientX) / ctm.a;
+        const dy = (e.touches[0].clientY - this.lastClientY) / ctm.d;
+        this.lastClientX = e.touches[0].clientX;
+        this.lastClientY = e.touches[0].clientY;
+        this.translateX += dx;
+        this.translateY += dy;
         this.applyTransform();
       } else if (e.touches.length === 2 && this.initialPinchDistance) {
         const currentDistance = Math.hypot(
@@ -105,7 +134,22 @@ export class MapEngine {
           e.touches[0].clientY - e.touches[1].clientY
         );
         const factor = currentDistance / this.initialPinchDistance;
-        this.scale = Math.max(0.6, Math.min(4.5, this.scale * factor));
+        const newScale = Math.max(0.6, Math.min(6.0, this.scale * factor));
+
+        if (this.pinchCenter) {
+          const pt = this.svg.createSVGPoint();
+          pt.x = this.pinchCenter.x;
+          pt.y = this.pinchCenter.y;
+          const ctm = this.svg.getScreenCTM();
+          if (ctm) {
+            const svgPt = pt.matrixTransform(ctm.inverse());
+            const worldX = (svgPt.x - this.translateX) / this.scale;
+            const worldY = (svgPt.y - this.translateY) / this.scale;
+            this.scale = newScale;
+            this.translateX = svgPt.x - worldX * this.scale;
+            this.translateY = svgPt.y - worldY * this.scale;
+          }
+        }
         this.initialPinchDistance = currentDistance;
         this.applyTransform();
       }
@@ -114,33 +158,21 @@ export class MapEngine {
     this.viewport.addEventListener("touchend", () => {
       this.isDragging = false;
       this.initialPinchDistance = null;
+      this.pinchCenter = null;
     });
 
-    // Map Controls buttons
+    // 4. Map Control Buttons
     document.getElementById("btn-zoom-in")?.addEventListener("click", () => this.zoom(1.25));
     document.getElementById("btn-zoom-out")?.addEventListener("click", () => this.zoom(0.8));
     document.getElementById("btn-zoom-reset")?.addEventListener("click", () => this.resetView());
 
-    // Map Mode buttons
+    // 5. Map Mode Selection
     document.querySelectorAll(".map-mode-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const mode = e.currentTarget.getAttribute("data-mode");
         audio.playClick();
         store.setActiveMapMode(mode);
       });
-    });
-
-    // Background Map Opacity Slider
-    const opacitySlider = document.getElementById("slider-map-opacity");
-    const opacityLabel = document.getElementById("label-map-opacity");
-    opacitySlider?.addEventListener("input", (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (this.bgImage) {
-        this.bgImage.style.opacity = (val / 100).toFixed(2);
-      }
-      if (opacityLabel) {
-        opacityLabel.textContent = `${val}%`;
-      }
     });
   }
 
@@ -151,41 +183,49 @@ export class MapEngine {
   }
 
   applyTransform() {
-    this.container.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+    if (this.worldGroup) {
+      this.worldGroup.setAttribute(
+        "transform",
+        `translate(${this.translateX.toFixed(2)}, ${this.translateY.toFixed(2)}) scale(${this.scale.toFixed(4)})`
+      );
+    }
     this.updateZoomLOD();
   }
 
   updateZoomLOD() {
     if (!this.labelsGroup) return;
 
-    // Macro nation labels: visible only when zoomed out (scale < 1.25)
+    // LOD Level 1: Sovereign Macro Names (scale < 1.25)
     const showMacro = this.scale < 1.25;
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
       el.style.display = showMacro ? "block" : "none";
     });
 
-    // Province labels: visible at medium zoom (1.1 <= scale < 2.2)
-    const showProvinces = this.scale >= 1.1;
+    // LOD Level 2: Province Names (scale >= 1.15)
+    const showProvinces = this.scale >= 1.15;
     this.labelsGroup.querySelectorAll(".province-label").forEach((el) => {
       el.style.display = showProvinces ? "block" : "none";
     });
 
-    // City nodes and micro-labels: visible at high zoom (scale >= 1.8)
-    const showCities = this.scale >= 1.8;
+    // LOD Level 3: City Nodes & Settlement Details (scale >= 2.0)
+    const showCities = this.scale >= 2.0;
     this.labelsGroup.querySelectorAll(".province-node, .city-label").forEach((el) => {
       el.style.display = showCities ? "block" : "none";
     });
   }
 
   zoom(factor) {
-    const rect = this.viewport.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+    const newScale = Math.max(0.6, Math.min(6.0, this.scale * factor));
+    // Center of standard 2000x1350 viewBox
+    const centerX = 1000;
+    const centerY = 675;
 
-    const newScale = Math.max(0.6, Math.min(4.5, this.scale * factor));
-    this.translateX = centerX - (centerX - this.translateX) * (newScale / this.scale);
-    this.translateY = centerY - (centerY - this.translateY) * (newScale / this.scale);
+    const worldX = (centerX - this.translateX) / this.scale;
+    const worldY = (centerY - this.translateY) / this.scale;
+
     this.scale = newScale;
+    this.translateX = centerX - worldX * this.scale;
+    this.translateY = centerY - worldY * this.scale;
     this.applyTransform();
   }
 
@@ -199,10 +239,10 @@ export class MapEngine {
   centerOnProvince(provinceId) {
     const prov = store.provinces[provinceId];
     if (!prov || !prov.center) return;
-    const rect = this.viewport.getBoundingClientRect();
-    this.scale = 1.6;
-    this.translateX = (rect.width / 2) - (prov.center[0] * this.scale);
-    this.translateY = (rect.height / 2) - (prov.center[1] * this.scale);
+    this.scale = 2.0;
+    // Center target coordinates on (1000, 675)
+    this.translateX = 1000 - prov.center[0] * this.scale;
+    this.translateY = 675 - prov.center[1] * this.scale;
     this.applyTransform();
   }
 
@@ -214,7 +254,7 @@ export class MapEngine {
 
     const provinces = Object.values(store.provinces);
 
-    // 1. Render Province Polygons
+    // 1. Render Pure Vector Province Polygons
     provinces.forEach((prov) => {
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", prov.svg_path);
@@ -235,18 +275,18 @@ export class MapEngine {
 
       this.provincesGroup.appendChild(path);
 
-      // 2. City Node and Province Label
+      // 2. City Node & Province Label
       if (prov.center && prov.center.length === 2) {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", prov.center[0]);
         circle.setAttribute("cy", prov.center[1]);
-        circle.setAttribute("r", "2.8");
+        circle.setAttribute("r", "3.5");
         circle.classList.add("province-node");
         this.labelsGroup.appendChild(circle);
 
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", prov.center[0]);
-        text.setAttribute("y", prov.center[1] - 5);
+        text.setAttribute("y", prov.center[1] - 8);
         text.classList.add("province-label");
         const shortName = prov.name.split("(")[0].trim();
         text.textContent = shortName;
@@ -254,34 +294,44 @@ export class MapEngine {
       }
     });
 
-    // 3. Render Sovereign Macro Labels (Cinzel Grand-Strategy LOD)
+    // 3. Dynamically Calculate & Render Macro Nation Labels
     this.renderMacroNationLabels();
-    this.updateZoomLOD();
+    this.applyTransform();
 
-    console.log(`Pax Modernica: Europakarte mit ${provinces.length} Polygon-Provinzen gerendert.`);
+    console.log(`Pax Modernica: ${provinces.length} reine Vektorprovinzen erfolgreich gerendert.`);
   }
 
+  /**
+   * Calculates sovereign territory centroids dynamically without hardcoded pixel offsets.
+   */
   renderMacroNationLabels() {
-    const macroLabels = [
-      { name: "PREUSSEN", x: 535, y: 325 },
-      { name: "FRANKREICH", x: 395, y: 415 },
-      { name: "GROSSBRITANNIEN", x: 370, y: 310 },
-      { name: "ÖSTERREICH", x: 555, y: 415 },
-      { name: "RUSSLAND", x: 780, y: 240 },
-      { name: "OSMANISCHES REICH", x: 710, y: 580 },
-      { name: "SPANIEN", x: 280, y: 550 },
-      { name: "SCHWEDEN", x: 570, y: 180 },
-      { name: "POLEN-LITAUEN", x: 620, y: 345 },
-      { name: "DÄNEMARK-NORWEGEN", x: 480, y: 180 },
-      { name: "PORTUGAL", x: 215, y: 560 }
-    ];
+    const nationCenters = {};
+    const nationCounts = {};
 
-    macroLabels.forEach((lbl) => {
+    Object.values(store.provinces).forEach((prov) => {
+      if (!prov.center) return;
+      const nid = prov.owner_id;
+      if (!nationCenters[nid]) {
+        nationCenters[nid] = [0, 0];
+        nationCounts[nid] = 0;
+      }
+      nationCenters[nid][0] += prov.center[0];
+      nationCenters[nid][1] += prov.center[1];
+      nationCounts[nid]++;
+    });
+
+    Object.entries(nationCenters).forEach(([nid, sum]) => {
+      const count = nationCounts[nid];
+      const cx = sum[0] / count;
+      const cy = sum[1] / count;
+      const nat = store.nations[nid];
+      const name = nat ? nat.name.toUpperCase() : nid.replace("nation_", "").toUpperCase();
+
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", lbl.x);
-      text.setAttribute("y", lbl.y);
+      text.setAttribute("x", Math.round(cx));
+      text.setAttribute("y", Math.round(cy));
       text.classList.add("nation-macro-label");
-      text.textContent = lbl.name;
+      text.textContent = name;
       this.labelsGroup.appendChild(text);
     });
   }
@@ -298,124 +348,110 @@ export class MapEngine {
   }
 
   /**
-   * Generates harmonious Grand-Strategy colors for the 10 map modes.
+   * Distinct, harmonious Grand-Strategy colors for all 10 toggleable map modes.
    */
   getProvinceColor(prov) {
     const mode = store.activeMapMode || "political";
 
-    // 1. POLITIK (Political): Translucent nation fills allowing 1700 cartography to shine through
+    // 1. POLITIK: Sovereign nation heraldic colors
     if (mode === "political") {
       const nat = store.nations[prov.owner_id];
-      if (!nat) return "rgba(100, 116, 139, 0.35)";
-      return this.hexToRgba(nat.color, 0.38);
+      if (!nat) return "#334155";
+      return nat.color || "#3b82f6";
     }
 
-    // 2. TERRAIN: Nearly transparent, giving maximum prominence to the authentic 1700 map topography
+    // 2. TERRAIN: Natural geographic biome tones
     if (mode === "terrain") {
       switch (prov.terrain) {
-        case "plains": return "rgba(74, 120, 70, 0.12)";
-        case "hills": return "rgba(150, 120, 70, 0.15)";
-        case "mountains": return "rgba(120, 110, 100, 0.22)";
-        case "forest": return "rgba(40, 90, 50, 0.18)";
-        case "marsh": return "rgba(60, 90, 110, 0.18)";
-        default: return "rgba(0, 0, 0, 0.05)";
+        case "plains": return "#2e4732";     // Fertile European Plains
+        case "hills": return "#473e2d";      // Highlands & Rolling Hills
+        case "mountains": return "#45423f";  // Alpine Massifs
+        case "forest": return "#203823";     // Dense Boreal/Deciduous Forests
+        case "marsh": return "#26363d";      // River Estuaries & Marshes
+        default: return "#334155";
       }
     }
 
-    // 3. RELIEF / ELEVATION: Shaded elevation contours
+    // 3. RELIEF: Shaded elevation contours
     if (mode === "relief") {
       switch (prov.terrain) {
-        case "plains": return "rgba(101, 163, 13, 0.25)";
-        case "hills": return "rgba(217, 119, 6, 0.35)";
-        case "mountains": return "rgba(180, 83, 9, 0.45)";
-        case "forest": return "rgba(22, 101, 52, 0.30)";
-        case "marsh": return "rgba(51, 65, 85, 0.35)";
-        default: return "rgba(100, 116, 139, 0.25)";
+        case "plains": return "#334a35";
+        case "hills": return "#5e4d2e";
+        case "mountains": return "#524d4b";
+        case "forest": return "#28442c";
+        case "marsh": return "#2a3d47";
+        default: return "#3b4252";
       }
     }
 
-    // 4. WIRTSCHAFT (Economy): Prosperity and fiscal yield gradient
+    // 4. WIRTSCHAFT (Economy): Fiscal yield and trade prosperity
     if (mode === "economy") {
       const tax = prov.tax_revenue || 50;
-      if (tax >= 180) return "rgba(234, 179, 8, 0.55)";  // High Prosperity Gold
-      if (tax >= 120) return "rgba(202, 138, 4, 0.45)";  // Wealthy
-      if (tax >= 75)  return "rgba(161, 98, 7, 0.35)";   // Moderate
-      return "rgba(113, 63, 18, 0.25)";                 // Developing
+      if (tax >= 180) return "#d4af37";  // Imperial Metropolis Gold
+      if (tax >= 120) return "#b38227";  // Prosperous Merchant Center
+      if (tax >= 75)  return "#855420";  // Established Province
+      return "#5e381b";                  // Developing Countryside
     }
 
-    // 5. BEVÖLKERUNG (Population): Density choropleth
+    // 5. BEVÖLKERUNG (Population): Demographic density
     if (mode === "population") {
       const pop = prov.population || 500000;
-      if (pop >= 4000000) return "rgba(185, 28, 28, 0.55)"; // Metropolis Crimson
-      if (pop >= 2500000) return "rgba(194, 65, 12, 0.45)"; // Dense
-      if (pop >= 1200000) return "rgba(217, 119, 6, 0.35)"; // Settled
-      return "rgba(101, 163, 13, 0.25)";                   // Rural
+      if (pop >= 4000000) return "#9e2d2d"; // Metropolis Crimson
+      if (pop >= 2500000) return "#8c4423"; // High Density
+      if (pop >= 1200000) return "#66552a"; // Settled
+      return "#3b4d2d";                    // Rural
     }
 
-    // 6. RELIGION: Historic European confessions
+    // 6. RELIGION: European historic confessions
     if (mode === "religion") {
       switch (prov.religion) {
-        case "Katholisch": return "rgba(217, 119, 6, 0.45)";     // Warm Amber
-        case "Protestantisch": return "rgba(2, 132, 199, 0.45)"; // Lutheran Blue
-        case "Reformiert": return "rgba(234, 88, 12, 0.45)";     // Calvinist Orange
-        case "Orthodox": return "rgba(124, 58, 237, 0.45)";      // Imperial Byzantine Purple
-        case "Anglikanisch": return "rgba(220, 38, 38, 0.45)";   // Tudor Red
-        case "Sunnitisch": return "rgba(5, 150, 105, 0.45)";     // Ottoman Emerald
-        default: return "rgba(107, 114, 128, 0.35)";
+        case "Katholisch": return "#8f6f32";     // Roman Catholic Amber
+        case "Protestantisch": return "#2e5b8a"; // Lutheran Sky Blue
+        case "Reformiert": return "#8a4923";     // Calvinist Umber
+        case "Orthodox": return "#5e388f";      // Eastern Orthodox Purple
+        case "Anglikanisch": return "#8f2e3e";   // Anglican Crimson
+        case "Sunnitisch": return "#2e7d58";     // Sunni Emerald
+        default: return "#475569";
       }
     }
 
-    // 7. INFRASTRUKTUR (Infrastructure): Paved highways & postal network
+    // 7. INFRASTRUKTUR: Postal roads & transit connectivity
     if (mode === "infrastructure") {
       const lvl = prov.infrastructure_level || 1;
-      if (lvl >= 3) return "rgba(59, 130, 246, 0.50)"; // Advanced Hub
-      if (lvl === 2) return "rgba(14, 165, 233, 0.38)"; // Paved Network
-      return "rgba(71, 85, 105, 0.28)";                // Dirt Roads
+      if (lvl >= 3) return "#2b82b8";  // Royal Macadam Highway
+      if (lvl === 2) return "#2b668f"; // Paved Post Road
+      return "#384554";                // Regional Dirt Track
     }
 
-    // 8. MILITÄR (Military): Strongholds & Garrisons
+    // 8. MILITÄR: Fortress bastions & garrison strength
     if (mode === "military") {
       const fort = prov.fortification_level || 0;
-      if (fort >= 3) return "rgba(225, 29, 72, 0.55)";  // Star Fortress
-      if (fort >= 2) return "rgba(234, 88, 12, 0.42)";  // Bastion
-      if (fort >= 1) return "rgba(202, 138, 4, 0.32)";  // Palisade
-      return "rgba(71, 85, 105, 0.18)";                // Open Country
+      if (fort >= 3) return "#b82838";  // Vauban Star Fortress
+      if (fort >= 2) return "#943828";  // Bastioned Citadel
+      if (fort >= 1) return "#785023";  // Border Redoubt
+      return "#364250";                // Open Countryside
     }
 
-    // 9. DIPLOMATIE (Diplomacy): Spheres of Influence
+    // 9. DIPLOMATIE: Spheres of Influence
     if (mode === "diplomacy") {
-      const playerNation = store.getPlayerNation();
-      if (!playerNation) return "rgba(100, 116, 139, 0.25)";
       if (prov.owner_id === store.playerNationId) {
-        return "rgba(34, 197, 94, 0.48)"; // Sovereign Realm Green
+        return "#287844"; // Sovereign Realm Emerald
       }
-      return "rgba(100, 116, 139, 0.28)"; // Neutral Foreign Powers
+      return "#384552";   // Foreign Sovereign States
     }
 
-    // 10. HANDEL (Trade): Strategic Goods
+    // 10. HANDEL (Trade): Key strategic commodities
     if (mode === "trade") {
       const goods = prov.goods_produced || "";
-      if (goods.includes("Waffen") || goods.includes("Eisen")) return "rgba(239, 68, 68, 0.45)";
-      if (goods.includes("Gold") || goods.includes("Silber") || goods.includes("Finanzen")) return "rgba(234, 179, 8, 0.55)";
-      if (goods.includes("Tuch") || goods.includes("Textilien") || goods.includes("Seide")) return "rgba(168, 85, 247, 0.45)";
-      if (goods.includes("Getreide") || goods.includes("Wein")) return "rgba(132, 204, 22, 0.40)";
-      if (goods.includes("Holz") || goods.includes("Pelze")) return "rgba(180, 83, 9, 0.42)";
-      return "rgba(14, 165, 233, 0.38)"; // Maritime & General Trade
+      if (goods.includes("Waffen") || goods.includes("Eisen")) return "#8f2828";
+      if (goods.includes("Gold") || goods.includes("Silber") || goods.includes("Finanzen")) return "#a8882b";
+      if (goods.includes("Tuch") || goods.includes("Textilien") || goods.includes("Seide")) return "#663878";
+      if (goods.includes("Getreide") || goods.includes("Wein")) return "#4d6e2e";
+      if (goods.includes("Holz") || goods.includes("Pelze")) return "#4d3b26";
+      return "#2b6678"; // Maritime & General Trade Goods
     }
 
-    return "rgba(100, 116, 139, 0.35)";
-  }
-
-  hexToRgba(hex, alpha = 0.4) {
-    if (!hex || typeof hex !== "string") return `rgba(100, 116, 139, ${alpha})`;
-    let cleanHex = hex.replace("#", "");
-    if (cleanHex.length === 3) {
-      cleanHex = cleanHex.split("").map((c) => c + c).join("");
-    }
-    const r = parseInt(cleanHex.substring(0, 2), 16) || 100;
-    const g = parseInt(cleanHex.substring(2, 4), 16) || 116;
-    const b = parseInt(cleanHex.substring(4, 6), 16) || 139;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    return "#334155";
   }
 
   highlightSelectedProvince(prov) {

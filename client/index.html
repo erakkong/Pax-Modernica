@@ -20,7 +20,7 @@
 <body>
   <div id="app-container">
     
-    <!-- TOP BAR -->
+    <!-- TOP BAR (OVERLAY: z-index 100) -->
     <header id="top-bar">
       <!-- Left: Date & Time controls -->
       <div class="top-bar-left">
@@ -92,32 +92,33 @@
       </div>
     </header>
 
-    <!-- MAIN WORKSPACE -->
+    <!-- MAIN WORKSPACE: Responsive 100% Canvas & Overlay Structure -->
     <main id="workspace">
 
-      <!-- LEFT DRAWER: NATIONAL AFFAIRS -->
-      <aside id="left-panel">
-        <div class="panel-header">
-          <span>Reichsministerium</span>
-          <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-serif);">1700–1930</span>
-        </div>
-        <nav class="left-nav-bar">
-          <button class="left-nav-btn active" data-tab="monarch">Krone</button>
-          <button class="left-nav-btn" data-tab="economy">Wirtschaft</button>
-          <button class="left-nav-btn" data-tab="politics">Politik</button>
-          <button class="left-nav-btn" data-tab="military">Militär</button>
-          <button class="left-nav-btn" data-tab="diplomacy">Diplomatie</button>
-          <button class="left-nav-btn" data-tab="technology">Forschung</button>
-        </nav>
-        <div id="left-panel-content" class="left-panel-content">
-          <!-- Dynamically populated -->
-        </div>
-      </aside>
-
-      <!-- MAP VIEWPORT -->
+      <!-- PURE VECTOR MAP VIEWPORT (z-index: 10, pointer-events: auto) -->
       <section id="map-viewport">
+        <div id="map-svg-container">
+          <svg id="europe-map-svg" viewBox="0 0 2000 1350" preserveAspectRatio="xMidYMid meet">
+            <!-- Authentic Nautical Sea Background -->
+            <rect width="100%" height="100%" class="sea-bg" />
+            
+            <!-- Dynamic Vector World Group (Pan & Zoom via Matrix/Transform) -->
+            <g id="map-world">
+              <g id="rivers-layer"></g>
+              <g id="provinces-layer"></g>
+              <g id="borders-layer"></g>
+              <g id="armies-layer"></g>
+              <g id="labels-layer"></g>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- UI OVERLAY CONTAINER (pointer-events: none; wraps all floating UI panels) -->
+      <div id="ui-overlay-container">
+
         <!-- Floating Map Modes Bar (10 Modes) -->
-        <div id="map-modes-bar">
+        <nav id="map-modes-bar" class="ui-interactive">
           <button class="map-mode-btn active" data-mode="political">Politik</button>
           <button class="map-mode-btn" data-mode="terrain">Terrain</button>
           <button class="map-mode-btn" data-mode="relief">Relief</button>
@@ -128,74 +129,72 @@
           <button class="map-mode-btn" data-mode="military">Militär</button>
           <button class="map-mode-btn" data-mode="diplomacy">Diplomatie</button>
           <button class="map-mode-btn" data-mode="trade">Handel</button>
-        </div>
+        </nav>
 
-        <!-- Floating Map Overlay Opacity Control -->
-        <div id="map-overlay-control" title="Hintergrundkarten-Transparenz anpassen">
-          <span>1700 Karte:</span>
-          <input type="range" id="slider-map-opacity" min="0" max="100" value="85" style="width:75px; accent-color:var(--brass-accent); cursor:pointer;">
-          <span id="label-map-opacity" style="min-width:30px; text-align:right;">85%</span>
-        </div>
-
-        <!-- Zoom & Nav Buttons -->
-        <div id="map-controls">
+        <!-- Floating Zoom & Reset Controls -->
+        <div id="map-controls" class="ui-interactive">
           <button id="btn-zoom-in" class="map-ctrl-btn" title="Heranzoomen">+</button>
           <button id="btn-zoom-out" class="map-ctrl-btn" title="Herauszoomen">−</button>
-          <button id="btn-zoom-reset" class="map-ctrl-btn" title="Ansicht zurücksetzen">⟲</button>
+          <button id="btn-zoom-reset" class="map-ctrl-btn" title="Ansicht zentrieren">⟲</button>
         </div>
 
-        <!-- SVG Map Container -->
-        <div id="map-svg-container">
-          <svg id="europe-map-svg" viewBox="0 0 1024 717" preserveAspectRatio="xMidYMid meet">
-            <!-- Authentic 1700 A.D. Map Base Image -->
-            <image id="map-background-image" href="/assets/europe_1700.jpg" x="0" y="0" width="1024" height="717" preserveAspectRatio="none" style="opacity: 0.85; transition: opacity 0.15s ease;" />
-            
-            <!-- Map Vector Layers -->
-            <g id="rivers-layer"></g>
-            <g id="provinces-layer"></g>
-            <g id="borders-layer"></g>
-            <g id="armies-layer"></g>
-            <g id="labels-layer"></g>
-          </svg>
-        </div>
-      </section>
-
-      <!-- PROVINCE INSPECTOR POPUP -->
-      <aside id="province-inspector">
-        <div class="inspector-header">
-          <div>
-            <div id="inspector-province-name" class="inspector-title">Provinz</div>
-            <div id="inspector-region-owner" class="inspector-subtitle">Region | Hoheit</div>
+        <!-- LEFT DRAWER: REICHSMINISTERIUM -->
+        <aside id="left-panel" class="ui-interactive collapsed">
+          <div class="panel-header">
+            <span>Reichsministerium</span>
+            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-serif);">1700–1930</span>
           </div>
-          <button id="btn-close-inspector" style="color:var(--text-dim); font-size:16px;">✕</button>
-        </div>
-        
-        <div id="inspector-grid" class="inspector-grid">
-          <!-- Dynamically filled with population, terrain, taxes, infrastructure -->
-        </div>
-
-        <div class="buildings-container">
-          <div class="buildings-title">Bauwerke & Infrastruktur</div>
-          <div id="inspector-buildings-list" class="buildings-list">
-            <!-- Interactive building construction cards -->
+          <nav class="left-nav-bar">
+            <button class="left-nav-btn active" data-tab="monarch">Krone</button>
+            <button class="left-nav-btn" data-tab="economy">Wirtschaft</button>
+            <button class="left-nav-btn" data-tab="politics">Politik</button>
+            <button class="left-nav-btn" data-tab="military">Militär</button>
+            <button class="left-nav-btn" data-tab="diplomacy">Diplomatie</button>
+            <button class="left-nav-btn" data-tab="technology">Forschung</button>
+          </nav>
+          <div id="left-panel-content" class="left-panel-content">
+            <!-- Dynamically populated -->
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      <!-- RIGHT DRAWER: PAX GAZETTE / CHRONICLE -->
-      <aside id="right-panel">
-        <div class="panel-header">
-          <span>Pax Gazette</span>
-          <span style="font-size:10px; color:#4ade80; letter-spacing:1px; font-weight:700;">CHRONIK</span>
-        </div>
-        <div id="chronicle-list" style="flex:1; overflow-y:auto; padding:12px;">
-          <!-- Dynamically populated with chronicle cards -->
-        </div>
-      </aside>
+        <!-- PROVINCE INSPECTOR POPUP -->
+        <aside id="province-inspector" class="ui-interactive">
+          <div class="inspector-header">
+            <div>
+              <div id="inspector-province-name" class="inspector-title">Provinz</div>
+              <div id="inspector-region-owner" class="inspector-subtitle">Region | Hoheit</div>
+            </div>
+            <button id="btn-close-inspector" style="color:var(--text-dim); font-size:16px;">✕</button>
+          </div>
+          
+          <div id="inspector-grid" class="inspector-grid">
+            <!-- Dynamically filled with population, terrain, taxes, infrastructure -->
+          </div>
+
+          <div class="buildings-container">
+            <div class="buildings-title">Bauwerke & Infrastruktur</div>
+            <div id="inspector-buildings-list" class="buildings-list">
+              <!-- Interactive building construction cards -->
+            </div>
+          </div>
+        </aside>
+
+        <!-- RIGHT DRAWER: PAX GAZETTE / CHRONICLE -->
+        <aside id="right-panel" class="ui-interactive collapsed">
+          <div class="panel-header">
+            <span>Pax Gazette</span>
+            <span style="font-size:10px; color:#4ade80; letter-spacing:1px; font-weight:700;">CHRONIK</span>
+          </div>
+          <div id="chronicle-list" style="flex:1; overflow-y:auto; padding:12px;">
+            <!-- Dynamically populated with chronicle cards -->
+          </div>
+        </aside>
+
+      </div>
 
     </main>
 
-    <!-- BOTTOM BAR -->
+    <!-- BOTTOM BAR (OVERLAY: z-index 100) -->
     <footer id="bottom-bar">
       <div>
         <span>Status: </span>
@@ -203,11 +202,11 @@
         <span style="margin-left:14px; color:var(--text-dim);">Tipp: [Leertaste] Pause | [1, 2, 3] Tempo | Klick auf Provinz für Inspektion</span>
       </div>
       <div>
-        <span>Pax Modernica – Version 1.0.0 (Grand Strategy Simulation 1700–1930)</span>
+        <span>Pax Modernica – Vektor-Topologie (Albers Equal-Area Conic)</span>
       </div>
     </footer>
 
-    <!-- MODAL OVERLAY CONTAINER -->
+    <!-- MODAL OVERLAY CONTAINER (z-index 200) -->
     <div id="modal-overlay" class="modal-overlay">
       <div class="modal-dialog">
         <div class="panel-header">

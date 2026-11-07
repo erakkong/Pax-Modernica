@@ -1,137 +1,66 @@
 """
-Pax Modernica - Authentic European Grand Strategy Map Generator
-Calibrated to the user's authentic 1700 A.D. map (1024x717 pixels).
-Processes official Eurostat NUTS-1 geographic boundaries and Natural Earth Eastern Europe/Russia boundaries.
-Constructs authentic European province polygons with zero overlapping tiles or rectangular placeholders.
+Pax Modernica - Pure Vector European Grand Strategy Map Generator
+Constructs authentic European province polygons via standard Albers Equal-Area Conic projection (EPSG:3035 / Conic Europe).
+Zero raster image dependencies, zero hardcoded pixel offsets, pure responsive vector geometry.
 """
 
 import json
 import math
-import numpy as np
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent
 NUTS_PATH = DATA_DIR / "eurostat_nuts1.json"
 COUNTRIES_PATH = DATA_DIR / "raw_countries.geojson"
 
-WIDTH = 1024
-HEIGHT = 717
+WIDTH = 2000
+HEIGHT = 1350
+PAD_X = 50
+PAD_Y = 50
 
-# 56 Calibrated Ground Control Points (WGS84 Lon, Lat -> 1024x717 Image Pixels)
-GCPS = [
-    # Iberia
-    (-9.50, 38.78, 215, 560), # Cabo da Roca
-    (-9.00, 37.00, 222, 590), # Cabo de Sao Vicente
-    (-9.28, 42.88, 233, 485), # Cabo Finisterre
-    (-5.60, 36.00, 265, 608), # Strait of Tarifa/Gibraltar
-    (-2.19, 36.72, 328, 603), # Cabo de Gata
-    (-0.70, 37.64, 345, 582), # Cabo de Palos
-    (0.80, 40.70, 362, 532),  # Ebro Delta
-    (3.30, 42.30, 398, 502),  # Cap de Creus
-    (3.21, 39.96, 390, 548),  # Mallorca
-    (-1.50, 43.50, 368, 478), # Bayonne
-    
-    # France & Low Countries & UK
-    (-4.72, 48.04, 328, 365), # Brittany Pointe du Raz
-    (-1.63, 49.71, 366, 352), # Cherbourg Cotentin
-    (4.70, 43.40, 425, 480),  # Marseille / Rhone
-    (1.58, 50.87, 410, 340),  # Calais
-    (4.75, 53.00, 455, 312),  # Texel Netherlands
-    (-5.71, 50.07, 328, 330), # Lands End
-    (1.30, 51.10, 410, 330),  # Dover
-    (-9.82, 51.45, 290, 325), # Mizen Head Ireland
-    (-7.38, 55.38, 320, 265), # Malin Head Ireland
-    (-3.37, 58.64, 365, 215), # Duncansby Head Scotland
-    (-3.20, 56.00, 368, 260), # Firth of Forth
-    
-    # Italy & Med
-    (8.64, 38.87, 464, 575),  # Sardinia South
-    (9.48, 43.00, 464, 485),  # Corsica North
-    (8.90, 44.40, 470, 475),  # Genoa
-    (12.33, 45.43, 510, 448), # Venice
-    (13.80, 45.30, 522, 452), # Trieste / Istria
-    (15.15, 36.68, 560, 635), # Sicily South (Passero)
-    (16.06, 37.93, 565, 608), # Calabria Toe
-    (18.52, 40.15, 590, 556), # Otranto Heel
-    (16.00, 41.90, 556, 520), # Gargano
-    
-    # Scandinavia & Baltic
-    (10.63, 57.74, 500, 245), # Skagen Denmark
-    (7.05, 57.98, 480, 230),  # Lindesnes Norway
-    (12.58, 55.68, 525, 275), # Copenhagen / Scania
-    (12.00, 67.50, 530, 95),  # Lofoten
-    (25.78, 71.17, 640, 42),  # Nordkapp
-    (18.07, 59.33, 585, 225), # Stockholm
-    (25.00, 60.20, 645, 225), # Helsinki
-    (29.80, 59.90, 685, 230), # St Petersburg / Kronstadt
-    (22.60, 57.75, 625, 260), # Cape Kolka Gulf of Riga
-    (24.10, 56.95, 645, 275), # Riga
-    (24.75, 59.44, 645, 240), # Tallinn
-    
-    # Greece, Balkans, Black Sea, East
-    (22.48, 36.38, 650, 618), # Cape Matapan Peloponnese
-    (23.70, 38.00, 662, 592), # Athens
-    (26.31, 35.31, 702, 635), # Crete East
-    (23.70, 35.50, 675, 636), # Crete West
-    (28.20, 36.40, 720, 618), # Rhodes
-    (26.40, 40.10, 686, 556), # Dardanelles
-    (29.01, 41.02, 706, 546), # Constantinople
-    (29.66, 45.16, 722, 480), # Danube Delta
-    (33.74, 44.39, 765, 475), # Crimea South
-    (36.65, 45.33, 798, 465), # Kerch Strait
-    (39.00, 47.10, 832, 440), # Sea of Azov / Don
-    (48.00, 46.35, 944, 449), # Caspian / Astrakhan
-    (32.30, 35.00, 790, 640), # Cyprus West
-    (34.10, 35.00, 815, 640), # Cyprus East
-    (31.50, 61.00, 705, 205), # Lake Ladoga
-    (38.00, 64.50, 730, 90),  # White Sea
+# Standard Albers Equal Area Conic for Europe
+PHI1 = math.radians(35.0)
+PHI2 = math.radians(65.0)
+LAMBDA0 = math.radians(12.0)
+
+N = 0.5 * (math.sin(PHI1) + math.sin(PHI2))
+C = math.cos(PHI1)**2 + 2 * N * math.sin(PHI1)
+
+def albers_project(lon, lat):
+    """Mathematical Albers Equal Area Conic projection."""
+    phi = math.radians(lat)
+    lam = math.radians(lon)
+    theta = N * (lam - LAMBDA0)
+    rho = math.sqrt(max(0, C - 2 * N * math.sin(phi))) / N
+    x = rho * math.sin(theta)
+    y = -rho * math.cos(theta)
+    return x, y
+
+# Continental European Envelope: Lon [-25.5, 55.0], Lat [34.0, 71.5]
+ENV_PTS = [
+    (-25.5, 65.0), # Iceland
+    (-25.5, 63.0),
+    (55.0, 65.0),  # Russia North Urals
+    (55.0, 45.0),  # Caspian
+    (-10.0, 36.0), # Gibraltar
+    (36.0, 34.0),  # Cyprus
+    (26.0, 71.2),  # North Cape
+    (12.0, 52.0),  # Central
 ]
-
-# Thin Plate Spline Solver
-_src = np.array([[g[0], g[1]] for g in GCPS])
-_dst = np.array([[g[2], g[3]] for g in GCPS])
-_N = len(_src)
-_K = np.zeros((_N, _N))
-for i in range(_N):
-    for j in range(_N):
-        r = np.linalg.norm(_src[i] - _src[j])
-        if r > 0:
-            _K[i, j] = (r**2) * np.log(r)
-_P = np.hstack([np.ones((_N, 1)), _src])
-_L = np.block([
-    [_K, _P],
-    [_P.T, np.zeros((3, 3))]
-])
-_L[:_N, :_N] += 1e-3 * np.eye(_N)
-_Y = np.vstack([_dst, np.zeros((3, 2))])
-_WEIGHTS = np.linalg.solve(_L, _Y)
+ENV_PROJS = [albers_project(lon, lat) for lon, lat in ENV_PTS]
+MIN_X = min(p[0] for p in ENV_PROJS)
+MAX_X = max(p[0] for p in ENV_PROJS)
+MIN_Y = min(p[1] for p in ENV_PROJS)
+MAX_Y = max(p[1] for p in ENV_PROJS)
 
 def project(lon, lat):
-    """Transforms WGS84 (lon, lat) to 1024x717 SVG pixel coordinates via calibrated TPS."""
-    # Special case: Iceland inset on top left of the 1700 map
-    if lon < -12.0 and lat > 62.0:
-        px = 292.0 + (lon - (-24.5)) / ((-13.5) - (-24.5)) * (362.0 - 292.0)
-        py = 85.0 - (lat - 63.3) / (66.6 - 63.3) * (85.0 - 36.0)
-        return round(px, 1), round(py, 1)
+    """Maps (lon, lat) to dynamic vector coordinate space (2000x1350)."""
+    x, y = albers_project(lon, lat)
+    sx = PAD_X + (x - MIN_X) / (MAX_X - MIN_X) * (WIDTH - 2 * PAD_X)
+    sy = (HEIGHT - PAD_Y) - (y - MIN_Y) / (MAX_Y - MIN_Y) * (HEIGHT - 2 * PAD_Y)
+    return round(sx, 1), round(sy, 1)
 
-    pt = np.array([lon, lat])
-    K_eval = np.zeros((1, _N))
-    for j in range(_N):
-        r = np.linalg.norm(pt - _src[j])
-        if r > 0:
-            K_eval[0, j] = (r**2) * np.log(r)
-    P_eval = np.array([[1.0, lon, lat]])
-    L_eval = np.hstack([K_eval, P_eval])
-    res = L_eval @ _WEIGHTS
-    x = float(res[0, 0])
-    y = float(res[0, 1])
-    # Clamp inside reasonable visible boundaries
-    x = max(20.0, min(1004.0, x))
-    y = max(20.0, min(695.0, y))
-    return round(x, 1), round(y, 1)
-
-def simplify_ring(points, tolerance=0.8):
-    """Douglas-Peucker-like point decimation for fast, crisp SVG rendering."""
+def simplify_ring(points, tolerance=0.7):
+    """Douglas-Peucker point decimation for lightweight, crisp SVG paths."""
     if len(points) <= 4:
         return points
     res = [points[0]]
@@ -152,7 +81,7 @@ def geom_to_svg_path(geometry):
     
     if gtype == "Polygon":
         for ring in coords:
-            pts = [project(p[0], p[1]) for p in ring]
+            pts = [project(p[0], p[1]) for p in ring if -26 <= p[0] <= 56 and 33 <= p[1] <= 72]
             pts = simplify_ring(pts)
             if len(pts) >= 3:
                 cmds = [f"M {pts[0][0]},{pts[0][1]}"]
@@ -164,7 +93,7 @@ def geom_to_svg_path(geometry):
     elif gtype == "MultiPolygon":
         for poly in coords:
             for ring in poly:
-                pts = [project(p[0], p[1]) for p in ring]
+                pts = [project(p[0], p[1]) for p in ring if -26 <= p[0] <= 56 and 33 <= p[1] <= 72]
                 pts = simplify_ring(pts)
                 if len(pts) >= 3:
                     cmds = [f"M {pts[0][0]},{pts[0][1]}"]
@@ -175,19 +104,19 @@ def geom_to_svg_path(geometry):
                     
     return " ".join(subpaths)
 
-def get_centroid(geometry):
-    """Computes centroid for city nodes and province labeling."""
+def compute_centroid(geometry):
+    """Calculates true centroid dynamically from polygon vertices."""
     gtype = geometry["type"]
     coords = geometry["coordinates"]
     pts = []
     
     if gtype == "Polygon":
         for ring in coords:
-            pts.extend([project(p[0], p[1]) for p in ring])
+            pts.extend([project(p[0], p[1]) for p in ring if -26 <= p[0] <= 56 and 33 <= p[1] <= 72])
     elif gtype == "MultiPolygon":
         for poly in coords:
             for ring in poly:
-                pts.extend([project(p[0], p[1]) for p in ring])
+                pts.extend([project(p[0], p[1]) for p in ring if -26 <= p[0] <= 56 and 33 <= p[1] <= 72])
                 
     if not pts:
         return [WIDTH // 2, HEIGHT // 2]
@@ -222,9 +151,9 @@ if is_east_pts:
     is_east_pts.append([-18.5, 63.8])
     is_east_pts.append(is_east_pts[0])
 
-# Mapping of historical 1700 provinces to NUTS-1 IDs or Country features
+# Mapping of historical 1700 provinces
 HISTORICAL_PROVINCES = [
-    # --- ISLAND (Prominently visible in the top inset box) ---
+    # --- ISLAND (Prominently represented with authentic geographic coastlines in the North Atlantic) ---
     {
         "id": "prov_iceland_west",
         "name": "Island (Reykjavík & Vestfirðir)",
@@ -236,8 +165,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 14,
         "goods_produced": "Fisch",
         "religion": "Protestantisch",
-        "culture": "Isländisch",
-        "custom_center": [312, 62]
+        "culture": "Isländisch"
     },
     {
         "id": "prov_iceland_east",
@@ -250,8 +178,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 10,
         "goods_produced": "Wolle",
         "religion": "Protestantisch",
-        "culture": "Isländisch",
-        "custom_center": [342, 58]
+        "culture": "Isländisch"
     },
 
     # --- GROSSBRITANNIEN & IRLAND ---
@@ -266,8 +193,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 50,
         "goods_produced": "Kohle",
         "religion": "Reformiert",
-        "culture": "Schottisch",
-        "custom_center": [360, 245]
+        "culture": "Schottisch"
     },
     {
         "id": "prov_england_north",
@@ -280,8 +206,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 75,
         "goods_produced": "Eisen",
         "religion": "Anglikanisch",
-        "culture": "Englisch",
-        "custom_center": [375, 295]
+        "culture": "Englisch"
     },
     {
         "id": "prov_wales",
@@ -294,8 +219,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 35,
         "goods_produced": "Kupfer",
         "religion": "Anglikanisch",
-        "culture": "Walisisch",
-        "custom_center": [355, 325]
+        "culture": "Walisisch"
     },
     {
         "id": "prov_london",
@@ -308,8 +232,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 195,
         "goods_produced": "Tuch",
         "religion": "Anglikanisch",
-        "culture": "Englisch",
-        "custom_center": [385, 335]
+        "culture": "Englisch"
     },
     {
         "id": "prov_ireland",
@@ -322,8 +245,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 65,
         "goods_produced": "Getreide",
         "religion": "Katholisch",
-        "culture": "Irisch",
-        "custom_center": [325, 310]
+        "culture": "Irisch"
     },
 
     # --- FRANKREICH ---
@@ -338,8 +260,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 240,
         "goods_produced": "Luxuswaren",
         "religion": "Katholisch",
-        "culture": "Französisch",
-        "custom_center": [412, 386]
+        "culture": "Französisch"
     },
     {
         "id": "prov_normandy",
@@ -499,8 +420,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 115,
         "goods_produced": "Getreide",
         "religion": "Protestantisch",
-        "culture": "Preußisch-Deutsch",
-        "custom_center": [534, 329]
+        "culture": "Preußisch-Deutsch"
     },
     {
         "id": "prov_pomerania",
@@ -593,8 +513,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 185,
         "goods_produced": "Waffen",
         "religion": "Katholisch",
-        "culture": "Österreichisch-Deutsch",
-        "custom_center": [545, 400]
+        "culture": "Österreichisch-Deutsch"
     },
     {
         "id": "prov_tyrol",
@@ -689,8 +608,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 170,
         "goods_produced": "Wolle",
         "religion": "Katholisch",
-        "culture": "Kastilisch",
-        "custom_center": [280, 540]
+        "culture": "Kastilisch"
     },
     {
         "id": "prov_andalusia",
@@ -742,8 +660,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 150,
         "goods_produced": "Gewürze / Kolonialwaren",
         "religion": "Katholisch",
-        "culture": "Portugiesisch",
-        "custom_center": [220, 560]
+        "culture": "Portugiesisch"
     },
 
     # --- ITALIEN ---
@@ -825,8 +742,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 130,
         "goods_produced": "Kupfer",
         "religion": "Protestantisch",
-        "culture": "Schwedisch",
-        "custom_center": [585, 225]
+        "culture": "Schwedisch"
     },
     {
         "id": "prov_scania",
@@ -865,8 +781,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 105,
         "goods_produced": "Öresundzoll",
         "religion": "Protestantisch",
-        "culture": "Dänisch",
-        "custom_center": [518, 268]
+        "culture": "Dänisch"
     },
     {
         "id": "prov_norway",
@@ -920,8 +835,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 120,
         "goods_produced": "Getreide",
         "religion": "Katholisch",
-        "culture": "Polnisch",
-        "custom_center": [595, 335]
+        "culture": "Polnisch"
     },
     {
         "id": "prov_lesser_poland",
@@ -1014,8 +928,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 210,
         "goods_produced": "Pelze",
         "religion": "Orthodox",
-        "culture": "Russisch",
-        "custom_center": [745, 265]
+        "culture": "Russisch"
     },
     {
         "id": "prov_ukraine",
@@ -1028,8 +941,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 135,
         "goods_produced": "Getreide",
         "religion": "Orthodox",
-        "culture": "Ukrainisch-Kosakisch",
-        "custom_center": [715, 365]
+        "culture": "Ukrainisch-Kosakisch"
     },
 
     # --- BALKAN & OSMANISCHES REICH ---
@@ -1044,8 +956,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 260,
         "goods_produced": "Seide / Luxusgüter",
         "religion": "Sunnitisch",
-        "culture": "Türkisch",
-        "custom_center": [706, 546]
+        "culture": "Türkisch"
     },
     {
         "id": "prov_greece",
@@ -1058,8 +969,7 @@ HISTORICAL_PROVINCES = [
         "tax_revenue": 115,
         "goods_produced": "Olivenöl",
         "religion": "Orthodox",
-        "culture": "Griechisch",
-        "custom_center": [655, 605]
+        "culture": "Griechisch"
     },
     {
         "id": "prov_bulgaria",
@@ -1128,7 +1038,7 @@ HISTORICAL_PROVINCES = [
     }
 ]
 
-print("Generating SVG polygons from Eurostat NUTS-1 features...")
+print("Generating pure mathematical SVG polygons from GeoJSON datasets...")
 provinces_output = []
 
 for p in HISTORICAL_PROVINCES:
@@ -1163,7 +1073,7 @@ for p in HISTORICAL_PROVINCES:
         continue
 
     svg_path = geom_to_svg_path(geom)
-    center = p.get("custom_center") or get_centroid(geom)
+    center = compute_centroid(geom)
 
     prov_entry = {
         "id": p["id"],
@@ -1186,7 +1096,7 @@ for p in HISTORICAL_PROVINCES:
     }
     provinces_output.append(prov_entry)
 
-# Compute province neighbors based on centroid distances
+# Compute province neighbors dynamically based on centroid distances
 for p1 in provinces_output:
     c1 = p1["center"]
     neighbors = []
@@ -1195,7 +1105,7 @@ for p1 in provinces_output:
             continue
         c2 = p2["center"]
         dist = math.hypot(c1[0] - c2[0], c1[1] - c2[1])
-        if dist < 120:  # Proximity threshold in 1024x717 space
+        if dist < 220:  # Proximity threshold in 2000x1350 space
             neighbors.append(p2["id"])
     p1["neighbors"] = neighbors
 
@@ -1204,12 +1114,12 @@ for p in provinces_output:
     if p["id"] == "prov_iceland_west":
         p["neighbors"] = ["prov_iceland_east"]
     elif p["id"] == "prov_iceland_east":
-        p["neighbors"] = ["prov_iceland_west", "prov_norway"]
+        p["neighbors"] = ["prov_iceland_west", "prov_scotland", "prov_norway"]
 
-print(f"Constructed {len(provinces_output)} authentic geographic European province polygons.")
+print(f"Constructed {len(provinces_output)} authentic pure-vector European province polygons.")
 
 map_output = {
-    "projection": "calibrated_tps_europe_1700",
+    "projection": "albers_equal_area_conic_europe",
     "viewBox": f"0 0 {WIDTH} {HEIGHT}",
     "dimensions": {"width": WIDTH, "height": HEIGHT},
     "provinces": provinces_output

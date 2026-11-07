@@ -1,87 +1,90 @@
 /* ==========================================================================
-   PAX MODERNICA – MAP ENGINE & KARTEN-RENDERING STYLES
-   Echte geografische Polygone, professionelle Grand-Strategy-Ästhetik
+   PAX MODERNICA – REINE VEKTORKARTEN-STILE (SVG ARCHITEKTUR)
+   Kein Rasterbild, keine starren Offsets; dynamische Vektor-Topologie
    ========================================================================== */
 
 #map-svg-container {
   width: 100%;
   height: 100%;
-  transform-origin: 0 0;
-  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 svg#europe-map-svg {
   width: 100%;
   height: 100%;
-  overflow: visible;
+  display: block;
+  background-color: var(--bg-ocean);
 }
 
-/* Meereshintergrund mit eleganter nautischer Tiefe */
+/* Meeresflächen: Dezentes, tiefes Nautikblau (#0b1118) */
 .sea-bg {
-  fill: #090f17;
+  fill: #0b1118;
 }
 
-/* Küstenlinien & Meereskontur */
-.coastline-halo {
+/* Subtile nautische Längen- und Breitengrade (Vektor-Graticule) */
+.graticule-line {
   fill: none;
-  stroke: rgba(45, 75, 110, 0.25);
-  stroke-width: 6px;
-  stroke-linejoin: round;
+  stroke: rgba(196, 163, 90, 0.05);
+  stroke-width: 0.5px;
+  stroke-dasharray: 4 8;
+  pointer-events: none;
 }
 
-/* Echte Provinzpolygone */
+/* Dynamische Provinzpolygone (Reine Vektorgeometrien) */
 .province-path {
-  stroke: rgba(220, 210, 190, 0.25);
-  stroke-width: 0.8px;
+  stroke: rgba(14, 20, 28, 0.7);
+  stroke-width: 0.9px;
   stroke-linejoin: round;
   stroke-linecap: round;
   cursor: pointer;
-  transition: fill 0.2s ease, stroke 0.15s ease, filter 0.15s ease;
+  transition: fill 0.18s ease, stroke 0.15s ease, filter 0.15s ease;
 }
 
 .province-path:hover {
   stroke: var(--brass-light);
-  stroke-width: 1.8px;
-  filter: brightness(1.18);
+  stroke-width: 2.2px;
+  filter: brightness(1.25);
 }
 
 .province-path.selected {
   stroke: #ffffff;
-  stroke-width: 2.2px;
-  filter: brightness(1.28);
+  stroke-width: 3.0px;
+  filter: brightness(1.38);
 }
 
 /* Hauptstadtsymbol & Siedlungsknoten */
-.city-node {
+.province-node {
   fill: var(--brass-light);
-  stroke: #0e131b;
-  stroke-width: 1.2px;
+  stroke: #0a0e14;
+  stroke-width: 1px;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
-/* Intelligente, zoomabhängige Typografie */
+/* Intelligente, zoomstufenabhängige Typografie (LOD) */
 .nation-macro-label {
-  fill: rgba(255, 245, 225, 0.72);
+  fill: rgba(245, 235, 215, 0.85);
   font-family: var(--font-serif);
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: 5px;
+  letter-spacing: 6px;
   text-anchor: middle;
   pointer-events: none;
   text-transform: uppercase;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
-  transition: opacity 0.25s ease, font-size 0.2s ease;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.25s ease;
 }
 
 .province-label {
-  fill: #e8dfcf;
+  fill: #ece3d3;
   font-family: var(--font-serif);
   font-size: 11px;
   font-weight: 600;
   text-anchor: middle;
   pointer-events: none;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
   transition: opacity 0.25s ease;
 }
 
@@ -94,99 +97,4 @@ svg#europe-map-svg {
   pointer-events: none;
   text-shadow: 0 1px 2px #000;
   transition: opacity 0.25s ease;
-}
-
-/* Schwebende Kartenmodi-Leiste (10 Modi, dezent & kompakt) */
-#map-modes-bar {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  background: rgba(14, 20, 30, 0.88);
-  border: var(--brass-hairline);
-  border-radius: var(--border-radius-sm);
-  padding: 3px 5px;
-  gap: 3px;
-  z-index: 70;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-}
-
-.map-mode-btn {
-  padding: 4px 9px;
-  font-family: var(--font-sans);
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  border: none;
-  background: transparent;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.map-mode-btn:hover {
-  color: var(--text-accent);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.map-mode-btn.active {
-  background: rgba(196, 163, 90, 0.22);
-  color: var(--text-accent);
-  border: 1px solid var(--brass-border);
-}
-
-/* Schwebende Steuerknöpfe für Zoom & Reset */
-#map-controls {
-  position: absolute;
-  bottom: 45px;
-  right: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  z-index: 70;
-}
-
-.map-ctrl-btn {
-  width: 30px;
-  height: 30px;
-  background: rgba(16, 22, 32, 0.88);
-  border: var(--brass-hairline);
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: all 0.15s;
-}
-
-.map-ctrl-btn:hover {
-  border-color: var(--brass-accent);
-  color: #fff;
-  background: rgba(26, 36, 52, 0.95);
-}
-
-/* Karten-Transparenz-Schieberegler für Bildüberlagerung */
-#map-overlay-control {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-  background: rgba(14, 20, 30, 0.88);
-  border: var(--brass-hairline);
-  padding: 4px 8px;
-  border-radius: var(--border-radius-sm);
-  z-index: 70;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-sans);
-  font-size: 10px;
-  color: var(--text-muted);
 }

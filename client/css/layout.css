@@ -1,6 +1,6 @@
 /* ==========================================================================
-   PAX MODERNICA – STRUKTUR- & LAYOUT-SYSTEM
-   Die Karte dominiert den Bildschirm; Menüs sind dezent und verdeckungsarm
+   PAX MODERNICA – STRUKTUR- & LAYOUT-SYSTEM (VEKTORKARTEN-ARCHITEKTUR)
+   Vollständig responsiv: Map-Canvas füllt 100% des Bildschirms; Overlays entkoppelt
    ========================================================================== */
 
 #app-container {
@@ -13,7 +13,7 @@
   background-color: var(--bg-ocean);
 }
 
-/* --- OBERE STATUSLEISTE (TOP BAR) --- */
+/* --- OBERE STATUSLEISTE (TOP BAR) – Z-INDEX: 100 --- */
 #top-bar {
   height: 48px;
   min-height: 48px;
@@ -24,6 +24,7 @@
   justify-content: space-between;
   padding: 0 16px;
   z-index: 100;
+  pointer-events: auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -33,168 +34,151 @@
   gap: 12px;
 }
 
-/* Kalender- & Geschwindigkeitsgruppe */
-.calendar-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.calendar-box {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.calendar-primary {
-  font-family: var(--font-serif);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-accent);
-  letter-spacing: 0.5px;
-  line-height: 1.1;
-}
-
-.calendar-secondary {
-  font-family: var(--font-sans);
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-.speed-control-group {
-  display: flex;
-  background: rgba(10, 14, 20, 0.85);
-  border: 1px solid var(--brass-border);
-  border-radius: var(--border-radius-sm);
-  overflow: hidden;
-}
-
-.speed-control-btn {
-  padding: 4px 9px;
-  font-size: 11px;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.speed-control-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.speed-control-btn.active {
-  background: rgba(196, 163, 90, 0.25);
-  color: var(--text-accent);
-}
-
-/* Nationalstatistiken im Top Bar */
-.stat-pill {
-  display: flex;
-  flex-direction: column;
-  padding: 2px 10px;
-  background: rgba(18, 24, 34, 0.65);
-  border: 1px solid rgba(196, 163, 90, 0.15);
-  border-radius: var(--border-radius-sm);
-}
-
-.stat-pill-label {
-  font-family: var(--font-sans);
-  font-size: 9px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  letter-spacing: 0.8px;
-  font-weight: 600;
-}
-
-.stat-pill-val-row {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.stat-pill-value {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.stat-pill-delta {
-  font-family: var(--font-sans);
-  font-size: 10px;
-  font-weight: 500;
-}
-.stat-pill-delta.pos { color: var(--text-positive); }
-.stat-pill-delta.neg { color: var(--text-negative); }
-
-/* Herrscher-Wappenanzeige */
-.monarch-crest-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 3px 10px;
-  background: rgba(24, 32, 46, 0.85);
-  border: 1px solid var(--brass-border);
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-
-.monarch-crest-pill:hover {
-  border-color: var(--brass-accent);
-}
-
-.monarch-crest-name {
-  font-family: var(--font-serif);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-accent);
-}
-
-.monarch-crest-ruler {
-  font-family: var(--font-sans);
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
 /* --- HAUPTBEREICH (WORKSPACE) --- */
 #workspace {
   flex: 1;
-  display: flex;
+  width: 100%;
+  height: calc(100vh - 48px - 28px);
   position: relative;
   overflow: hidden;
+  background: var(--bg-ocean);
 }
 
-/* --- KARTEN-VIEWPORT (NIMMT GRÖSSTTEIL EIN) --- */
+/* --- PURE VECTOR MAP VIEWPORT – Z-INDEX: 10 (NIMMT 100% EIN) --- */
 #map-viewport {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  position: relative;
   overflow: hidden;
-  background: var(--bg-ocean-pattern);
+  background-color: var(--bg-ocean);
   cursor: grab;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 #map-viewport:active {
   cursor: grabbing;
 }
 
-/* --- LINKES MINISTERIAL-PANEL --- */
+#map-svg-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+svg#europe-map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+}
+
+/* --- UI-OVERLAYS CONTAINER – Z-INDEX: 30 (POINTER-EVENTS: NONE) --- */
+#ui-overlay-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* Interaktive Steuerelemente im Overlay */
+.ui-interactive {
+  pointer-events: auto;
+}
+
+/* --- KARTENMODI-LEISTE – Z-INDEX: 50 --- */
+#map-modes-bar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: rgba(14, 20, 30, 0.92);
+  border: var(--brass-hairline);
+  border-radius: var(--border-radius-sm);
+  padding: 3px 6px;
+  gap: 4px;
+  z-index: 50;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.map-mode-btn {
+  padding: 4px 10px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.map-mode-btn:hover {
+  color: var(--text-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.map-mode-btn.active {
+  background: rgba(196, 163, 90, 0.22);
+  color: var(--text-accent);
+  border: 1px solid var(--brass-border);
+}
+
+/* --- KARTEN-STEUERUNG (ZOOM & RESET) – Z-INDEX: 50 --- */
+#map-controls {
+  position: absolute;
+  bottom: 25px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 50;
+}
+
+.map-ctrl-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(16, 22, 32, 0.9);
+  border: var(--brass-hairline);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s;
+}
+
+.map-ctrl-btn:hover {
+  border-color: var(--brass-accent);
+  color: #fff;
+  background: rgba(26, 36, 52, 0.95);
+}
+
+/* --- LINKES MINISTERIAL-PANEL – Z-INDEX: 40 --- */
 #left-panel {
   position: absolute;
   top: 12px;
   left: 12px;
-  bottom: 40px;
+  bottom: 25px;
   width: 360px;
   background: var(--bg-panel);
   border: var(--brass-hairline);
   box-shadow: var(--shadow-subtle);
-  z-index: 80;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   border-radius: var(--border-radius-sm);
@@ -206,13 +190,18 @@
   transform: translateX(-385px);
 }
 
-.left-panel-header {
+.panel-header {
   padding: 10px 14px;
   border-bottom: var(--brass-hairline);
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: rgba(14, 18, 26, 0.95);
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brass-light);
+  letter-spacing: 0.5px;
 }
 
 .left-nav-bar {
@@ -229,8 +218,11 @@
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-secondary);
+  border: none;
+  background: transparent;
   border-bottom: 2px solid transparent;
   transition: all 0.15s;
+  cursor: pointer;
   white-space: nowrap;
 }
 
@@ -250,17 +242,17 @@
   padding: 14px;
 }
 
-/* --- RECHTES CHRONIK-PANEL --- */
+/* --- RECHTES CHRONIK-PANEL – Z-INDEX: 40 --- */
 #right-panel {
   position: absolute;
   top: 12px;
   right: 12px;
   width: 330px;
-  max-height: calc(100% - 55px);
+  max-height: calc(100% - 35px);
   background: var(--bg-panel);
   border: var(--brass-hairline);
   box-shadow: var(--shadow-subtle);
-  z-index: 80;
+  z-index: 40;
   display: flex;
   flex-direction: column;
   border-radius: var(--border-radius-sm);
@@ -272,16 +264,16 @@
   transform: translateX(355px);
 }
 
-/* --- PROVINZINSPEKTOR POPUP --- */
+/* --- PROVINZINSPEKTOR POPUP – Z-INDEX: 45 --- */
 #province-inspector {
   position: absolute;
-  bottom: 45px;
+  bottom: 25px;
   left: 385px;
   width: 360px;
   background: var(--bg-panel);
   border: 1px solid var(--brass-accent);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  z-index: 85;
+  z-index: 45;
   border-radius: var(--border-radius-sm);
   backdrop-filter: blur(12px);
   display: none;
@@ -291,7 +283,7 @@
   display: block;
 }
 
-/* --- UNTERE STATUSLEISTE (BOTTOM BAR) --- */
+/* --- UNTERE STATUSLEISTE (BOTTOM BAR) – Z-INDEX: 100 --- */
 #bottom-bar {
   height: 28px;
   background: var(--bg-panel-solid);
@@ -303,7 +295,8 @@
   font-family: var(--font-sans);
   font-size: 11px;
   color: var(--text-muted);
-  z-index: 90;
+  z-index: 100;
+  pointer-events: auto;
 }
 
 /* Responsive Verhalten */
