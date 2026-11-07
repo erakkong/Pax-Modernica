@@ -1,5 +1,6 @@
 /**
  * Pax Modernica - Top Bar Controller
+ * Clean, serious historical typography without emojis.
  */
 
 import { store } from "../state/game_state.js";
@@ -49,10 +50,10 @@ export class TopBarController {
       wsClient.send({ type: "SET_SPEED", speed: 5.0 });
     });
 
-    // Sound toggle button
+    // Sound toggle button (Clean text indicator)
     document.getElementById("btn-toggle-sound")?.addEventListener("click", (e) => {
       const isMuted = audio.toggleMute();
-      e.currentTarget.textContent = isMuted ? "🔇" : "🔊";
+      e.currentTarget.textContent = isMuted ? "Ton: Aus" : "Ton: An";
     });
   }
 
@@ -77,7 +78,7 @@ export class TopBarController {
     // Highlight active speed button
     if (this.btnPause) {
       this.btnPause.classList.toggle("active", clock.is_paused);
-      this.btnPause.textContent = clock.is_paused ? "▶ Fortsetzen" : "⏸ Pause";
+      this.btnPause.textContent = clock.is_paused ? "Fortsetzen" : "Pause";
     }
     if (this.btnSpeed1) this.btnSpeed1.classList.toggle("active", !clock.is_paused && clock.speed_multiplier === 1.0);
     if (this.btnSpeed2) this.btnSpeed2.classList.toggle("active", !clock.is_paused && clock.speed_multiplier === 2.0);

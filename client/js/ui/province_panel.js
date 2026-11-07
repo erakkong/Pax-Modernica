@@ -1,5 +1,6 @@
 /**
  * Pax Modernica - Province Inspector Panel Controller
+ * Victoria 3 / EU4 style inspector with authentic heraldic styling and no emojis.
  */
 
 import { store } from "../state/game_state.js";
@@ -51,29 +52,29 @@ export class ProvincePanelController {
 
     if (gridEl) {
       gridEl.innerHTML = `
-        <div class="inspector-field">
-          <div class="inspector-field-label">Bevölkerung</div>
-          <div class="inspector-field-value">${(prov.population || 0).toLocaleString("de-DE")}</div>
+        <div class="inspector-cell">
+          <div class="inspector-cell-label">Bevölkerung</div>
+          <div class="inspector-cell-val">${(prov.population || 0).toLocaleString("de-DE")}</div>
         </div>
-        <div class="inspector-field">
-          <div class="inspector-field-label">Gelände</div>
-          <div class="inspector-field-value">${this.translateTerrain(prov.terrain)}</div>
+        <div class="inspector-cell">
+          <div class="inspector-cell-label">Gelände</div>
+          <div class="inspector-cell-val">${this.translateTerrain(prov.terrain)}</div>
         </div>
-        <div class="inspector-field">
-          <div class="inspector-field-label">Kultur & Religion</div>
-          <div class="inspector-field-value">${prov.culture || "Europäisch"} (${prov.religion || "Katholisch"})</div>
+        <div class="inspector-cell">
+          <div class="inspector-cell-label">Kultur & Glaube</div>
+          <div class="inspector-cell-val">${prov.culture || "Europäisch"} (${prov.religion || "Katholisch"})</div>
         </div>
-        <div class="inspector-field">
-          <div class="inspector-field-label">Steuerertrag / Ware</div>
-          <div class="inspector-field-value">${prov.tax_revenue || 0} Gold (${prov.goods_produced || "Güter"})</div>
+        <div class="inspector-cell">
+          <div class="inspector-cell-label">Steuer / Erzeugnis</div>
+          <div class="inspector-cell-val">${prov.tax_revenue || 0} Taler (${prov.goods_produced || "Güter"})</div>
         </div>
-        <div class="inspector-field">
-          <div class="inspector-field-label">Infrastruktur</div>
-          <div class="inspector-field-value">Stufe ${prov.infrastructure_level || 1}</div>
+        <div class="inspector-cell">
+          <div class="inspector-cell-label">Infrastruktur</div>
+          <div class="inspector-cell-val">Stufe ${prov.infrastructure_level || 1}</div>
         </div>
-        <div class="inspector-field">
-          <div class="inspector-field-label">Befestigungsgrad</div>
-          <div class="inspector-field-value">Stufe ${prov.fortification_level || 0}</div>
+        <div class="inspector-cell">
+          <div class="inspector-cell-label">Befestigungsgrad</div>
+          <div class="inspector-cell-val">Stufe ${prov.fortification_level || 0}</div>
         </div>
       `;
     }
@@ -94,10 +95,10 @@ export class ProvincePanelController {
         const disabled = !isPlayerOwned || !canAfford;
 
         return `
-          <div class="building-item">
+          <div class="building-row">
             <div>
-              <div style="font-weight:700; color:var(--text-gold); font-size:12px;">
-                ${cfg.name} ${count > 0 ? `<span style="color:#4ade80;">(Vorhanden: ${count})</span>` : ""}
+              <div style="font-weight:700; color:var(--brass-light); font-size:12px;">
+                ${cfg.name} ${count > 0 ? `<span style="color:#4ade80;">(Bestand: ${count})</span>` : ""}
               </div>
               <div style="font-size:10px; color:var(--text-dim);">${cfg.desc}</div>
             </div>
@@ -106,9 +107,9 @@ export class ProvincePanelController {
                 class="btn-regal btn-build-action" 
                 data-building="${cfg.type}" 
                 data-cost="${cfg.cost}"
-                ${disabled ? "disabled style='opacity:0.5; cursor:not-allowed;'" : ""}
+                ${disabled ? "disabled style='opacity:0.4; cursor:not-allowed;'" : ""}
               >
-                Errichten (${cfg.cost} 🪙)
+                Errichten (${cfg.cost} Taler)
               </button>
             </div>
           </div>
@@ -137,7 +138,7 @@ export class ProvincePanelController {
       case "hills": return "Hügelland (+15% Verteidigung)";
       case "mountains": return "Hochgebirge (+35% Verteidigung)";
       case "forest": return "Dichter Wald (+10% Verteidigung)";
-      case "marsh": return "Marschland (-20% Bewegung)";
+      case "marsh": return "Marschland (-20% Tempo)";
       default: return terrain;
     }
   }

@@ -92,6 +92,10 @@ export class GameState {
     this.emit("map_mode_changed", mode);
   }
 
+  setActiveMapMode(mode) {
+    this.setMapMode(mode);
+  }
+
   setPlayerNation(nationId) {
     if (this.nations[nationId]) {
       this.playerNationId = nationId;

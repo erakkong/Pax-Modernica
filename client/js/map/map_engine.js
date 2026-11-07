@@ -1,5 +1,7 @@
 /**
  * Pax Modernica - Modular Map Engine (SVG Vector & Topo Architecture)
+ * Fully calibrated to authentic 1700 A.D. cartography (1024x717 pixels).
+ * Features 10 strategic map modes and zoom-dependent level of detail (LOD).
  */
 
 import { store } from "../state/game_state.js";
@@ -10,7 +12,9 @@ export class MapEngine {
     this.viewport = viewportEl;
     this.container = document.getElementById("map-svg-container");
     this.svg = document.getElementById("europe-map-svg");
+    this.bgImage = document.getElementById("map-background-image");
     this.provincesGroup = document.getElementById("provinces-layer");
+    this.bordersGroup = document.getElementById("borders-layer");
     this.labelsGroup = document.getElementById("labels-layer");
 
     // Transform State (Pan & Zoom)
@@ -30,7 +34,10 @@ export class MapEngine {
 
   setupStoreListeners() {
     store.subscribe("world_loaded", () => this.renderMap());
-    store.subscribe("map_mode_changed", () => this.updateProvinceColors());
+    store.subscribe("map_mode_changed", (mode) => {
+      this.updateActiveMapModeButton(mode);
+      this.updateProvinceColors();
+    });
     store.subscribe("province_selected", (prov) => this.highlightSelectedProvince(prov));
   }
 
@@ -58,7 +65,7 @@ export class MapEngine {
     this.viewport.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-      const newScale = Math.max(0.4, Math.min(4.5, this.scale * zoomFactor));
+      const newScale = Math.max(0.6, Math.min(4.5, this.scale * zoomFactor));
 
       const rect = this.viewport.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -98,7 +105,7 @@ export class MapEngine {
           e.touches[0].clientY - e.touches[1].clientY
         );
         const factor = currentDistance / this.initialPinchDistance;
-        this.scale = Math.max(0.4, Math.min(4.5, this.scale * factor));
+        this.scale = Math.max(0.6, Math.min(4.5, this.scale * factor));
         this.initialPinchDistance = currentDistance;
         this.applyTransform();
       }
@@ -113,10 +120,61 @@ export class MapEngine {
     document.getElementById("btn-zoom-in")?.addEventListener("click", () => this.zoom(1.25));
     document.getElementById("btn-zoom-out")?.addEventListener("click", () => this.zoom(0.8));
     document.getElementById("btn-zoom-reset")?.addEventListener("click", () => this.resetView());
+
+    // Map Mode buttons
+    document.querySelectorAll(".map-mode-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const mode = e.currentTarget.getAttribute("data-mode");
+        audio.playClick();
+        store.setActiveMapMode(mode);
+      });
+    });
+
+    // Background Map Opacity Slider
+    const opacitySlider = document.getElementById("slider-map-opacity");
+    const opacityLabel = document.getElementById("label-map-opacity");
+    opacitySlider?.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (this.bgImage) {
+        this.bgImage.style.opacity = (val / 100).toFixed(2);
+      }
+      if (opacityLabel) {
+        opacityLabel.textContent = `${val}%`;
+      }
+    });
+  }
+
+  updateActiveMapModeButton(activeMode) {
+    document.querySelectorAll(".map-mode-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-mode") === activeMode);
+    });
   }
 
   applyTransform() {
     this.container.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+    this.updateZoomLOD();
+  }
+
+  updateZoomLOD() {
+    if (!this.labelsGroup) return;
+
+    // Macro nation labels: visible only when zoomed out (scale < 1.25)
+    const showMacro = this.scale < 1.25;
+    this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
+      el.style.display = showMacro ? "block" : "none";
+    });
+
+    // Province labels: visible at medium zoom (1.1 <= scale < 2.2)
+    const showProvinces = this.scale >= 1.1;
+    this.labelsGroup.querySelectorAll(".province-label").forEach((el) => {
+      el.style.display = showProvinces ? "block" : "none";
+    });
+
+    // City nodes and micro-labels: visible at high zoom (scale >= 1.8)
+    const showCities = this.scale >= 1.8;
+    this.labelsGroup.querySelectorAll(".province-node, .city-label").forEach((el) => {
+      el.style.display = showCities ? "block" : "none";
+    });
   }
 
   zoom(factor) {
@@ -124,7 +182,7 @@ export class MapEngine {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const newScale = Math.max(0.4, Math.min(4.5, this.scale * factor));
+    const newScale = Math.max(0.6, Math.min(4.5, this.scale * factor));
     this.translateX = centerX - (centerX - this.translateX) * (newScale / this.scale);
     this.translateY = centerY - (centerY - this.translateY) * (newScale / this.scale);
     this.scale = newScale;
@@ -156,8 +214,8 @@ export class MapEngine {
 
     const provinces = Object.values(store.provinces);
 
+    // 1. Render Province Polygons
     provinces.forEach((prov) => {
-      // 1. Create SVG Path polygon
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("d", prov.svg_path);
       path.setAttribute("id", `svg-prov-${prov.id}`);
@@ -165,12 +223,10 @@ export class MapEngine {
       path.setAttribute("data-province-id", prov.id);
       path.style.fill = this.getProvinceColor(prov);
 
-      // Tooltip / title
       const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
       title.textContent = `${prov.name} (${store.nations[prov.owner_id]?.name || "Unbekannt"})`;
       path.appendChild(title);
 
-      // Click to inspect
       path.addEventListener("click", (e) => {
         e.stopPropagation();
         audio.playProvinceSelect();
@@ -179,27 +235,55 @@ export class MapEngine {
 
       this.provincesGroup.appendChild(path);
 
-      // 2. Create city circle and text label
+      // 2. City Node and Province Label
       if (prov.center && prov.center.length === 2) {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", prov.center[0]);
         circle.setAttribute("cy", prov.center[1]);
-        circle.setAttribute("r", "3");
+        circle.setAttribute("r", "2.8");
         circle.classList.add("province-node");
         this.labelsGroup.appendChild(circle);
 
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", prov.center[0]);
-        text.setAttribute("y", prov.center[1] - 8);
+        text.setAttribute("y", prov.center[1] - 5);
         text.classList.add("province-label");
-        // Short name for label
         const shortName = prov.name.split("(")[0].trim();
         text.textContent = shortName;
         this.labelsGroup.appendChild(text);
       }
     });
 
-    console.log(`Europakarte mit ${provinces.length} Provinzen erfolgreich gerendert.`);
+    // 3. Render Sovereign Macro Labels (Cinzel Grand-Strategy LOD)
+    this.renderMacroNationLabels();
+    this.updateZoomLOD();
+
+    console.log(`Pax Modernica: Europakarte mit ${provinces.length} Polygon-Provinzen gerendert.`);
+  }
+
+  renderMacroNationLabels() {
+    const macroLabels = [
+      { name: "PREUSSEN", x: 535, y: 325 },
+      { name: "FRANKREICH", x: 395, y: 415 },
+      { name: "GROSSBRITANNIEN", x: 370, y: 310 },
+      { name: "ÖSTERREICH", x: 555, y: 415 },
+      { name: "RUSSLAND", x: 780, y: 240 },
+      { name: "OSMANISCHES REICH", x: 710, y: 580 },
+      { name: "SPANIEN", x: 280, y: 550 },
+      { name: "SCHWEDEN", x: 570, y: 180 },
+      { name: "POLEN-LITAUEN", x: 620, y: 345 },
+      { name: "DÄNEMARK-NORWEGEN", x: 480, y: 180 },
+      { name: "PORTUGAL", x: 215, y: 560 }
+    ];
+
+    macroLabels.forEach((lbl) => {
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", lbl.x);
+      text.setAttribute("y", lbl.y);
+      text.classList.add("nation-macro-label");
+      text.textContent = lbl.name;
+      this.labelsGroup.appendChild(text);
+    });
   }
 
   updateProvinceColors() {
@@ -213,59 +297,128 @@ export class MapEngine {
     });
   }
 
+  /**
+   * Generates harmonious Grand-Strategy colors for the 10 map modes.
+   */
   getProvinceColor(prov) {
-    const mode = store.activeMapMode;
+    const mode = store.activeMapMode || "political";
 
+    // 1. POLITIK (Political): Translucent nation fills allowing 1700 cartography to shine through
     if (mode === "political") {
       const nat = store.nations[prov.owner_id];
-      return nat ? nat.color : "#4b5563";
+      if (!nat) return "rgba(100, 116, 139, 0.35)";
+      return this.hexToRgba(nat.color, 0.38);
     }
 
+    // 2. TERRAIN: Nearly transparent, giving maximum prominence to the authentic 1700 map topography
     if (mode === "terrain") {
       switch (prov.terrain) {
-        case "plains": return "#2d5a27";
-        case "hills": return "#65532f";
-        case "mountains": return "#52525b";
-        case "forest": return "#14361b";
-        case "marsh": return "#2a3942";
-        default: return "#3f4a36";
+        case "plains": return "rgba(74, 120, 70, 0.12)";
+        case "hills": return "rgba(150, 120, 70, 0.15)";
+        case "mountains": return "rgba(120, 110, 100, 0.22)";
+        case "forest": return "rgba(40, 90, 50, 0.18)";
+        case "marsh": return "rgba(60, 90, 110, 0.18)";
+        default: return "rgba(0, 0, 0, 0.05)";
       }
     }
 
-    if (mode === "economy") {
-      // Color gradient from copper to gold based on tax revenue
-      const tax = prov.tax_revenue || 50;
-      if (tax > 150) return "#eab308";
-      if (tax > 100) return "#ca8a04";
-      if (tax > 70) return "#a16207";
-      return "#713f12";
+    // 3. RELIEF / ELEVATION: Shaded elevation contours
+    if (mode === "relief") {
+      switch (prov.terrain) {
+        case "plains": return "rgba(101, 163, 13, 0.25)";
+        case "hills": return "rgba(217, 119, 6, 0.35)";
+        case "mountains": return "rgba(180, 83, 9, 0.45)";
+        case "forest": return "rgba(22, 101, 52, 0.30)";
+        case "marsh": return "rgba(51, 65, 85, 0.35)";
+        default: return "rgba(100, 116, 139, 0.25)";
+      }
     }
 
+    // 4. WIRTSCHAFT (Economy): Prosperity and fiscal yield gradient
+    if (mode === "economy") {
+      const tax = prov.tax_revenue || 50;
+      if (tax >= 180) return "rgba(234, 179, 8, 0.55)";  // High Prosperity Gold
+      if (tax >= 120) return "rgba(202, 138, 4, 0.45)";  // Wealthy
+      if (tax >= 75)  return "rgba(161, 98, 7, 0.35)";   // Moderate
+      return "rgba(113, 63, 18, 0.25)";                 // Developing
+    }
+
+    // 5. BEVÖLKERUNG (Population): Density choropleth
     if (mode === "population") {
       const pop = prov.population || 500000;
-      if (pop > 3500000) return "#b91c1c";
-      if (pop > 2000000) return "#c2410c";
-      if (pop > 1000000) return "#d97706";
-      return "#4d7c0f";
+      if (pop >= 4000000) return "rgba(185, 28, 28, 0.55)"; // Metropolis Crimson
+      if (pop >= 2500000) return "rgba(194, 65, 12, 0.45)"; // Dense
+      if (pop >= 1200000) return "rgba(217, 119, 6, 0.35)"; // Settled
+      return "rgba(101, 163, 13, 0.25)";                   // Rural
     }
 
+    // 6. RELIGION: Historic European confessions
     if (mode === "religion") {
       switch (prov.religion) {
-        case "Katholisch": return "#d97706";     // Golden Amber
-        case "Protestantisch": return "#0284c7"; // Cyan Blue
-        case "Reformiert": return "#ea580c";     // Dutch Orange
-        case "Orthodox": return "#7c3aed";       // Imperial Purple
-        case "Anglikanisch": return "#dc2626";   // English Red
-        case "Sunnitisch": return "#059669";     // Emerald Green
-        default: return "#6b7280";
+        case "Katholisch": return "rgba(217, 119, 6, 0.45)";     // Warm Amber
+        case "Protestantisch": return "rgba(2, 132, 199, 0.45)"; // Lutheran Blue
+        case "Reformiert": return "rgba(234, 88, 12, 0.45)";     // Calvinist Orange
+        case "Orthodox": return "rgba(124, 58, 237, 0.45)";      // Imperial Byzantine Purple
+        case "Anglikanisch": return "rgba(220, 38, 38, 0.45)";   // Tudor Red
+        case "Sunnitisch": return "rgba(5, 150, 105, 0.45)";     // Ottoman Emerald
+        default: return "rgba(107, 114, 128, 0.35)";
       }
     }
 
-    return "#3b82f6";
+    // 7. INFRASTRUKTUR (Infrastructure): Paved highways & postal network
+    if (mode === "infrastructure") {
+      const lvl = prov.infrastructure_level || 1;
+      if (lvl >= 3) return "rgba(59, 130, 246, 0.50)"; // Advanced Hub
+      if (lvl === 2) return "rgba(14, 165, 233, 0.38)"; // Paved Network
+      return "rgba(71, 85, 105, 0.28)";                // Dirt Roads
+    }
+
+    // 8. MILITÄR (Military): Strongholds & Garrisons
+    if (mode === "military") {
+      const fort = prov.fortification_level || 0;
+      if (fort >= 3) return "rgba(225, 29, 72, 0.55)";  // Star Fortress
+      if (fort >= 2) return "rgba(234, 88, 12, 0.42)";  // Bastion
+      if (fort >= 1) return "rgba(202, 138, 4, 0.32)";  // Palisade
+      return "rgba(71, 85, 105, 0.18)";                // Open Country
+    }
+
+    // 9. DIPLOMATIE (Diplomacy): Spheres of Influence
+    if (mode === "diplomacy") {
+      const playerNation = store.getPlayerNation();
+      if (!playerNation) return "rgba(100, 116, 139, 0.25)";
+      if (prov.owner_id === store.playerNationId) {
+        return "rgba(34, 197, 94, 0.48)"; // Sovereign Realm Green
+      }
+      return "rgba(100, 116, 139, 0.28)"; // Neutral Foreign Powers
+    }
+
+    // 10. HANDEL (Trade): Strategic Goods
+    if (mode === "trade") {
+      const goods = prov.goods_produced || "";
+      if (goods.includes("Waffen") || goods.includes("Eisen")) return "rgba(239, 68, 68, 0.45)";
+      if (goods.includes("Gold") || goods.includes("Silber") || goods.includes("Finanzen")) return "rgba(234, 179, 8, 0.55)";
+      if (goods.includes("Tuch") || goods.includes("Textilien") || goods.includes("Seide")) return "rgba(168, 85, 247, 0.45)";
+      if (goods.includes("Getreide") || goods.includes("Wein")) return "rgba(132, 204, 22, 0.40)";
+      if (goods.includes("Holz") || goods.includes("Pelze")) return "rgba(180, 83, 9, 0.42)";
+      return "rgba(14, 165, 233, 0.38)"; // Maritime & General Trade
+    }
+
+    return "rgba(100, 116, 139, 0.35)";
+  }
+
+  hexToRgba(hex, alpha = 0.4) {
+    if (!hex || typeof hex !== "string") return `rgba(100, 116, 139, ${alpha})`;
+    let cleanHex = hex.replace("#", "");
+    if (cleanHex.length === 3) {
+      cleanHex = cleanHex.split("").map((c) => c + c).join("");
+    }
+    const r = parseInt(cleanHex.substring(0, 2), 16) || 100;
+    const g = parseInt(cleanHex.substring(2, 4), 16) || 116;
+    const b = parseInt(cleanHex.substring(4, 6), 16) || 139;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   highlightSelectedProvince(prov) {
-    // Remove previous selection
     this.provincesGroup.querySelectorAll(".province-path.selected").forEach((el) => {
       el.classList.remove("selected");
     });
@@ -274,7 +427,6 @@ export class MapEngine {
       const path = document.getElementById(`svg-prov-${prov.id}`);
       if (path) {
         path.classList.add("selected");
-        // Bring selected polygon to top of SVG layer
         this.provincesGroup.appendChild(path);
       }
     }

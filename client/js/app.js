@@ -90,7 +90,7 @@ class PaxApp {
           const user = await resp.json();
           store.currentUser = user;
           const btn = document.getElementById("btn-account-login");
-          if (btn) btn.textContent = `👤 ${user.username}`;
+          if (btn) btn.textContent = `Konto: ${user.username}`;
         }
       } catch (e) {
         console.warn("Auth token validation failed:", e);

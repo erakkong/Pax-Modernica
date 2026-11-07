@@ -1,119 +1,151 @@
-/* Victoria 3 Inspired Grand Strategy Imperial Theme */
+/* ==========================================================================
+   PAX MODERNICA – HISTORISCHE GRAND-STRATEGY-ÄSTHETIK (VICTORIA 3 INSPIRIERT)
+   Dezente Farbpalette, professionelle Hierarchie, keine übertriebenen Effekte
+   ========================================================================== */
+
 :root {
-  /* Royal Palette */
-  --bg-darkest: #07090e;
-  --bg-dark: #0f131c;
-  --bg-panel: rgba(18, 24, 38, 0.94);
-  --bg-panel-solid: #131a29;
-  --bg-panel-alt: rgba(25, 33, 51, 0.85);
-  --bg-card: rgba(10, 14, 23, 0.7);
+  /* Tiefes, ruhiges Farbschema (Parchment & Charcoal Slate) */
+  --bg-ocean: #0b1118;
+  --bg-ocean-pattern: radial-gradient(circle at 50% 40%, #101824 0%, #070b10 100%);
+  --bg-canvas: #0e131b;
+  --bg-panel: rgba(16, 22, 32, 0.92);
+  --bg-panel-solid: #121824;
+  --bg-card: rgba(22, 30, 44, 0.75);
+  --bg-card-hover: rgba(30, 40, 58, 0.9);
 
-  /* Regal Imperial Brass & Gilded Gold */
-  --gold-primary: #d4af37;
-  --gold-bright: #ffd700;
-  --gold-dim: #997d26;
-  --gold-border: #80682a;
-  --gold-border-glow: rgba(212, 175, 55, 0.35);
-  --brass-grad: linear-gradient(180deg, #f3d47a 0%, #d4af37 50%, #997825 100%);
-  --brass-grad-dark: linear-gradient(180deg, #2b2210 0%, #171208 100%);
+  /* Historisches Messing & Antikgold – dezent, matt, nicht grell */
+  --brass-accent: #c4a35a;
+  --brass-light: #dfc68b;
+  --brass-dim: #7d6738;
+  --brass-border: rgba(196, 163, 90, 0.22);
+  --brass-border-active: rgba(196, 163, 90, 0.65);
+  --brass-hairline: 1px solid var(--brass-border);
 
-  /* Accents & States */
-  --royal-blue: #1e3a8a;
-  --crimson-red: #991b1b;
-  --emerald-green: #065f46;
-  --text-main: #f5eedc;
-  --text-dim: #b8ac95;
-  --text-dark: #6e6451;
-  --text-gold: #f7df94;
+  /* Typografie & Kontraste */
+  --text-primary: #ece5d8;
+  --text-secondary: #a89f8d;
+  --text-muted: #6c6659;
+  --text-accent: #dfc68b;
+  --text-positive: #5cb85c;
+  --text-negative: #d9534f;
 
-  /* Fonts */
-  --font-serif: 'Cinzel', 'Playfair Display', 'Times New Roman', serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Schriften */
+  --font-serif: 'Cinzel', 'Playfair Display', 'Georgia', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Shadows & Filigree */
-  --shadow-heavy: 0 12px 36px rgba(0, 0, 0, 0.85);
-  --shadow-glow: 0 0 15px rgba(212, 175, 55, 0.25);
-  --border-regal: 1px solid var(--gold-border);
-  --border-double: 3px double var(--gold-border);
+  /* Grenzen & Linien */
+  --border-radius-sm: 2px;
+  --border-radius-md: 4px;
+  --shadow-subtle: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.35);
+
+  /* Muted Historical Nation Colors (Harmonisch, historisch stimmig) */
+  --col-prussia: #2b3a4a;
+  --col-france: #1f395b;
+  --col-austria: #877443;
+  --col-england: #6b2828;
+  --col-russia: #204232;
+  --col-spain: #703923;
+  --col-sweden: #274b70;
+  --col-ottoman: #214739;
+  --col-poland: #5e1e27;
+  --col-netherlands: #84481c;
+  --col-portugal: #1e4a33;
+  --col-denmark: #5e2020;
+  --col-venice: #4f1d35;
+  --col-papal: #7a5823;
+  --col-bavaria: #26547c;
+  --col-switzerland: #752828;
 }
 
-/* Custom Scrollbars */
+/* Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 14, 22, 0.8);
+  background: rgba(10, 14, 20, 0.6);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--gold-dim);
+  background: var(--brass-dim);
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-primary);
+  background: var(--brass-accent);
 }
 
-/* Regal Utility Classes */
-.gold-text {
-  color: var(--gold-bright);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-.brass-border {
-  border: var(--border-regal);
-  box-shadow: inset 0 0 6px rgba(212, 175, 55, 0.15);
-}
-
-.panel-header {
-  background: linear-gradient(90deg, rgba(30, 41, 64, 0.95), rgba(15, 20, 31, 0.95));
-  border-bottom: var(--border-regal);
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* Utility Header & Card Styles */
+.panel-header-title {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  color: var(--text-accent);
   font-weight: 700;
-  font-size: 13px;
-  color: var(--text-gold);
 }
 
-.btn-regal {
-  background: var(--brass-grad-dark);
-  border: 1px solid var(--gold-border);
-  color: var(--text-gold);
-  padding: 6px 14px;
-  border-radius: 2px;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
+.panel-header-sub {
+  font-family: var(--font-sans);
   font-size: 11px;
-  transition: all 0.2s ease;
-  box-shadow: inset 0 1px 0 rgba(255, 215, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--text-muted);
+}
+
+/* Buttons im Victoria-3-Stil */
+.v3-btn {
+  background: rgba(22, 30, 44, 0.85);
+  border: 1px solid var(--brass-border);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--border-radius-sm);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 
-.btn-regal:hover {
-  background: linear-gradient(180deg, #443519 0%, #291e0a 100%);
-  border-color: var(--gold-bright);
-  color: #fff;
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-1px);
+.v3-btn:hover {
+  background: rgba(36, 48, 70, 0.95);
+  border-color: var(--brass-accent);
+  color: var(--text-accent);
 }
 
-.btn-regal:active {
-  transform: translateY(1px);
+.v3-btn:active {
+  background: rgba(16, 22, 32, 0.95);
 }
 
-.btn-regal.primary {
-  background: var(--brass-grad);
-  color: #1a1304;
-  border-color: #ffe082;
-  font-weight: 700;
+.v3-btn.active {
+  background: rgba(196, 163, 90, 0.18);
+  border-color: var(--brass-accent);
+  color: var(--text-accent);
+  font-weight: 600;
 }
-.btn-regal.primary:hover {
-  filter: brightness(1.15);
-  color: #000;
+
+.v3-btn.primary {
+  background: linear-gradient(180deg, #9d803d 0%, #7d632c 100%);
+  border-color: #bda25b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.v3-btn.primary:hover {
+  background: linear-gradient(180deg, #b59549 0%, #907335 100%);
+  border-color: #dfc68b;
+}
+
+.v3-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Hairline Separator */
+.v3-divider {
+  height: 1px;
+  background: var(--brass-border);
+  margin: 10px 0;
 }

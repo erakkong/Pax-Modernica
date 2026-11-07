@@ -52,7 +52,7 @@ export class ModalController {
         Sichert den vollständigen Weltzustand (Provinzen, Kassen, Herrscher, Chronik) transaktionssicher in der SQLite-Datenbank.
       </p>
       <div style="margin-top:16px; text-align:right;">
-        <button id="btn-confirm-save" class="btn-regal primary">💾 Jetzt speichern</button>
+        <button id="btn-confirm-save" class="btn-regal primary">Jetzt speichern</button>
       </div>
     `);
 
@@ -132,7 +132,7 @@ export class ModalController {
           >
             <div style="font-weight:700; color:var(--text-gold); font-size:12px;">${n.name}</div>
             <div style="font-size:10px; color:var(--text-dim);">${n.government}</div>
-            <div style="font-size:10px; color:#fff; margin-top:2px;">👑 ${n.ruler?.name || ""}</div>
+            <div style="font-size:10px; color:#fff; margin-top:2px;">Herrscher: ${n.ruler?.name || ""}</div>
           </div>
         `).join("")}
       </div>

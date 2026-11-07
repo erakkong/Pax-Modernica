@@ -1,4 +1,8 @@
-/* Map Engine Styles */
+/* ==========================================================================
+   PAX MODERNICA – MAP ENGINE & KARTEN-RENDERING STYLES
+   Echte geografische Polygone, professionelle Grand-Strategy-Ästhetik
+   ========================================================================== */
+
 #map-svg-container {
   width: 100%;
   height: 100%;
@@ -12,120 +16,177 @@ svg#europe-map-svg {
   overflow: visible;
 }
 
-/* Sea background gradient */
+/* Meereshintergrund mit eleganter nautischer Tiefe */
 .sea-bg {
-  fill: #0c1626;
+  fill: #090f17;
 }
 
-/* Province Polygons */
-.province-path {
-  stroke: rgba(255, 235, 179, 0.45);
-  stroke-width: 1.2px;
+/* Küstenlinien & Meereskontur */
+.coastline-halo {
+  fill: none;
+  stroke: rgba(45, 75, 110, 0.25);
+  stroke-width: 6px;
   stroke-linejoin: round;
+}
+
+/* Echte Provinzpolygone */
+.province-path {
+  stroke: rgba(220, 210, 190, 0.25);
+  stroke-width: 0.8px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
   cursor: pointer;
-  transition: fill 0.25s ease, stroke 0.15s ease, filter 0.15s ease;
+  transition: fill 0.2s ease, stroke 0.15s ease, filter 0.15s ease;
 }
 
 .province-path:hover {
-  stroke: var(--gold-bright);
-  stroke-width: 2.5px;
-  filter: brightness(1.25) drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+  stroke: var(--brass-light);
+  stroke-width: 1.8px;
+  filter: brightness(1.18);
 }
 
 .province-path.selected {
   stroke: #ffffff;
-  stroke-width: 3.5px;
-  filter: brightness(1.35) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  stroke-width: 2.2px;
+  filter: brightness(1.28);
 }
 
-/* Province Center City Circles & Labels */
-.province-node {
-  fill: var(--gold-bright);
-  stroke: #000;
-  stroke-width: 1px;
+/* Hauptstadtsymbol & Siedlungsknoten */
+.city-node {
+  fill: var(--brass-light);
+  stroke: #0e131b;
+  stroke-width: 1.2px;
   pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Intelligente, zoomabhängige Typografie */
+.nation-macro-label {
+  fill: rgba(255, 245, 225, 0.72);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-anchor: middle;
+  pointer-events: none;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
+  transition: opacity 0.25s ease, font-size 0.2s ease;
 }
 
 .province-label {
-  fill: #fdf6e2;
+  fill: #e8dfcf;
   font-family: var(--font-serif);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   text-anchor: middle;
   pointer-events: none;
-  text-shadow: 0 1px 3px #000, 0 -1px 3px #000, 1px 0 3px #000, -1px 0 3px #000;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.25s ease;
 }
 
-/* Floating Map Mode Selector */
+.city-label {
+  fill: var(--text-accent);
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 500;
+  text-anchor: middle;
+  pointer-events: none;
+  text-shadow: 0 1px 2px #000;
+  transition: opacity 0.25s ease;
+}
+
+/* Schwebende Kartenmodi-Leiste (10 Modi, dezent & kompakt) */
 #map-modes-bar {
   position: absolute;
-  top: 14px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  background: rgba(15, 20, 31, 0.9);
-  border: var(--border-regal);
-  border-radius: 20px;
-  padding: 4px 6px;
-  gap: 4px;
+  background: rgba(14, 20, 30, 0.88);
+  border: var(--brass-hairline);
+  border-radius: var(--border-radius-sm);
+  padding: 3px 5px;
+  gap: 3px;
   z-index: 70;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
 }
 
 .map-mode-btn {
-  padding: 5px 12px;
-  font-size: 11px;
+  padding: 4px 9px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
   font-weight: 600;
-  color: var(--text-dim);
-  border-radius: 14px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .map-mode-btn:hover {
-  color: var(--text-gold);
-  background: rgba(212, 175, 55, 0.12);
+  color: var(--text-accent);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .map-mode-btn.active {
-  background: var(--brass-grad);
-  color: #161005;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  background: rgba(196, 163, 90, 0.22);
+  color: var(--text-accent);
+  border: 1px solid var(--brass-border);
 }
 
-/* Floating Zoom & Navigation Controls */
+/* Schwebende Steuerknöpfe für Zoom & Reset */
 #map-controls {
   position: absolute;
-  bottom: 50px;
-  right: 20px;
+  bottom: 45px;
+  right: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   z-index: 70;
 }
 
 .map-ctrl-btn {
-  width: 34px;
-  height: 34px;
-  background: rgba(18, 24, 38, 0.9);
-  border: var(--border-regal);
-  color: var(--text-gold);
-  font-size: 16px;
+  width: 30px;
+  height: 30px;
+  background: rgba(16, 22, 32, 0.88);
+  border: var(--brass-hairline);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  transition: all 0.2s;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s;
 }
 
 .map-ctrl-btn:hover {
-  background: var(--brass-grad-dark);
-  border-color: var(--gold-bright);
+  border-color: var(--brass-accent);
   color: #fff;
-  transform: scale(1.05);
+  background: rgba(26, 36, 52, 0.95);
+}
+
+/* Karten-Transparenz-Schieberegler für Bildüberlagerung */
+#map-overlay-control {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  background: rgba(14, 20, 30, 0.88);
+  border: var(--brass-hairline);
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-muted);
 }

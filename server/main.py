@@ -83,6 +83,15 @@ async def load_game(save_id: str):
 async def get_scenario():
     return engine.world.scenario_meta
 
+@app.get("/api/game/state")
+async def get_game_state():
+    return {
+        "clock": engine.clock.to_dict(),
+        "world": engine.world.to_dict(),
+        "nations": engine.world.nations,
+        "provinces": engine.world.provinces
+    }
+
 @app.get("/api/game/map")
 async def get_map_data():
     map_file = Path(__file__).resolve().parent / "data" / "europe_map.json"
