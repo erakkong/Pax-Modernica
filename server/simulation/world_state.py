@@ -74,6 +74,7 @@ class WorldState:
             nat["player_account_id"] = None
 
         # Initialize regions
+        self.land_path = map_data.get("land_path", "")
         self.regions = {}
         for reg in map_data.get("regions", []):
             rid = reg["id"]
@@ -321,6 +322,7 @@ class WorldState:
         """Serializes world state for client init or save snapshot."""
         return {
             "scenario": self.scenario_meta,
+            "land_path": self.land_path,
             "nations": self.nations,
             "regions": self.regions,
             "provinces": self.provinces,

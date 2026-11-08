@@ -1088,14 +1088,30 @@ NATION_RESERVE_CITIES = {
     ]
 }
 
-# 1. COMPILE ALL REGIONS FROM IMAGE 2
+# 1. COMPILE ALL REGIONS FROM IMAGE 2 (ZERO-GAP DILATION TOPOLOGY)
 compiled_regions = {}
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+land_mask = (res2 > 1).astype(np.uint8)
+
+# Continuous vector continent land underlay for Europe to guarantee 100% solid land base
+land_cnts, _ = cv2.findContours(land_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+land_subpaths = []
+for c in land_cnts:
+    if cv2.contourArea(c) >= 15:
+        poly = cv2.approxPolyDP(c, 0.4, True)
+        pts = poly.reshape(-1, 2)
+        if len(pts) >= 3:
+            land_subpaths.append("M " + " ".join([f"{p[0]},{p[1]}" for p in pts]) + " Z")
+continent_land_path = " ".join(land_subpaths)
+
 for mid, s_idx in reg_mid_to_sidx.items():
     rmask = (res2 == mid).astype(np.uint8)
-    contours, _ = cv2.findContours(rmask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # 1px dilation into land ensures seamless contact with neighboring regions without any gaps
+    rmask_dil = cv2.dilate(rmask, kernel, iterations=1) & land_mask
+    contours, _ = cv2.findContours(rmask_dil, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     subpaths = []
     for c in contours:
-        poly = cv2.approxPolyDP(c, 0.8, True)
+        poly = cv2.approxPolyDP(c, 0.35, True)
         pts = poly.reshape(-1, 2)
         if len(pts) >= 3:
             subpaths.append("M " + " ".join([f"{p[0]},{p[1]}" for p in pts]) + " Z")
@@ -1199,12 +1215,14 @@ for mid, reg_data in compiled_regions.items():
         cy = sub_info["cy"]
         area = sub_info["area"]
 
-        cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Dilate within region to ensure zero gaps between sub-provinces
+        m_dil = cv2.dilate(m, kernel, iterations=1) & crop_reg.astype(np.uint8)
+        cnts, _ = cv2.findContours(m_dil, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         subpaths = []
         for c in cnts:
             if cv2.contourArea(c) < 8 and len(cnts) > 1:
                 continue
-            poly = cv2.approxPolyDP(c, 0.65, True)
+            poly = cv2.approxPolyDP(c, 0.35, True)
             pts = poly.reshape(-1, 2)
             if len(pts) >= 3:
                 pts[:, 0] += min_x
@@ -1414,6 +1432,7 @@ output_data = {
     "description": "Pax Modernica Europe 1700 - Authentic Two-Tier Historical Vector Map",
     "region_count": len(compiled_regions),
     "province_count": len(compiled_provinces),
+    "land_path": continent_land_path,
     "regions": list(compiled_regions.values()),
     "provinces": list(compiled_provinces.values())
 }

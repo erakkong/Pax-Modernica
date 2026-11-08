@@ -13,22 +13,22 @@ import { audio } from "../ui/audio_controller.js";
 
 // Curated, non-overlapping historical nation label positions (Victoria 3 & HoI4 style)
 const NATION_LABEL_CONFIG = {
-  nation_prussia:     { title: "PREUSSEN",          x: 535, y: 465, minScale: 0.65, maxScale: 1.55, fontSize: 17, letterSpacing: 5 },
-  nation_france:      { title: "FRANKREICH",        x: 395, y: 575, minScale: 0.65, maxScale: 1.55, fontSize: 20, letterSpacing: 6 },
-  nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 1.55, fontSize: 19, letterSpacing: 5 },
-  nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 1.55, fontSize: 18, letterSpacing: 5 },
-  nation_russia:      { title: "RUSSLAND",          x: 845, y: 340, minScale: 0.65, maxScale: 1.55, fontSize: 22, letterSpacing: 7 },
-  nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 1.55, fontSize: 19, letterSpacing: 5 },
-  nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 1.55, fontSize: 20, letterSpacing: 6 },
-  nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 1.55, fontSize: 18, letterSpacing: 5 },
-  nation_poland:      { title: "POLEN-LITAUEN",     x: 690, y: 475, minScale: 0.65, maxScale: 1.55, fontSize: 18, letterSpacing: 5 },
-  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 395, minScale: 0.85, maxScale: 1.7, fontSize: 14, letterSpacing: 4 },
-  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 475, minScale: 1.10, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
-  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 1.8, fontSize: 13, letterSpacing: 3 },
-  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 610, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
-  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
-  nation_venice:      { title: "VENEDIG",           x: 540, y: 625, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 },
-  nation_papal:       { title: "KIRCHENSTAAT",      x: 530, y: 695, minScale: 1.15, maxScale: 1.9, fontSize: 11, letterSpacing: 2 }
+  nation_prussia:     { title: "PREUSSEN",          x: 535, y: 465, minScale: 0.65, maxScale: 2.60, fontSize: 17, letterSpacing: 5 },
+  nation_france:      { title: "FRANKREICH",        x: 395, y: 575, minScale: 0.65, maxScale: 2.60, fontSize: 20, letterSpacing: 6 },
+  nation_austria:     { title: "ÖSTERREICH",        x: 605, y: 575, minScale: 0.65, maxScale: 2.60, fontSize: 19, letterSpacing: 5 },
+  nation_england:     { title: "GROSSBRITANNIEN",   x: 305, y: 465, minScale: 0.65, maxScale: 2.60, fontSize: 18, letterSpacing: 5 },
+  nation_russia:      { title: "RUSSLAND",          x: 845, y: 340, minScale: 0.65, maxScale: 2.60, fontSize: 22, letterSpacing: 7 },
+  nation_ottoman:     { title: "OSMANISCHES REICH", x: 740, y: 735, minScale: 0.65, maxScale: 2.60, fontSize: 19, letterSpacing: 5 },
+  nation_spain:       { title: "SPANIEN",           x: 295, y: 740, minScale: 0.65, maxScale: 2.60, fontSize: 20, letterSpacing: 6 },
+  nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 2.60, fontSize: 18, letterSpacing: 5 },
+  nation_poland:      { title: "POLEN-LITAUEN",     x: 690, y: 475, minScale: 0.65, maxScale: 2.60, fontSize: 18, letterSpacing: 5 },
+  nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 395, minScale: 0.85, maxScale: 2.70, fontSize: 14, letterSpacing: 4 },
+  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 475, minScale: 1.00, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
+  nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 2.80, fontSize: 13, letterSpacing: 3 },
+  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 610, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
+  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
+  nation_venice:      { title: "VENEDIG",           x: 540, y: 625, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
+  nation_papal:       { title: "KIRCHENSTAAT",      x: 530, y: 695, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 }
 };
 
 export class MapEngine {
@@ -51,13 +51,17 @@ export class MapEngine {
     this.hoverGoodsInfo = document.getElementById("hover-goods-info");
     this.tooltipVisible = false;
 
-    // Dynamic Transform Matrix State (Pan & Zoom in SVG coordinate space)
-    this.scale = 1.0;
-    this.translateX = 0;
-    this.translateY = 0;
+    // Dynamic Transform Matrix State (Enlarged grand-strategy scale focused on Europe)
+    this.scale = 1.65;
+    this.translateX = -320;
+    this.translateY = -270;
     this.isDragging = false;
     this.lastClientX = 0;
     this.lastClientY = 0;
+
+    // Map Scale Badge Elements
+    this.scaleLineEl = document.getElementById("map-scale-line");
+    this.scaleLabelEl = document.getElementById("map-scale-label");
 
     // Pinch zoom for touch
     this.initialPinchDistance = null;
@@ -126,7 +130,7 @@ export class MapEngine {
     this.viewport.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-      const newScale = Math.max(0.65, Math.min(6.5, this.scale * zoomFactor));
+      const newScale = Math.max(0.85, Math.min(12.0, this.scale * zoomFactor));
       if (newScale === this.scale) return;
 
       const pt = this.svg.createSVGPoint();
@@ -182,7 +186,7 @@ export class MapEngine {
           e.touches[0].clientY - e.touches[1].clientY
         );
         const factor = currentDistance / this.initialPinchDistance;
-        const newScale = Math.max(0.65, Math.min(6.5, this.scale * factor));
+        const newScale = Math.max(0.85, Math.min(12.0, this.scale * factor));
 
         if (this.pinchCenter) {
           const pt = this.svg.createSVGPoint();
@@ -213,6 +217,7 @@ export class MapEngine {
     document.getElementById("btn-zoom-in")?.addEventListener("click", () => this.zoom(1.25));
     document.getElementById("btn-zoom-out")?.addEventListener("click", () => this.zoom(0.8));
     document.getElementById("btn-zoom-reset")?.addEventListener("click", () => this.resetView());
+    document.getElementById("btn-zoom-fit")?.addEventListener("click", () => this.fitContinentView());
 
     // 5. Map Mode Selection
     document.querySelectorAll(".map-mode-btn").forEach((btn) => {
@@ -350,6 +355,24 @@ export class MapEngine {
       );
     }
     this.updateZoomLOD();
+    this.updateMapScaleBadge();
+  }
+
+  updateMapScaleBadge() {
+    if (!this.scaleLabelEl || !this.scaleLineEl) return;
+    // Across 1024 SVG units = approx 3,500 km across Europe (3.42 km / SVG unit)
+    const kmPerPixel = 3.42 / this.scale;
+    const targetKm = 40 * kmPerPixel;
+    const standardSteps = [50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000];
+    let chosenKm = standardSteps[0];
+    for (const step of standardSteps) {
+      if (Math.abs(step - targetKm) < Math.abs(chosenKm - targetKm)) {
+        chosenKm = step;
+      }
+    }
+    const barWidthPx = Math.max(26, Math.min(65, Math.round(chosenKm / kmPerPixel)));
+    this.scaleLineEl.style.width = `${barWidthPx}px`;
+    this.scaleLabelEl.textContent = `${chosenKm} km`;
   }
 
   /**
@@ -365,7 +388,7 @@ export class MapEngine {
     // 1. Continental Macro Titles (Shown during overview zoom)
     this.labelsGroup.querySelectorAll(".nation-macro-label").forEach((el) => {
       const minS = parseFloat(el.getAttribute("data-min-scale") || "0.65");
-      const maxS = parseFloat(el.getAttribute("data-max-scale") || "1.7");
+      const maxS = parseFloat(el.getAttribute("data-max-scale") || "2.6");
       if (this.scale >= minS && this.scale <= maxS) {
         el.style.display = "block";
       } else {
@@ -377,7 +400,7 @@ export class MapEngine {
   }
 
   zoom(factor) {
-    const newScale = Math.max(0.65, Math.min(6.5, this.scale * factor));
+    const newScale = Math.max(0.85, Math.min(12.0, this.scale * factor));
     const centerX = 512;
     const centerY = 464;
 
@@ -391,6 +414,15 @@ export class MapEngine {
   }
 
   resetView() {
+    // Victoria 3 / Grand-Strategy standard: focused, enlarged scale on European theater
+    this.scale = 1.65;
+    this.translateX = -320;
+    this.translateY = -270;
+    this.applyTransform();
+  }
+
+  fitContinentView() {
+    // Overview of entire continent
     this.scale = 1.0;
     this.translateX = 0;
     this.translateY = 0;
@@ -400,7 +432,7 @@ export class MapEngine {
   centerOnProvince(provinceId) {
     const target = store.provinces[provinceId] || store.regions[provinceId];
     if (!target || !target.center) return;
-    this.scale = 2.4;
+    this.scale = 2.8;
     this.translateX = 512 - target.center[0] * this.scale;
     this.translateY = 464 - target.center[1] * this.scale;
     this.applyTransform();
@@ -418,6 +450,12 @@ export class MapEngine {
     this.regionsGroup.innerHTML = "";
     this.provincesGroup.innerHTML = "";
     this.labelsGroup.innerHTML = "";
+
+    // 0. Continental Solid Land Bedrock (Zero background peek-through)
+    const underlay = document.getElementById("continent-underlay");
+    if (underlay && store.land_path) {
+      underlay.setAttribute("d", store.land_path);
+    }
 
     const regions = Object.values(store.regions || {});
     const provinces = Object.values(store.provinces || {});
