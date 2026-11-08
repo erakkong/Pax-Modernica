@@ -202,6 +202,17 @@ class SimulationEngine:
             nation_id = action.get("nation_id")
             if nation_id not in self.world.nations:
                 return {"success": False, "error": "Nation nicht gefunden."}
+            
+            # 1 Player Per Nation Enforcement
+            claimed = getattr(self.world, "claimed_nations", {})
+            if nation_id in claimed:
+                existing_holder = claimed[nation_id]
+                if account_id and existing_holder.get("account_id") != account_id:
+                    return {
+                        "success": False,
+                        "error": f"Diese Nation wird bereits von '{existing_holder.get('username')}' regiert!"
+                    }
+
             if account_id:
                 self.world.active_players[account_id] = nation_id
                 self.world.nations[nation_id]["player_account_id"] = account_id

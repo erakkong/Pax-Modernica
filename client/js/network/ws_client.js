@@ -88,6 +88,12 @@ export class WebSocketClient {
         store.emit("action_error", msg.error);
         break;
 
+      case "NATION_CLAIMED":
+        if (msg.nation_id) {
+          store.claimNation(msg.nation_id, msg.account_id, msg.username);
+        }
+        break;
+
       case "PONG":
         break;
 

@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from server.database.connection import init_db, get_db
+from server.database.connection import init_db, get_db, load_nation_claims
 from server.auth.router import router as auth_router
 from server.websocket.router import router as ws_router
 from server.websocket.connection_manager import manager
@@ -22,6 +22,9 @@ CLIENT_DIR = Path(__file__).resolve().parent.parent / "client"
 async def lifespan(app: FastAPI):
     # Startup: initialize database and start simulation loop
     await init_db()
+    # Load persistent player nation claims into authoritative world state
+    claims = await load_nation_claims()
+    engine.world.claimed_nations = claims
     engine.broadcast_callback = manager.broadcast
     engine.start()
     yield

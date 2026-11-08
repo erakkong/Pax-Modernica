@@ -46,8 +46,8 @@ svg#europe-map-svg {
 
 /* Tier 1: Overarching Regional States (Image 2 - 251 States) */
 .region-path {
-  stroke: rgba(15, 23, 42, 0.5);
-  stroke-width: 0.65px;
+  stroke: rgba(15, 23, 42, 0.7);
+  stroke-width: 0.85px;
   vector-effect: non-scaling-stroke;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -56,41 +56,38 @@ svg#europe-map-svg {
 }
 
 .region-path:hover {
-  stroke: #fde047;
+  stroke: #c4a35a;
   stroke-width: 1.2px;
   vector-effect: non-scaling-stroke;
 }
 
 .region-path.region-selected {
-  stroke: #fde047;
-  stroke-width: 1.8px;
+  stroke: #f59e0b;
+  stroke-width: 1.6px;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 5px rgba(253, 224, 71, 0.4));
 }
 
-/* Tier 2: Granular Internal Provinces (Zero dark grid, seamless borders like Victoria 3) */
+/* Tier 2: Granular Internal Provinces (Crisp Thin Hairlines - ConquerEuropa Aesthetic) */
 .province-path {
-  stroke: none !important;
-  stroke-width: 0 !important;
+  stroke: rgba(15, 23, 42, 0.38) !important;
+  stroke-width: 0.45px !important;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
   transition: fill 0.15s ease, stroke 0.15s ease;
 }
 
 .province-path:hover {
-  stroke: #fde047 !important;
+  stroke: #c4a35a !important;
   stroke-width: 1.2px !important;
   vector-effect: non-scaling-stroke;
-  fill: rgba(253, 224, 71, 0.18) !important;
-  filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.4));
+  fill: rgba(196, 163, 90, 0.15) !important;
 }
 
 .province-path.selected {
-  stroke: #fef08a !important;
-  stroke-width: 1.8px !important;
+  stroke: #f59e0b !important;
+  stroke-width: 1.6px !important;
   vector-effect: non-scaling-stroke;
-  fill: rgba(254, 240, 138, 0.28) !important;
-  filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.6));
+  fill: rgba(245, 158, 11, 0.22) !important;
 }
 
 /* Sovereign Macro Empire Labels (Clean, Subtle Victorian Watermark Typography) */
@@ -217,35 +214,32 @@ svg#europe-map-svg {
 .province-city-marker:hover .province-city-label,
 .province-city-marker.hovered .province-city-label {
   display: block !important;
-  fill: #fde047 !important;
-  font-weight: 800 !important;
-  text-shadow: 0 0 6px rgba(253, 224, 71, 0.9);
+  fill: #f8fafc !important;
+  font-weight: 700 !important;
 }
 
 .province-city-marker.selected .province-city-label {
   display: block !important;
-  fill: #38bdf8 !important;
+  fill: #f59e0b !important;
   font-weight: 700;
 }
 
 .province-city-marker.hovered .province-city-dot {
-  fill: #fde047;
-  stroke: #ffffff;
-  stroke-width: 1.5px;
-  r: 3.6px;
-  filter: drop-shadow(0 0 6px #fde047);
+  fill: #f8fafc;
+  stroke: #c4a35a;
+  stroke-width: 1.2px;
+  r: 2.8px;
 }
 
 .province-city-marker.selected .province-city-dot {
-  fill: #38bdf8;
+  fill: #f59e0b;
   stroke: #ffffff;
   stroke-width: 1.5px;
-  r: 3.5px;
-  filter: drop-shadow(0 0 4px #38bdf8);
+  r: 3.2px;
 }
 
 .province-city-marker.selected .province-city-label {
-  fill: #38bdf8;
+  fill: #f59e0b;
   font-weight: 700;
 }
 

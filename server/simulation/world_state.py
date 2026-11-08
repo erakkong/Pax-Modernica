@@ -27,6 +27,7 @@ class WorldState:
         self.provinces: Dict[str, Dict[str, Any]] = {}
         self.nations: Dict[str, Dict[str, Any]] = {}
         self.active_players: Dict[str, str] = {}  # account_id -> nation_id
+        self.claimed_nations: Dict[str, Dict[str, str]] = {}  # nation_id -> {"account_id": ..., "username": ...}
         self.chronicle: List[Dict[str, Any]] = []
         self.scenario_meta: Dict[str, Any] = {}
         self.diplomacy: Optional[DiplomacyManager] = None
@@ -368,6 +369,7 @@ class WorldState:
             "scenario": self.scenario_meta,
             "land_path": self.land_path,
             "national_borders": getattr(self, "national_borders", {}),
+            "claimed_nations": getattr(self, "claimed_nations", {}),
             "nations": self.nations,
             "regions": self.regions,
             "provinces": self.provinces,

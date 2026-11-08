@@ -137,7 +137,7 @@ export class MapEngine {
     this.viewport.addEventListener("wheel", (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-      const newScale = Math.max(0.85, Math.min(12.0, this.scale * zoomFactor));
+      const newScale = Math.max(0.65, Math.min(35.0, this.scale * zoomFactor));
       if (newScale === this.scale) return;
 
       const pt = this.svg.createSVGPoint();
@@ -193,7 +193,7 @@ export class MapEngine {
           e.touches[0].clientY - e.touches[1].clientY
         );
         const factor = currentDistance / this.initialPinchDistance;
-        const newScale = Math.max(0.85, Math.min(12.0, this.scale * factor));
+        const newScale = Math.max(0.65, Math.min(35.0, this.scale * factor));
 
         if (this.pinchCenter) {
           const pt = this.svg.createSVGPoint();
@@ -441,7 +441,7 @@ export class MapEngine {
   }
 
   zoom(factor) {
-    const newScale = Math.max(0.85, Math.min(12.0, this.scale * factor));
+    const newScale = Math.max(0.65, Math.min(35.0, this.scale * factor));
     const centerX = 512;
     const centerY = 464;
 

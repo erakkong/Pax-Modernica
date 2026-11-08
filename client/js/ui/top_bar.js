@@ -216,7 +216,9 @@ export class TopBarController {
     // Switch nation on crest click
     document.getElementById("btn-switch-nation")?.addEventListener("click", () => {
       audio.playClick();
-      this.openNationSwitchDialog();
+      if (window.paxModalController) {
+        window.paxModalController.openNationSelectModal();
+      }
     });
   }
 
@@ -224,10 +226,43 @@ export class TopBarController {
     store.subscribe("clock_updated", (clock) => this.renderClock(clock));
     store.subscribe("player_nation_changed", () => this.renderNationalStats());
     store.subscribe("nations_updated", () => this.renderNationalStats());
+    store.subscribe("user_updated", (user) => this.updateAccountDisplay(user));
     store.subscribe("world_loaded", () => {
       this.renderClock(store.clock);
       this.renderNationalStats();
+      this.updateAccountDisplay(store.currentUser);
     });
+  }
+
+  updateAccountDisplay(user) {
+    const container = document.getElementById("account-status-container");
+    if (!container) return;
+    if (user && user.username) {
+      const assignedNation = user.assigned_nation_id && store.nations[user.assigned_nation_id]
+        ? store.nations[user.assigned_nation_id].name
+        : "Keine Nation gewählt";
+      container.innerHTML = `
+        <div class="user-account-badge" title="Eingeloggt als ${user.username} (${assignedNation})">
+          <span class="user-avatar-icon">👤</span>
+          <span class="user-name-text">${user.username}</span>
+          <button id="btn-account-logout" class="btn-logout-mini" title="Abmelden">⎋</button>
+        </div>
+      `;
+      document.getElementById("btn-account-logout")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        localStorage.removeItem("pax_token");
+        store.setCurrentUser(null);
+        audio.playClick();
+      });
+    } else {
+      container.innerHTML = `<button id="btn-account-login" class="v3-brass-pill-btn">Anmelden</button>`;
+      document.getElementById("btn-account-login")?.addEventListener("click", () => {
+        audio.playClick();
+        if (window.paxModalController) {
+          window.paxModalController.openAuthModal();
+        }
+      });
+    }
   }
 
   renderClock(clock) {
@@ -353,45 +388,8 @@ export class TopBarController {
   }
 
   openNationSwitchDialog() {
-    const nations = Object.values(store.nations);
-    const body = document.getElementById("modal-body");
-    const title = document.getElementById("modal-title");
-    const overlay = document.getElementById("modal-overlay");
-
-    if (title) title.textContent = "Herrscherhaus & Nation wählen";
-    if (body) {
-      body.innerHTML = `
-        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">
-          Wähle ein europäisches Herrscherhaus zur Führung in der Epoche 1700–1930:
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:400px; overflow-y:auto;">
-          ${nations.map((nat) => `
-            <div class="nation-select-card" data-nid="${nat.id}" style="padding:10px; background:rgba(20,26,38,0.85); border:1px solid ${nat.id === store.playerNationId ? 'var(--brass-accent)' : 'var(--brass-border)'}; border-radius:4px; cursor:pointer;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div style="width:14px; height:14px; border-radius:50%; background:${nat.color};"></div>
-                <strong style="color:#f1f5f9; font-size:12px;">${nat.name}</strong>
-              </div>
-              <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">${nat.ruler?.name || "Herrscher"} · ${nat.government || "Monarchie"}</div>
-            </div>
-          `).join("")}
-        </div>
-      `;
-
-      body.querySelectorAll(".nation-select-card").forEach((card) => {
-        card.addEventListener("click", (e) => {
-          const nid = e.currentTarget.getAttribute("data-nid");
-          audio.playClick();
-          store.setPlayerNation(nid);
-          overlay?.classList.remove("visible");
-        });
-      });
-    }
-
-    if (overlay) {
-      overlay.classList.add("visible");
-      document.getElementById("btn-close-modal")?.addEventListener("click", () => {
-        overlay.classList.remove("visible");
-      }, { once: true });
+    if (window.paxModalController) {
+      window.paxModalController.openNationSelectModal();
     }
   }
 }

@@ -31,6 +31,7 @@ export class GameState {
     this.selectedProvinceId = null;
     this.activeMapMode = "political"; // political, terrain, economy, population, religion
     this.currentUser = null;
+    this.claimed_nations = {}; // nation_id -> { account_id, username }
 
     this.listeners = new Map();
   }
@@ -67,6 +68,7 @@ export class GameState {
   setInitialWorld(worldData) {
     this.land_path = worldData.land_path || "";
     this.national_borders = worldData.national_borders || {};
+    this.claimed_nations = worldData.claimed_nations || {};
     this.nations = worldData.nations || {};
     this.regions = worldData.regions || {};
     this.provinces = worldData.provinces || {};
@@ -78,12 +80,29 @@ export class GameState {
     this.technology = worldData.technology || {};
     this.pendingEvents = worldData.events?.pending_events || {};
     this.emit("world_loaded", this);
+    this.emit("claimed_nations_updated", this.claimed_nations);
     this.emit("armies_updated", this.armies);
     this.emit("diplomacy_updated", this.diplomacy);
     this.emit("technology_updated", this.technology);
     if (this.pendingEvents[this.playerNationId]) {
       this.emit("event_triggered", this.pendingEvents[this.playerNationId]);
     }
+  }
+
+  claimNation(nationId, accountId, username) {
+    this.claimed_nations[nationId] = {
+      account_id: accountId,
+      username: username
+    };
+    this.emit("claimed_nations_updated", this.claimed_nations);
+  }
+
+  setCurrentUser(user) {
+    this.currentUser = user;
+    if (user && user.assigned_nation_id && this.nations[user.assigned_nation_id]) {
+      this.setPlayerNation(user.assigned_nation_id);
+    }
+    this.emit("user_updated", this.currentUser);
   }
 
   setRankings(rankings) {

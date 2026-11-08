@@ -35,6 +35,7 @@ class PaxApp {
     this.leftPanel = new LeftPanelController();
     this.rightPanel = new RightPanelController();
     this.modals = new ModalController();
+    window.paxModalController = this.modals;
 
     this.bindMapModes();
     this.bindKeyboardShortcuts();
@@ -153,9 +154,7 @@ class PaxApp {
         });
         if (resp.ok) {
           const user = await resp.json();
-          store.currentUser = user;
-          const btn = document.getElementById("btn-account-login");
-          if (btn) btn.textContent = `Konto: ${user.username}`;
+          store.setCurrentUser(user);
         }
       } catch (e) {
         console.warn("Auth token validation failed:", e);
