@@ -357,48 +357,10 @@ class WorldState:
         return {"success": True, "building_type": building_type, "province_id": province_id}
 
     def compute_national_borders(self) -> Dict[str, str]:
-        """Computes continuous national outer boundary SVG paths for all sovereign nations."""
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        borders = {}
-
-        def parse_svg(d: str):
-            polys = []
-            curr = []
-            for m in re.finditer(r"([MZ])|([0-9\.]+),([0-9\.]+)", d):
-                cmd = m.group(1)
-                if cmd in ("M", "Z"):
-                    if curr:
-                        polys.append(np.array(curr, dtype=np.int32))
-                        curr = []
-                else:
-                    x, y = float(m.group(2)), float(m.group(3))
-                    curr.append([int(round(x)), int(round(y))])
-            if curr:
-                polys.append(np.array(curr, dtype=np.int32))
-            return polys
-
-        for nid in self.nations.keys():
-            nat_regions = [r for r in self.regions.values() if r.get("owner_id") == nid]
-            if not nat_regions:
-                continue
-            mask = np.zeros((928, 1024), dtype=np.uint8)
-            for r in nat_regions:
-                for p in parse_svg(r.get("svg_path", "")):
-                    cv2.fillPoly(mask, [p], 255)
-            # Dilate 1px then extract crisp external contour
-            mask_dil = cv2.dilate(mask, kernel, iterations=1)
-            cnts, _ = cv2.findContours(mask_dil, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            subpaths = []
-            for c in cnts:
-                if cv2.contourArea(c) >= 25:
-                    poly = cv2.approxPolyDP(c, 0.45, True)
-                    pts = poly.reshape(-1, 2)
-                    if len(pts) >= 3:
-                        subpaths.append("M " + " ".join([f"{p[0]},{p[1]}" for p in pts]) + " Z")
-            if subpaths:
-                borders[nid] = " ".join(subpaths)
-
-        return borders
+        """Returns national borders dictionary.
+        Dilated raster contouring is disabled to ensure 100% pure vector topology
+        without offset black artifacts or double borders."""
+        return {}
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes world state for client init or save snapshot."""

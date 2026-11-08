@@ -310,9 +310,9 @@
 
           <!-- Horizontal Victoria 3 State Tabs -->
           <nav class="v3-state-tabs">
-            <button class="v3-state-tab" data-tab="overview">Übersicht</button>
+            <button class="v3-state-tab active" data-tab="overview">Übersicht</button>
             <button class="v3-state-tab" data-tab="buildings">Gebäude</button>
-            <button class="v3-state-tab active" data-tab="population">Bevölkerung</button>
+            <button class="v3-state-tab" data-tab="population">Bevölkerung</button>
             <button class="v3-state-tab" data-tab="prices">Ortspreise</button>
             <button class="v3-state-tab" data-tab="info">Information</button>
           </nav>
@@ -425,35 +425,8 @@
           </div>
         </aside>
 
-        <!-- VICTORIA 3 BOTTOM CENTER QUICK DOCK (z-index: 55) -->
-        <div id="v3-bottom-quick-dock" class="ui-interactive">
-          <button class="v3-round-brass-btn" data-action="production" title="Bau- & Produktionssektor">
-            <span class="quick-icon">🏗️</span>
-          </button>
-          <button class="v3-round-brass-btn" data-action="laws" title="Gesetze & Verfassung">
-            <span class="quick-icon">⚖️</span>
-          </button>
-          <button class="v3-round-brass-btn" data-action="diplomacy" title="Diplomatisches Korps">
-            <span class="quick-icon">🕊️</span>
-          </button>
-          <button class="v3-round-brass-btn" data-action="military" title="Oberkommando & Manöver">
-            <span class="quick-icon">⚔️</span>
-          </button>
-        </div>
-
-        <!-- VICTORIA 3 NOTIFICATION TOASTS (BOTTOM RIGHT, z-index: 55) -->
-        <div id="v3-toast-container" class="ui-interactive">
-          <div class="v3-toast-pill">
-            <span class="toast-flag">🇳🇱</span>
-            <span class="toast-text">Niederlande erhöhte Einschränkungen für Straße</span>
-            <span class="toast-time">Heute</span>
-          </div>
-          <div class="v3-toast-pill">
-            <span class="toast-flag">🏛️</span>
-            <span class="toast-text">Gesetzesentwurf: Merkantilistisches Zollwesen eingereicht</span>
-            <span class="toast-time">Gestern</span>
-          </div>
-        </div>
+        <!-- DYNAMIC NOTIFICATION TOASTS (BOTTOM RIGHT, z-index: 55) -->
+        <div id="v3-toast-container" class="ui-interactive"></div>
 
         <!-- FLOATING PROVINCE/REGION HOVER BADGE (FOLLOWS CURSOR) -->
         <div id="map-hover-tooltip" class="map-hover-badge">

@@ -20,7 +20,7 @@ export class ProvincePanelController {
     this.subtitleEl = document.getElementById("inspector-region-owner");
     this.ownerFlagEl = document.getElementById("inspector-owner-flag");
 
-    this.activeTab = "population"; // Default to demographic view as in Screenshot 1
+    this.activeTab = "overview"; // Default to authentic dossier overview
     this.constructionCategory = "buildings";
     this.currentProvince = null;
 
@@ -77,17 +77,21 @@ export class ProvincePanelController {
     this.currentProvince = prov;
     this.panel.classList.add("visible");
 
+    // Sync active tab indicator
+    document.querySelectorAll(".v3-state-tab").forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-tab") === this.activeTab);
+    });
+
     const reg = store.regions[prov.region_id] || null;
     const owner = store.nations[prov.owner_id] || { name: "Unabhängig", color: "#666" };
     
     // Set Header Title & Flag
     if (this.titleEl) {
-      const displayName = reg ? reg.name : prov.name;
-      this.titleEl.textContent = displayName.toUpperCase();
+      this.titleEl.textContent = (prov.name || "PROVINZ").toUpperCase();
     }
     if (this.subtitleEl) {
-      const nationName = owner.name.replace("Königreich ", "").replace("Erzherzogtum ", "").replace("Kurfürstentum ", "");
-      this.subtitleEl.innerHTML = `Staat <span style="color:${owner.color}; font-weight:700;">${owner.name}</span> in ${nationName}`;
+      const regName = reg ? reg.name : "Region";
+      this.subtitleEl.innerHTML = `<span style="color:#cbd5e1; font-weight:600;">${regName}</span> · <span style="color:${owner.color}; font-weight:700;">${owner.name}</span>`;
     }
 
     this.renderTabContent();
@@ -214,18 +218,7 @@ export class ProvincePanelController {
     };
 
     this.tabContentEl.innerHTML = `
-      <!-- Cultures Row (Screenshot 1: Primary + Secondary Culture Pills) -->
-      <div class="v3-cultures-row">
-        <div class="culture-pill">
-          <span>${primaryCulture}</span>
-          <span style="color:#4ade80; font-size:10px;">+10</span>
-        </div>
-        <div class="culture-pill secondary">
-          <span>${secondaryCulture}</span>
-        </div>
-      </div>
-
-      <!-- Standard of Living Card (Screenshot 1: Lebensstandard Card) -->
+      <!-- Standard of Living Card -->
       <div class="v3-sol-card">
         <div class="sol-left">
           <div class="sol-title">Lebensstandard</div>
@@ -234,100 +227,87 @@ export class ProvincePanelController {
         <div class="sol-right">
           <div class="sol-stat-item">
             <span class="sol-stat-val">${(farmers / 1000).toFixed(0)}K</span>
-            <span class="sol-stat-lbl">Bauern</span>
+            <span class="sol-stat-lbl">Ackerbauern</span>
           </div>
           <div class="sol-stat-item">
-            <span class="sol-stat-val" style="color:#f87171;">${(unemployed / 1000).toFixed(2)}K</span>
-            <span class="sol-stat-lbl">Arbeitslos</span>
+            <span class="sol-stat-val" style="color:#f59e0b;">${(workers / 1000).toFixed(0)}K</span>
+            <span class="sol-stat-lbl">Handwerker</span>
           </div>
         </div>
       </div>
 
-      <!-- DIAGRAMME SECTION (Screenshot 1: Kulturen, Religionen, Beruf, Politischer Druck) -->
-      <div>
-        <div class="v3-diagrams-heading">Diagramme</div>
-        <div class="v3-diagrams-grid">
-
-          <!-- 1. Kulturen Diagram -->
-          <div class="v3-diagram-card">
-            <div class="diagram-title">Kulturen</div>
-            <div class="diagram-graphic-box">
-              <div class="diagram-slice" style="width: ${primaryCulturePct}%; background: #9e4740;" title="${primaryCulture} ${primaryCulturePct}%"></div>
-              <div class="diagram-slice" style="width: ${secondaryCulturePct}%; background: #388f8d;" title="${secondaryCulture} ${secondaryCulturePct}%"></div>
-            </div>
-            <div class="diagram-legend">
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:#9e4740;"></span>${primaryCulture}</span>
-                <span class="legend-val">${primaryCulturePct}%</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:#388f8d;"></span>${secondaryCulture}</span>
-                <span class="legend-val">${secondaryCulturePct}%</span>
-              </div>
-            </div>
+      <!-- HISTORICAL DEMOGRAPHIC REGISTER -->
+      <div style="background:rgba(18,24,34,0.75); border:1px solid rgba(196,163,90,0.2); border-radius:4px; padding:12px; display:flex; flex-direction:column; gap:12px;">
+        
+        <!-- 1. Kulturen & Nationalitäten -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--brass-light); margin-bottom:6px; display:flex; justify-content:space-between;">
+            <span>Ethnische Gliederung</span>
+            <span style="font-size:10px; color:#cbd5e1;">${primaryCulture} (${primaryCulturePct}%) · ${secondaryCulture} (${secondaryCulturePct}%)</span>
           </div>
-
-          <!-- 2. Religionen Diagram -->
-          <div class="v3-diagram-card">
-            <div class="diagram-title">Religionen</div>
-            <div class="diagram-graphic-box">
-              <div class="diagram-slice" style="width: ${primaryReligionPct}%; background: ${getRelColor(primaryReligion)};" title="${primaryReligion} ${primaryReligionPct}%"></div>
-              <div class="diagram-slice" style="width: ${secondaryReligionPct}%; background: ${getRelColor(secondaryReligion)};" title="${secondaryReligion} ${secondaryReligionPct}%"></div>
-            </div>
-            <div class="diagram-legend">
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:${getRelColor(primaryReligion)};"></span>${primaryReligion}</span>
-                <span class="legend-val">${primaryReligionPct}%</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:${getRelColor(secondaryReligion)};"></span>${secondaryReligion}</span>
-                <span class="legend-val">${secondaryReligionPct}%</span>
-              </div>
-            </div>
+          <div style="height:6px; border-radius:3px; background:rgba(0,0,0,0.5); overflow:hidden; display:flex;">
+            <div style="width:${primaryCulturePct}%; background:#3b536b;"></div>
+            <div style="width:${secondaryCulturePct}%; background:#8c6b38;"></div>
           </div>
-
-          <!-- 3. Berufe Diagram -->
-          <div class="v3-diagram-card">
-            <div class="diagram-title">Beruf</div>
-            <div class="diagram-graphic-box">
-              <div class="diagram-slice" style="width: ${farmerPct}%; background: #475569;" title="Bauern ${farmerPct}%"></div>
-              <div class="diagram-slice" style="width: ${workerPct}%; background: #0284c7;" title="Arbeiter ${workerPct}%"></div>
-              <div class="diagram-slice" style="width: ${100 - farmerPct - workerPct}%; background: #16a34a;" title="Landwirte / Klerus ${100 - farmerPct - workerPct}%"></div>
-            </div>
-            <div class="diagram-legend">
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:#475569;"></span>Bauern</span>
-                <span class="legend-val">${farmerPct}%</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:#0284c7;"></span>Arbeiter</span>
-                <span class="legend-val">${workerPct}%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. Politischer Druck Diagram -->
-          <div class="v3-diagram-card">
-            <div class="diagram-title">Politischer Druck</div>
-            <div class="diagram-graphic-box">
-              <div class="diagram-slice" style="width: ${landvolkPct}%; background: #15803d;" title="Landvolk ${landvolkPct}%"></div>
-              <div class="diagram-slice" style="width: ${grundbesitzerPct}%; background: #b45309;" title="Grundbesitzer ${grundbesitzerPct}%"></div>
-              <div class="diagram-slice" style="width: ${streitkraeftePct}%; background: #4f46e5;" title="Streitkräfte ${streitkraeftePct}%"></div>
-              <div class="diagram-slice" style="width: ${100 - landvolkPct - grundbesitzerPct - streitkraeftePct}%; background: #d97706;" title="Klerus / Bürgertum ${100 - landvolkPct - grundbesitzerPct - streitkraeftePct}%"></div>
-            </div>
-            <div class="diagram-legend">
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:#15803d;"></span>Landvolk</span>
-                <span class="legend-val">${landvolkPct}%</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-name"><span class="legend-color-dot" style="background:#b45309;"></span>Grundbesitzer</span>
-                <span class="legend-val">${grundbesitzerPct}%</span>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        <!-- 2. Konfessionen & Glaube -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--brass-light); margin-bottom:6px; display:flex; justify-content:space-between;">
+            <span>Konfessionelle Ordnung</span>
+            <span style="font-size:10px; color:#cbd5e1;">${primaryReligion} (${primaryReligionPct}%) · ${secondaryReligion} (${secondaryReligionPct}%)</span>
+          </div>
+          <div style="height:6px; border-radius:3px; background:rgba(0,0,0,0.5); overflow:hidden; display:flex;">
+            <div style="width:${primaryReligionPct}%; background:#3f5a43;"></div>
+            <div style="width:${secondaryReligionPct}%; background:#705335;"></div>
+          </div>
+        </div>
+
+        <!-- 3. Soziale Stände & Berufe -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--brass-light); margin-bottom:8px;">Ständische Berufsverteilung</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:10.5px;">
+            <div style="background:rgba(12,16,24,0.6); padding:5px 8px; border-radius:3px; display:flex; justify-content:space-between;">
+              <span style="color:var(--text-secondary);">🌾 Landvolk / Bauern</span>
+              <strong style="color:#e2e8f0;">${farmerPct}%</strong>
+            </div>
+            <div style="background:rgba(12,16,24,0.6); padding:5px 8px; border-radius:3px; display:flex; justify-content:space-between;">
+              <span style="color:var(--text-secondary);">⚒️ Bürger & Handwerk</span>
+              <strong style="color:#e2e8f0;">${workerPct}%</strong>
+            </div>
+            <div style="background:rgba(12,16,24,0.6); padding:5px 8px; border-radius:3px; display:flex; justify-content:space-between;">
+              <span style="color:var(--text-secondary);">🏰 Adel & Gutsherren</span>
+              <strong style="color:#e2e8f0;">${landlordPct}%</strong>
+            </div>
+            <div style="background:rgba(12,16,24,0.6); padding:5px 8px; border-radius:3px; display:flex; justify-content:space-between;">
+              <span style="color:var(--text-secondary);">⛪ Klerus & Gelehrte</span>
+              <strong style="color:#e2e8f0;">${clergyPct}%</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Politische Interessengruppen -->
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--brass-light); margin-bottom:8px;">Politischer Einfluss der Stände</div>
+          <div style="display:flex; flex-direction:column; gap:4px; font-size:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="color:var(--text-secondary);">Landvolk-Verband</span>
+              <span style="font-weight:600; color:#e2e8f0;">${landvolkPct}%</span>
+            </div>
+            <div style="height:4px; border-radius:2px; background:rgba(0,0,0,0.5); overflow:hidden;">
+              <div style="width:${landvolkPct}%; height:100%; background:#4ade80;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+              <span style="color:var(--text-secondary);">Krone & Grundbesitzer</span>
+              <span style="font-weight:600; color:#e2e8f0;">${grundbesitzerPct}%</span>
+            </div>
+            <div style="height:4px; border-radius:2px; background:rgba(0,0,0,0.5); overflow:hidden;">
+              <div style="width:${grundbesitzerPct}%; height:100%; background:#f59e0b;"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     `;
   }

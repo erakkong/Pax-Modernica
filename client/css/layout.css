@@ -812,17 +812,17 @@
 }
 
 /* ==========================================================================
-   5. DETAIL-PANEL: STATE / PROVINCE INSPECTOR (SCREENSHOT 1 "OST-SCHWEIZ")
+   5. DETAIL-PANEL: STATE / PROVINCE DOSSIER (CONQUEREUROPA & VICTORIA 3 AESTHETIC)
    ========================================================================== */
 #province-inspector {
   position: absolute;
   top: 14px;
   left: 68px;
   bottom: 25px;
-  width: 440px;
-  background: linear-gradient(180deg, rgba(18, 23, 33, 0.96) 0%, rgba(12, 16, 24, 0.98) 100%);
-  border: 1.5px solid var(--brass-accent);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  width: 380px;
+  background: linear-gradient(180deg, rgba(16, 22, 32, 0.98) 0%, rgba(10, 14, 20, 0.98) 100%);
+  border: 1px solid var(--brass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
   z-index: 55;
   border-radius: 4px;
   backdrop-filter: blur(14px);
@@ -836,26 +836,26 @@
   display: flex;
 }
 
-/* Ornate Burgundy Arch Banner Header (Victoria 3 Original Style) */
+/* Refined Dark Slate & Brass Header (ConquerEuropa / HoI IV Military Dossier Style) */
 .v3-state-header {
-  background: linear-gradient(180deg, #4a121a 0%, #280a0e 100%);
-  border-bottom: 2px solid var(--brass-accent);
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1.5px solid var(--brass-border);
   padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  box-shadow: inset 0 -1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 -1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .v3-state-header::after {
   content: "";
   position: absolute;
-  bottom: -4px;
-  left: 20px;
-  right: 20px;
+  bottom: -2px;
+  left: 15px;
+  right: 15px;
   height: 1px;
-  background: rgba(196, 163, 90, 0.4);
+  background: rgba(196, 163, 90, 0.3);
 }
 
 .v3-state-title-group {
@@ -865,22 +865,21 @@
 
 .v3-state-title {
   font-family: var(--font-serif);
-  font-size: 17px;
-  font-weight: 800;
-  color: #fef08a;
-  letter-spacing: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brass-light);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .v3-state-subtitle {
-  font-size: 11px;
-  color: #e2e8f0;
+  font-size: 10.5px;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  margin-top: 2px;
+  gap: 6px;
+  margin-top: 3px;
 }
 
 .v3-header-controls, .v3-header-nav-arrows {
