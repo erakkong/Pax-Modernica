@@ -23,12 +23,12 @@ const NATION_LABEL_CONFIG = {
   nation_sweden:      { title: "SCHWEDEN",          x: 575, y: 270, minScale: 0.65, maxScale: 2.60, fontSize: 18, letterSpacing: 5 },
   nation_poland:      { title: "POLEN-LITAUEN",     x: 690, y: 475, minScale: 0.65, maxScale: 2.60, fontSize: 18, letterSpacing: 5 },
   nation_denmark:     { title: "DÄNEMARK",          x: 495, y: 395, minScale: 0.85, maxScale: 2.70, fontSize: 14, letterSpacing: 4 },
-  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 475, minScale: 1.00, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
+  nation_netherlands: { title: "NIEDERLANDE",       x: 410, y: 485, minScale: 2.00, maxScale: 3.50, fontSize: 11, letterSpacing: 2 },
   nation_portugal:    { title: "PORTUGAL",          x: 235, y: 735, minScale: 0.95, maxScale: 2.80, fontSize: 13, letterSpacing: 3 },
-  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 610, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
-  nation_bavaria:     { title: "BAYERN",            x: 520, y: 550, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
-  nation_venice:      { title: "VENEDIG",           x: 540, y: 625, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 },
-  nation_papal:       { title: "KIRCHENSTAAT",      x: 530, y: 695, minScale: 1.10, maxScale: 2.80, fontSize: 11, letterSpacing: 2 }
+  nation_switzerland: { title: "SCHWEIZ",           x: 490, y: 615, minScale: 2.00, maxScale: 3.50, fontSize: 11, letterSpacing: 2 },
+  nation_bavaria:     { title: "BAYERN",            x: 525, y: 550, minScale: 2.00, maxScale: 3.50, fontSize: 11, letterSpacing: 2 },
+  nation_venice:      { title: "VENEDIG",           x: 540, y: 630, minScale: 2.00, maxScale: 3.50, fontSize: 11, letterSpacing: 2 },
+  nation_papal:       { title: "KIRCHENSTAAT",      x: 535, y: 695, minScale: 2.00, maxScale: 3.50, fontSize: 11, letterSpacing: 2 }
 };
 
 export class MapEngine {
@@ -62,6 +62,13 @@ export class MapEngine {
     // Map Scale Badge Elements
     this.scaleLineEl = document.getElementById("map-scale-line");
     this.scaleLabelEl = document.getElementById("map-scale-label");
+
+    // Strategic Minimap Elements (ConquerEuropa / HoI IV aesthetic)
+    this.minimapContainer = document.getElementById("minimap-container");
+    this.minimapSvg = document.getElementById("minimap-svg");
+    this.minimapLand = document.getElementById("minimap-land");
+    this.minimapRegionsGroup = document.getElementById("minimap-regions");
+    this.minimapRect = document.getElementById("minimap-viewport-rect");
 
     // Pinch zoom for touch
     this.initialPinchDistance = null;
@@ -219,7 +226,22 @@ export class MapEngine {
     document.getElementById("btn-zoom-reset")?.addEventListener("click", () => this.resetView());
     document.getElementById("btn-zoom-fit")?.addEventListener("click", () => this.fitContinentView());
 
-    // 5. Map Mode Selection
+    // 5. Strategic Minimap Interaction (ConquerEuropa style)
+    this.minimapSvg?.addEventListener("click", (e) => {
+      const ctm = this.minimapSvg.getScreenCTM();
+      if (!ctm) return;
+      const pt = this.minimapSvg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const svgPt = pt.matrixTransform(ctm.inverse());
+      this.centerOnCoords(svgPt.x, svgPt.y);
+    });
+
+    document.getElementById("btn-toggle-minimap")?.addEventListener("click", () => {
+      this.minimapContainer?.classList.toggle("minimized");
+    });
+
+    // 6. Map Mode Selection
     document.querySelectorAll(".map-mode-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const mode = e.currentTarget.getAttribute("data-mode");
@@ -356,6 +378,25 @@ export class MapEngine {
     }
     this.updateZoomLOD();
     this.updateMapScaleBadge();
+    this.updateMinimapViewport();
+  }
+
+  updateMinimapViewport() {
+    if (!this.minimapRect) return;
+    const viewW = 1024 / this.scale;
+    const viewH = 928 / this.scale;
+    const viewX = (512 - this.translateX) / this.scale - viewW / 2;
+    const viewY = (464 - this.translateY) / this.scale - viewH / 2;
+    this.minimapRect.setAttribute("x", Math.max(0, viewX).toFixed(1));
+    this.minimapRect.setAttribute("y", Math.max(0, viewY).toFixed(1));
+    this.minimapRect.setAttribute("width", Math.min(1024, viewW).toFixed(1));
+    this.minimapRect.setAttribute("height", Math.min(928, viewH).toFixed(1));
+  }
+
+  centerOnCoords(cx, cy) {
+    this.translateX = 512 - cx * this.scale;
+    this.translateY = 464 - cy * this.scale;
+    this.applyTransform();
   }
 
   updateMapScaleBadge() {
@@ -457,6 +498,23 @@ export class MapEngine {
       underlay.setAttribute("d", store.land_path);
     }
 
+    // Populate Strategic Minimap
+    if (this.minimapLand && store.land_path) {
+      this.minimapLand.setAttribute("d", store.land_path);
+    }
+    if (this.minimapRegionsGroup) {
+      this.minimapRegionsGroup.innerHTML = "";
+      const regionsList = Object.values(store.regions || {});
+      regionsList.forEach((reg) => {
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute("d", reg.svg_path);
+        p.classList.add("minimap-reg-path");
+        p.setAttribute("data-region-id", reg.id);
+        p.style.fill = this.getRegionColor(reg);
+        this.minimapRegionsGroup.appendChild(p);
+      });
+    }
+
     const regions = Object.values(store.regions || {});
     const provinces = Object.values(store.provinces || {});
 
@@ -524,17 +582,37 @@ export class MapEngine {
       this.provincesGroup.appendChild(path);
     });
 
-    // 4. Render Victoria 3 City Settlements & Regional Capitals
+    // 4. Render Sovereign National Outer Borders (ConquerEuropa / HoI IV aesthetic)
+    this.renderNationalBorders();
+
+    // 5. Render Victoria 3 City Settlements & Regional Capitals
     this.renderCitiesAndCapitals();
 
-    // 5. Render Sovereign Macro Empire Labels
+    // 6. Render Sovereign Macro Empire Labels
     this.renderMacroNationLabels();
 
-    // 6. Render Military Armies on Map
+    // 7. Render Military Armies on Map
     this.renderArmies(store.armies);
 
     this.applyTransform();
-    console.log(`Pax Modernica: Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen mit Victoria-3-Städten).`);
+    console.log(`Pax Modernica: Karte bereit (${regions.length} Regionen, ${provinces.length} Provinzen mit 1750-Grenzen).`);
+  }
+
+  renderNationalBorders() {
+    if (!this.bordersGroup) return;
+    this.bordersGroup.innerHTML = "";
+
+    const borders = store.national_borders || {};
+    Object.entries(borders).forEach(([nid, pathStr]) => {
+      if (!pathStr) return;
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", pathStr);
+      path.setAttribute("id", `nat-border-${nid}`);
+      path.classList.add("national-border");
+      path.setAttribute("data-nation-id", nid);
+      path.setAttribute("vector-effect", "non-scaling-stroke");
+      this.bordersGroup.appendChild(path);
+    });
   }
 
   renderCitiesAndCapitals() {
@@ -683,6 +761,14 @@ export class MapEngine {
         if (prov) path.style.fill = this.getProvinceColor(prov);
       });
     }
+
+    if (this.minimapRegionsGroup) {
+      this.minimapRegionsGroup.querySelectorAll(".minimap-reg-path").forEach((path) => {
+        const rid = path.getAttribute("data-region-id");
+        const reg = store.regions[rid];
+        if (reg) path.style.fill = this.getRegionColor(reg);
+      });
+    }
   }
 
   getRegionColor(reg) {
@@ -692,25 +778,25 @@ export class MapEngine {
       return "rgba(22, 32, 45, 0.4)";
     }
 
-    // Authentic Victoria 3 Diplomatic Palette
+    // Authentic Grand Strategy & ConquerEuropa Matte Palette
     if (mode === "political" || mode === "regions") {
       const nationPalette = {
-        "nation_prussia": "#4a708b",     // Prussian Blue / Steel
-        "nation_france": "#3852a4",      // French Royal Blue
-        "nation_austria": "#ded7cb",     // Imperial Habsburg Off-White
-        "nation_england": "#b8474d",     // British Redcoat Crimson
-        "nation_russia": "#558e57",      // Russian Imperial Green
-        "nation_ottoman": "#7d9e6e",     // Ottoman Sage Green
-        "nation_spain": "#cc9f3d",       // Spanish Ochre / Gold
-        "nation_sweden": "#5b92ba",      // Baltic Soft Blue
-        "nation_poland": "#9e4c6c",      // Polish Magenta
-        "nation_denmark": "#b54444",     // Dannebrog Coral
-        "nation_netherlands": "#bd7433", // Orange-Nassau
-        "nation_portugal": "#3b7a8c",    // Portuguese Sea Teal
-        "nation_switzerland": "#9e4740", // Swiss Terracotta Red
-        "nation_bavaria": "#4a85b5",     // Bavarian Sky Blue
-        "nation_venice": "#388f8d",      // Venetian Lagoon Teal
-        "nation_papal": "#ded8b8"        // Papal Parchment Cream
+        "nation_prussia": "#3b536b",     // Prussian Blue / Slate Steel
+        "nation_france": "#2d4b7a",      // French Royal Blue
+        "nation_austria": "#c4ae88",     // Imperial Habsburg Biscuit Sand Tan (ConquerEuropa style)
+        "nation_england": "#9e3838",     // British Redcoat Crimson
+        "nation_russia": "#4a7050",      // Russian Imperial Forest Green
+        "nation_ottoman": "#6e8248",     // Ottoman Sage Olive Green
+        "nation_spain": "#ba8c38",       // Spanish Ochre / Gold
+        "nation_sweden": "#4a7596",      // Baltic Soft Blue
+        "nation_poland": "#bf6f7b",      // Polish Soft Rose / Magenta (ConquerEuropa style)
+        "nation_denmark": "#9e3f3f",     // Dannebrog Coral
+        "nation_netherlands": "#ad6d34", // Orange-Nassau Bronze
+        "nation_portugal": "#336d7a",    // Portuguese Sea Teal
+        "nation_switzerland": "#8f3e3a", // Swiss Terracotta Red
+        "nation_bavaria": "#437b9e",     // Bavarian Sky Blue
+        "nation_venice": "#347370",      // Venetian Lagoon Teal
+        "nation_papal": "#c4baa0"        // Papal Parchment Cream
       };
       return nationPalette[reg.owner_id] || "#475569";
     }

@@ -253,6 +253,21 @@
           </div>
         </div>
 
+        <!-- STRATEGIC MINIMAP (CONQUEREUROPA & HOI IV AESTHETIC, BOTTOM RIGHT) -->
+        <div id="minimap-container" class="ui-interactive" title="Strategische Übersichtskarte (Klicken zum Zentrieren)">
+          <div class="minimap-header">
+            <span class="minimap-title">EUROPA 1750</span>
+            <button id="btn-toggle-minimap" class="minimap-toggle-btn" title="Minikarte ein-/ausklappen">▾</button>
+          </div>
+          <div id="minimap-body">
+            <svg id="minimap-svg" viewBox="0 0 1024 928" preserveAspectRatio="xMidYMid meet">
+              <path id="minimap-land" class="minimap-land-path" d="" />
+              <g id="minimap-regions"></g>
+              <rect id="minimap-viewport-rect" class="minimap-viewport" x="0" y="0" width="1024" height="928" />
+            </svg>
+          </div>
+        </div>
+
         <!-- LEFT DRAWER: REICHSKABINETT (z-index: 55) -->
         <aside id="left-panel" class="ui-interactive collapsed">
           <div class="panel-header v3-burgundy-header">

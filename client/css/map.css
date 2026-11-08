@@ -39,10 +39,22 @@ svg#europe-map-svg {
   pointer-events: none;
 }
 
+/* Sovereign National Outer Borders (ConquerEuropa / HoI IV distinct national demarcations) */
+.national-border {
+  fill: none;
+  stroke: rgba(15, 23, 42, 0.82);
+  stroke-width: 0.95px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.45));
+}
+
 /* Tier 1: Overarching Regional States (Image 2 - 251 States) */
 .region-path {
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 0.35px;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.45px;
+  vector-effect: non-scaling-stroke;
   stroke-linejoin: round;
   stroke-linecap: round;
   cursor: pointer;
@@ -51,12 +63,14 @@ svg#europe-map-svg {
 
 .region-path:hover {
   stroke: #fde047;
-  stroke-width: 1.1px;
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
 }
 
 .region-path.region-selected {
   stroke: #fde047;
-  stroke-width: 1.8px;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
   filter: drop-shadow(0 0 5px rgba(253, 224, 71, 0.5));
 }
 
@@ -64,6 +78,7 @@ svg#europe-map-svg {
 .province-path {
   stroke: none !important;
   stroke-width: 0 !important;
+  vector-effect: non-scaling-stroke;
   cursor: pointer;
   transition: fill 0.15s ease, stroke 0.15s ease;
 }
@@ -71,6 +86,7 @@ svg#europe-map-svg {
 .province-path:hover {
   stroke: #fde047 !important;
   stroke-width: 1.2px !important;
+  vector-effect: non-scaling-stroke;
   fill: rgba(253, 224, 71, 0.18) !important;
   filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.4));
 }
@@ -78,6 +94,7 @@ svg#europe-map-svg {
 .province-path.selected {
   stroke: #fef08a !important;
   stroke-width: 1.8px !important;
+  vector-effect: non-scaling-stroke;
   fill: rgba(254, 240, 138, 0.28) !important;
   filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.6));
 }

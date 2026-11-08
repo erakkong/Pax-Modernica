@@ -66,6 +66,7 @@ export class GameState {
 
   setInitialWorld(worldData) {
     this.land_path = worldData.land_path || "";
+    this.national_borders = worldData.national_borders || {};
     this.nations = worldData.nations || {};
     this.regions = worldData.regions || {};
     this.provinces = worldData.provinces || {};

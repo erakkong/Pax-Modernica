@@ -57,3 +57,23 @@ def test_national_budget_and_rankings():
     assert res["success"] is True
     assert ws.nations["nation_prussia"]["monthly_income"] > base_income
     assert ws.nations["nation_prussia"]["satisfaction"] < 80
+
+def test_historical_1750_borders():
+    """Validates that 1750 scenario assigns historical post-Silesian-war borders."""
+    ws = WorldState()
+    assert ws.scenario_meta["starting_year"] == 50
+    assert ws.scenario_meta["historical_reference_year"] == 1750
+
+    # 1. Silesia is Prussian
+    assert ws.regions["reg_schlesien_2060"]["owner_id"] == "nation_prussia"
+    assert ws.regions["reg_oberschlesien_2100"]["owner_id"] == "nation_prussia"
+
+    # 2. Austrian Netherlands (Belgium) is Austrian
+    assert ws.regions["reg_span_niederlande_2043"]["owner_id"] == "nation_austria"
+
+    # 3. Ingermanland / St. Petersburg & Baltic are Russian
+    assert ws.regions["reg_ingermanland_1439"]["owner_id"] == "nation_russia"
+    assert ws.regions["reg_estland_1475"]["owner_id"] == "nation_russia"
+    assert ws.regions["reg_livland_1616"]["owner_id"] == "nation_russia"
+    assert ws.provinces["prov_192"]["name"] == "Sankt Petersburg"
+    assert ws.provinces["prov_192"]["owner_id"] == "nation_russia"

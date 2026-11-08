@@ -1,0 +1,541 @@
+{
+  "id": "scenario_1750",
+  "name": "1750 – Das Zeitalter Friedrichs des Großen",
+  "starting_year": 50,
+  "historical_reference_year": 1750,
+  "description": "Nach dem Aachener Frieden von 1748 und den Schlesischen Kriegen stehen sich Preußen und Österreich unversöhnlich gegenüber. Russland hat unter Zarin Elisabeth die Ostsee gesichert und Friedrich II. rüstet seine preußische Armee für kommende Bewährungsproben.",
+  "nations": {
+    "nation_prussia": {
+      "id": "nation_prussia",
+      "name": "Königreich Preußen",
+      "adjective": "Preußisch",
+      "government": "Aufgeklärter Absolutismus",
+      "ruler": {
+        "name": "Friedrich II. (Der Große)",
+        "house": "Haus Hohenzollern",
+        "age": 38,
+        "title": "König von Preußen & Kurfürst von Brandenburg",
+        "traits": [
+          "Militärgenie",
+          "Aufklärer",
+          "Schlesiens Bezwinger",
+          "Philosoph von Sanssouci"
+        ],
+        "legitimacy": 95,
+        "military_skill": 10,
+        "diplomacy_skill": 8,
+        "economy_skill": 9
+      },
+      "capital_province_id": "prov_berlin",
+      "color": "#3b536b",
+      "gold": 3800,
+      "prestige": 90,
+      "stability": 88,
+      "manpower": 65000,
+      "primary_culture": "Preußisch-Deutsch",
+      "state_religion": "Protestantisch"
+    },
+    "nation_austria": {
+      "id": "nation_austria",
+      "name": "Habsburgermonarchie",
+      "adjective": "Österreichisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Maria Theresia",
+        "house": "Haus Habsburg-Lothringen",
+        "age": 33,
+        "title": "Erzherzogin von Österreich & Königin von Ungarn und Böhmen",
+        "traits": [
+          "Staatsreformerin",
+          "Theresianische Tapferkeit",
+          "Kaiserliche Würde",
+          "Unbeugsam"
+        ],
+        "legitimacy": 96,
+        "military_skill": 8,
+        "diplomacy_skill": 9,
+        "economy_skill": 9
+      },
+      "capital_province_id": "prov_vienna",
+      "color": "#c4ae88",
+      "gold": 3500,
+      "prestige": 92,
+      "stability": 84,
+      "manpower": 70000,
+      "primary_culture": "Deutsch-Österreichisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_russia": {
+      "id": "nation_russia",
+      "name": "Russisches Kaiserreich",
+      "adjective": "Russisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Elisabeth I. (Jelisaweta)",
+        "house": "Haus Romanow",
+        "age": 41,
+        "title": "Kaiserin aller Reußen",
+        "traits": [
+          "Tochter Peters des Großen",
+          "Siegerin im Ostseeraum",
+          "Prachtliebende Reformerin",
+          "Strenge Autokratin"
+        ],
+        "legitimacy": 92,
+        "military_skill": 8,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_192",
+      "color": "#4a7050",
+      "gold": 3100,
+      "prestige": 86,
+      "stability": 80,
+      "manpower": 85000,
+      "primary_culture": "Russisch",
+      "state_religion": "Orthodox"
+    },
+    "nation_france": {
+      "id": "nation_france",
+      "name": "Königreich Frankreich",
+      "adjective": "Französisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Ludwig XV.",
+        "house": "Haus Bourbon",
+        "age": 40,
+        "title": "König von Frankreich & Navarra",
+        "traits": [
+          "Der Vielgeliebte",
+          "Diplomatische Revolution",
+          "Versailler Prunk",
+          "Kolonialer Rivale"
+        ],
+        "legitimacy": 90,
+        "military_skill": 7,
+        "diplomacy_skill": 9,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_paris",
+      "color": "#2d4b7a",
+      "gold": 4200,
+      "prestige": 94,
+      "stability": 78,
+      "manpower": 78000,
+      "primary_culture": "Französisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_england": {
+      "id": "nation_england",
+      "name": "Königreich Großbritannien",
+      "adjective": "Britisch",
+      "government": "Parlamentarische Monarchie",
+      "ruler": {
+        "name": "Georg II.",
+        "house": "Haus Hannover",
+        "age": 67,
+        "title": "König von Großbritannien & Kurfürst von Hannover",
+        "traits": [
+          "Beherrscher der Meere",
+          "Parlamentarische Stärke",
+          "Hannover-Union",
+          "Handelsmagnat"
+        ],
+        "legitimacy": 92,
+        "military_skill": 8,
+        "diplomacy_skill": 8,
+        "economy_skill": 10
+      },
+      "capital_province_id": "prov_london",
+      "color": "#9e3838",
+      "gold": 4800,
+      "prestige": 90,
+      "stability": 86,
+      "manpower": 52000,
+      "primary_culture": "Britisch",
+      "state_religion": "Anglikanisch"
+    },
+    "nation_sweden": {
+      "id": "nation_sweden",
+      "name": "Königreich Schweden",
+      "adjective": "Schwedisch",
+      "government": "Konstitutionelle Monarchie",
+      "ruler": {
+        "name": "Adolf Friedrich",
+        "house": "Haus Holstein-Gottorp",
+        "age": 40,
+        "title": "König von Schweden",
+        "traits": [
+          "Reichstagsmonarch",
+          "Zeitalter der Freiheit",
+          "Friedensstifter"
+        ],
+        "legitimacy": 80,
+        "military_skill": 6,
+        "diplomacy_skill": 7,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_stockholm",
+      "color": "#4a7596",
+      "gold": 1600,
+      "prestige": 70,
+      "stability": 75,
+      "manpower": 28000,
+      "primary_culture": "Schwedisch",
+      "state_religion": "Protestantisch"
+    },
+    "nation_poland": {
+      "id": "nation_poland",
+      "name": "Königreich Polen-Litauen",
+      "adjective": "Polnisch",
+      "government": "Adelsrepublik / Wahlmonarchie",
+      "ruler": {
+        "name": "August III. von Polen",
+        "house": "Haus Wettin",
+        "age": 54,
+        "title": "König von Polen, Großfürst von Litauen & Kurfürst von Sachsen",
+        "traits": [
+          "Sächsische Union",
+          "Kunstmäzen",
+          "Liberum Veto Belastet"
+        ],
+        "legitimacy": 78,
+        "military_skill": 6,
+        "diplomacy_skill": 7,
+        "economy_skill": 6
+      },
+      "capital_province_id": "prov_warsaw",
+      "color": "#bf6f7b",
+      "gold": 2100,
+      "prestige": 75,
+      "stability": 68,
+      "manpower": 42000,
+      "primary_culture": "Polnisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_spain": {
+      "id": "nation_spain",
+      "name": "Königreich Spanien",
+      "adjective": "Spanisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Ferdinand VI.",
+        "house": "Haus Bourbon",
+        "age": 37,
+        "title": "König von Spanien & beider Indien",
+        "traits": [
+          "Friedensmonarch",
+          "Flottenaufrüstung",
+          "Ensenada-Reformen"
+        ],
+        "legitimacy": 90,
+        "military_skill": 7,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_madrid",
+      "color": "#ba8c38",
+      "gold": 3200,
+      "prestige": 82,
+      "stability": 82,
+      "manpower": 48000,
+      "primary_culture": "Kastilisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_ottoman": {
+      "id": "nation_ottoman",
+      "name": "Osmanisches Reich",
+      "adjective": "Osmanisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Mahmud I.",
+        "house": "Haus Osman",
+        "age": 54,
+        "title": "Sultan des Osmanischen Reiches",
+        "traits": [
+          "Reformer der Artillerie",
+          "Bibliothekenstifter",
+          "Balkan-Hüter"
+        ],
+        "legitimacy": 88,
+        "military_skill": 7,
+        "diplomacy_skill": 8,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_constantinople",
+      "color": "#6e8248",
+      "gold": 2800,
+      "prestige": 80,
+      "stability": 76,
+      "manpower": 80000,
+      "primary_culture": "Osmanisch-Türkisch",
+      "state_religion": "Sunnitisch"
+    },
+    "nation_denmark": {
+      "id": "nation_denmark",
+      "name": "Königreich Dänemark-Norwegen",
+      "adjective": "Dänisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Friedrich V.",
+        "house": "Haus Oldenburg",
+        "age": 27,
+        "title": "König von Dänemark und Norwegen",
+        "traits": [
+          "Bernstorff-Kabinett",
+          "Handelsförderer",
+          "Aufgeklärt"
+        ],
+        "legitimacy": 88,
+        "military_skill": 7,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_copenhagen",
+      "color": "#9e3f3f",
+      "gold": 1900,
+      "prestige": 74,
+      "stability": 82,
+      "manpower": 24000,
+      "primary_culture": "Dänisch",
+      "state_religion": "Protestantisch"
+    },
+    "nation_netherlands": {
+      "id": "nation_netherlands",
+      "name": "Republik der Vereinigten Niederlande",
+      "adjective": "Niederländisch",
+      "government": "Parlamentarische Republik",
+      "ruler": {
+        "name": "Wilhelm IV. von Oranien",
+        "house": "Haus Oranien-Nassau",
+        "age": 39,
+        "title": "Erbstatthalter der Vereinigten Provinzen",
+        "traits": [
+          "General-Erbstatthalter",
+          "Finanzier",
+          "Welthandelskapitän"
+        ],
+        "legitimacy": 85,
+        "military_skill": 6,
+        "diplomacy_skill": 9,
+        "economy_skill": 10
+      },
+      "capital_province_id": "prov_amsterdam",
+      "color": "#ad6d34",
+      "gold": 4500,
+      "prestige": 85,
+      "stability": 85,
+      "manpower": 30000,
+      "primary_culture": "Niederländisch",
+      "state_religion": "Kalvinistisch"
+    },
+    "nation_portugal": {
+      "id": "nation_portugal",
+      "name": "Königreich Portugal",
+      "adjective": "Portugiesisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Joseph I. (José I.)",
+        "house": "Haus Braganza",
+        "age": 36,
+        "title": "König von Portugal und der Algarven",
+        "traits": [
+          "Pombal-Ära Einleiter",
+          "Kolonialer Handel",
+          "Atlantische Seemacht"
+        ],
+        "legitimacy": 88,
+        "military_skill": 6,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_lisbon",
+      "color": "#336d7a",
+      "gold": 2700,
+      "prestige": 78,
+      "stability": 80,
+      "manpower": 22000,
+      "primary_culture": "Portugiesisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_bavaria": {
+      "id": "nation_bavaria",
+      "name": "Kurfürstentum Bayern",
+      "adjective": "Bayerisch",
+      "government": "Absolute Monarchie",
+      "ruler": {
+        "name": "Maximilian III. Joseph",
+        "house": "Haus Wittelsbach",
+        "age": 23,
+        "title": "Kurfürst von Bayern",
+        "traits": [
+          "Max der Vielgeliebte",
+          "Friede von Füssen 1745",
+          "Nymphenburger Porzellan"
+        ],
+        "legitimacy": 86,
+        "military_skill": 7,
+        "diplomacy_skill": 8,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_munich",
+      "color": "#437b9e",
+      "gold": 1400,
+      "prestige": 72,
+      "stability": 80,
+      "manpower": 18000,
+      "primary_culture": "Bayerisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_venice": {
+      "id": "nation_venice",
+      "name": "Serenissima Republik Venedig",
+      "adjective": "Venetianisch",
+      "government": "Aristokratische Republik",
+      "ruler": {
+        "name": "Pietro Grimani",
+        "house": "Patrizierhaus Grimani",
+        "age": 73,
+        "title": "Doge von Venedig",
+        "traits": [
+          "Gelehrter Doge",
+          "Adriatischer Seehandel",
+          "Karnevalsmetropole"
+        ],
+        "legitimacy": 84,
+        "military_skill": 6,
+        "diplomacy_skill": 9,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_venice",
+      "color": "#347370",
+      "gold": 2600,
+      "prestige": 78,
+      "stability": 82,
+      "manpower": 16000,
+      "primary_culture": "Venetianisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_papal": {
+      "id": "nation_papal",
+      "name": "Kirchenstaat",
+      "adjective": "Päpstlich",
+      "government": "Theokratie",
+      "ruler": {
+        "name": "Benedikt XIV. (Prospero Lambertini)",
+        "house": "Kurie Rom",
+        "age": 75,
+        "title": "Bischof von Rom & Papst",
+        "traits": [
+          "Kirchenlehrer",
+          "Wissenschaftsförderer",
+          "Konzilianter Diplomat"
+        ],
+        "legitimacy": 98,
+        "military_skill": 5,
+        "diplomacy_skill": 10,
+        "economy_skill": 7
+      },
+      "capital_province_id": "prov_rome",
+      "color": "#c4baa0",
+      "gold": 2200,
+      "prestige": 88,
+      "stability": 86,
+      "manpower": 12000,
+      "primary_culture": "Italienisch",
+      "state_religion": "Katholisch"
+    },
+    "nation_switzerland": {
+      "id": "nation_switzerland",
+      "name": "Alte Eidgenossenschaft",
+      "adjective": "Schweizerisch",
+      "government": "Republikanischer Staatenbund",
+      "ruler": {
+        "name": "Eidgenössische Tagsatzung",
+        "house": "Ortspatrizier (Zürich & Bern)",
+        "age": 50,
+        "title": "Landammann & Tagsatzungsdelegation",
+        "traits": [
+          "Bewaffnete Neutralität",
+          "Alpenfestung",
+          "Präzisionsgewerbe"
+        ],
+        "legitimacy": 90,
+        "military_skill": 8,
+        "diplomacy_skill": 8,
+        "economy_skill": 8
+      },
+      "capital_province_id": "prov_zurich",
+      "color": "#8f3e3a",
+      "gold": 1800,
+      "prestige": 70,
+      "stability": 88,
+      "manpower": 22000,
+      "primary_culture": "Allemannisch-Schweizerisch",
+      "state_religion": "Reformiert"
+    }
+  },
+  "region_overrides": {
+    "reg_schlesien_2060": {
+      "owner_id": "nation_prussia",
+      "name": "Herzogtum Schlesien (Breslau)"
+    },
+    "reg_oberschlesien_2100": {
+      "owner_id": "nation_prussia",
+      "name": "Oberschlesien & Oppeln (Preußisch-Schlesien)"
+    },
+    "reg_span_niederlande_2043": {
+      "owner_id": "nation_austria",
+      "name": "Österreichische Niederlande (Brüssel)"
+    },
+    "reg_span_niederlande_2055": {
+      "owner_id": "nation_austria",
+      "name": "Österreichische Niederlande (Flandern & Gent)"
+    },
+    "reg_span_niederlande_2107": {
+      "owner_id": "nation_austria",
+      "name": "Österreichische Niederlande (Antwerpen)"
+    },
+    "reg_span_niederlande_2118": {
+      "owner_id": "nation_austria",
+      "name": "Österreichische Niederlande (Brabant & Mecheln)"
+    },
+    "reg_span_niederlande_2119": {
+      "owner_id": "nation_austria",
+      "name": "Österreichische Niederlande (Namur & Hennegau)"
+    },
+    "reg_span_niederlande_2146": {
+      "owner_id": "nation_austria",
+      "name": "Österreichische Niederlande (Luxemburg)"
+    },
+    "reg_ingermanland_1439": {
+      "owner_id": "nation_russia",
+      "name": "Gouvernement Sankt Petersburg & Ingermanland"
+    },
+    "reg_estland_1475": {
+      "owner_id": "nation_russia",
+      "name": "Gouvernement Estland (Reval & Narwa)"
+    },
+    "reg_livland_1616": {
+      "owner_id": "nation_russia",
+      "name": "Gouvernement Livland (Riga & Dorpat)"
+    },
+    "reg_livland_1693": {
+      "owner_id": "nation_russia",
+      "name": "Gouvernement Livland (Dorpat & Wenden)"
+    },
+    "reg_karelien_1303": {
+      "owner_id": "nation_russia",
+      "name": "Gouvernement Wiborg (Wiborg & Ladoga)"
+    }
+  },
+  "province_overrides": {
+    "prov_192": {
+      "name": "Sankt Petersburg",
+      "is_capital": true,
+      "owner_id": "nation_russia",
+      "population": 220000,
+      "economy": 18000
+    }
+  }
+}

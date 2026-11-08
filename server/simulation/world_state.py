@@ -7,6 +7,9 @@ import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import copy
+import re
+import cv2
+import numpy as np
 
 from server.simulation.diplomacy import DiplomacyManager
 from server.simulation.technology import TechManager
@@ -33,10 +36,14 @@ class WorldState:
         self.ai: Optional[AIDirector] = None
         self.load_initial_data()
 
-    def load_initial_data(self) -> None:
-        """Loads map topology and initial 1700 scenario into memory."""
+    def load_initial_data(self, scenario_id: str = "scenario_1750") -> None:
+        """Loads map topology and scenario into memory."""
         map_file = DATA_DIR / "europe_map.json"
-        scenario_file = DATA_DIR / "scenario_1700.json"
+        scenario_file = DATA_DIR / f"{scenario_id}.json"
+        if not scenario_file.exists():
+            scenario_file = DATA_DIR / "scenario_1750.json"
+        if not scenario_file.exists():
+            scenario_file = DATA_DIR / "scenario_1700.json"
 
         if not map_file.exists() or not scenario_file.exists():
             raise FileNotFoundError("Scenario or map data missing in server/data")
@@ -45,10 +52,10 @@ class WorldState:
         scenario_data = json.loads(scenario_file.read_text(encoding="utf-8"))
 
         self.scenario_meta = {
-            "id": scenario_data.get("id", "scenario_1700"),
-            "name": scenario_data.get("name", "1700"),
-            "starting_year": scenario_data.get("starting_year", 0),
-            "historical_reference_year": scenario_data.get("historical_reference_year", 1700)
+            "id": scenario_data.get("id", "scenario_1750"),
+            "name": scenario_data.get("name", "1750"),
+            "starting_year": scenario_data.get("starting_year", 50),
+            "historical_reference_year": scenario_data.get("historical_reference_year", 1750)
         }
 
         # Initialize nations
@@ -65,32 +72,63 @@ class WorldState:
             nat["budget_research"] = 1.0   # Technik & Innovation
             nat["budget_investments"] = 1.0# Infrastruktur & Bau
             nat["budget_military"] = 1.0   # Heer & Flottenunterhalt
-            nat["satisfaction"] = 82       # 0 - 100%
-            nat["literacy"] = nat.get("literacy", 52.0)
+            nat["satisfaction"] = 84       # 0 - 100%
+            nat["literacy"] = nat.get("literacy", 54.0)
             nat["monthly_income_breakdown"] = {"taxes": 0.0, "tariffs": 0.0, "total": 0.0}
             nat["monthly_expense_breakdown"] = {
                 "military": 0.0, "admin": 0.0, "research": 0.0, "investments": 0.0, "total": 0.0
             }
             nat["player_account_id"] = None
 
-        # Initialize regions
+        # Initialize regions with scenario overrides
         self.land_path = map_data.get("land_path", "")
         self.regions = {}
+        reg_overrides = scenario_data.get("region_overrides", {})
+        prov_overrides = scenario_data.get("province_overrides", {})
+
         for reg in map_data.get("regions", []):
             rid = reg["id"]
-            self.regions[rid] = copy.deepcopy(reg)
+            reg_obj = copy.deepcopy(reg)
+            if rid in reg_overrides:
+                reg_obj["owner_id"] = reg_overrides[rid].get("owner_id", reg_obj["owner_id"])
+                if "name" in reg_overrides[rid]:
+                    reg_obj["name"] = reg_overrides[rid]["name"]
+            self.regions[rid] = reg_obj
 
-        # Initialize provinces
+        # Initialize provinces with scenario overrides and parent region ownership inheritance
+        self.provinces = {}
         for prov in map_data.get("provinces", []):
             pid = prov["id"]
-            self.provinces[pid] = copy.deepcopy(prov)
-            owner = prov.get("owner_id")
+            prov_obj = copy.deepcopy(prov)
+            rid = prov_obj.get("region_id")
+
+            # Inherit owner from parent region if region was overridden
+            if rid in self.regions:
+                prov_obj["owner_id"] = self.regions[rid]["owner_id"]
+
+            # Apply explicit province override
+            if pid in prov_overrides:
+                prov_obj["owner_id"] = prov_overrides[pid].get("owner_id", prov_obj["owner_id"])
+                if "name" in prov_overrides[pid]:
+                    prov_obj["name"] = prov_overrides[pid]["name"]
+                if "is_capital" in prov_overrides[pid]:
+                    prov_obj["is_capital"] = prov_overrides[pid]["is_capital"]
+                if "population" in prov_overrides[pid]:
+                    prov_obj["population"] = prov_overrides[pid]["population"]
+                if "economy" in prov_overrides[pid]:
+                    prov_obj["economy"] = prov_overrides[pid]["economy"]
+
+            self.provinces[pid] = prov_obj
+            owner = prov_obj.get("owner_id")
             if owner and owner in self.nations:
                 self.nations[owner]["provinces"].append(pid)
-                self.nations[owner]["total_population"] += prov.get("population", 0)
+                self.nations[owner]["total_population"] += prov_obj.get("population", 0)
 
         # Compute initial national budgets
         self.recalculate_all_national_budgets()
+
+        # Compute crisp sovereign national borders
+        self.national_borders = self.compute_national_borders()
 
         # Initialize modular authoritative systems
         self.diplomacy = DiplomacyManager(self)
@@ -102,12 +140,12 @@ class WorldState:
         # Initial chronicle greeting
         self.add_chronicle_event(
             tick_id=0,
-            year=0,
+            year=self.scenario_meta.get("starting_year", 50),
             month=1,
             day=1,
             category="HISTORIE",
-            headline="Das Zeitalter von Pax Modernica beginnt",
-            body="Im Januar des Jahres 0 (1700 n. Chr.) formieren sich die Reiche Europas. Die Monarchen rüsten ihre Kassen und Heere für eine neue Epoche."
+            headline="Das Zeitalter von 1750 hat begonnen",
+            body="Im Januar 1750 (Jahr 50) herrscht nach dem Frieden von Aachen ein gespanntes Mächtegleichgewicht. Friedrich II. hält Schlesien besetzt, während in Wien und Versailles neue Allianzen geschmiedet werden."
         )
 
     def recalculate_all_national_budgets(self) -> None:
@@ -318,11 +356,56 @@ class WorldState:
         self.recalculate_all_national_budgets()
         return {"success": True, "building_type": building_type, "province_id": province_id}
 
+    def compute_national_borders(self) -> Dict[str, str]:
+        """Computes continuous national outer boundary SVG paths for all sovereign nations."""
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        borders = {}
+
+        def parse_svg(d: str):
+            polys = []
+            curr = []
+            for m in re.finditer(r"([MZ])|([0-9\.]+),([0-9\.]+)", d):
+                cmd = m.group(1)
+                if cmd in ("M", "Z"):
+                    if curr:
+                        polys.append(np.array(curr, dtype=np.int32))
+                        curr = []
+                else:
+                    x, y = float(m.group(2)), float(m.group(3))
+                    curr.append([int(round(x)), int(round(y))])
+            if curr:
+                polys.append(np.array(curr, dtype=np.int32))
+            return polys
+
+        for nid in self.nations.keys():
+            nat_regions = [r for r in self.regions.values() if r.get("owner_id") == nid]
+            if not nat_regions:
+                continue
+            mask = np.zeros((928, 1024), dtype=np.uint8)
+            for r in nat_regions:
+                for p in parse_svg(r.get("svg_path", "")):
+                    cv2.fillPoly(mask, [p], 255)
+            # Dilate 1px then extract crisp external contour
+            mask_dil = cv2.dilate(mask, kernel, iterations=1)
+            cnts, _ = cv2.findContours(mask_dil, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            subpaths = []
+            for c in cnts:
+                if cv2.contourArea(c) >= 25:
+                    poly = cv2.approxPolyDP(c, 0.45, True)
+                    pts = poly.reshape(-1, 2)
+                    if len(pts) >= 3:
+                        subpaths.append("M " + " ".join([f"{p[0]},{p[1]}" for p in pts]) + " Z")
+            if subpaths:
+                borders[nid] = " ".join(subpaths)
+
+        return borders
+
     def to_dict(self) -> Dict[str, Any]:
         """Serializes world state for client init or save snapshot."""
         return {
             "scenario": self.scenario_meta,
             "land_path": self.land_path,
+            "national_borders": getattr(self, "national_borders", {}),
             "nations": self.nations,
             "regions": self.regions,
             "provinces": self.provinces,

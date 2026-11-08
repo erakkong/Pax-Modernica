@@ -18,8 +18,9 @@ class SimulationEngine:
     """Core game loop orchestrator and authoritative rule referee."""
 
     def __init__(self):
-        self.clock = GameClock(is_paused=False)
         self.world = WorldState()
+        start_yr = self.world.scenario_meta.get("starting_year", 50)
+        self.clock = GameClock(year=start_yr, is_paused=False)
         self.is_running = False
         self._loop_task: Optional[asyncio.Task] = None
         self.broadcast_callback: Optional[Callable[[Dict[str, Any]], Awaitable[None]]] = None
