@@ -254,14 +254,23 @@ export class MapEngine {
     this.tooltipEl.classList.add("visible");
     this.tooltipVisible = true;
 
-    // Hover Highlight: Reveal city dot & name immediately
+    // Hover Highlight: Reveal city dot & name ONLY for this specific hovered province
     if (this.labelsGroup) {
+      if (this.activeHoverMarker) {
+        this.activeHoverMarker.classList.remove("hovered");
+        if (!this.activeHoverMarker.classList.contains("selected")) {
+          this.activeHoverMarker.style.display = "none";
+          const oldLabel = this.activeHoverMarker.querySelector(".province-city-label, .region-capital-label");
+          if (oldLabel) oldLabel.style.display = "none";
+        }
+      }
       const marker = this.labelsGroup.querySelector(`.province-city-marker[data-prov-id="${prov.id}"]`);
       if (marker) {
         marker.classList.add("hovered");
         marker.style.display = "block";
         const label = marker.querySelector(".province-city-label");
         if (label) label.style.display = "block";
+        this.activeHoverMarker = marker;
       }
     }
   }
@@ -289,12 +298,23 @@ export class MapEngine {
     this.tooltipEl.classList.add("visible");
     this.tooltipVisible = true;
 
-    // Reveal regional capital city name on hover
+    // Reveal regional capital city name ONLY for this specific hovered region
     if (this.labelsGroup) {
+      if (this.activeHoverMarker) {
+        this.activeHoverMarker.classList.remove("hovered");
+        if (!this.activeHoverMarker.classList.contains("selected")) {
+          this.activeHoverMarker.style.display = "none";
+          const oldLabel = this.activeHoverMarker.querySelector(".province-city-label, .region-capital-label");
+          if (oldLabel) oldLabel.style.display = "none";
+        }
+      }
       const regMarker = this.labelsGroup.querySelector(`.region-capital-marker[data-region-id="${reg.id}"]`);
       if (regMarker) {
         regMarker.classList.add("hovered");
         regMarker.style.display = "block";
+        const label = regMarker.querySelector(".region-capital-label");
+        if (label) label.style.display = "block";
+        this.activeHoverMarker = regMarker;
       }
     }
   }
@@ -304,21 +324,15 @@ export class MapEngine {
       this.tooltipEl.classList.remove("visible");
       this.tooltipVisible = false;
     }
-    // Clean up hover highlights on province city markers
-    if (this.labelsGroup) {
-      this.labelsGroup.querySelectorAll(".province-city-marker.hovered").forEach((m) => {
-        m.classList.remove("hovered");
-        if (this.scale < 1.80 && !m.classList.contains("selected")) {
-          m.style.display = "none";
-        }
-      });
-      // Clean up hover highlights on region capital markers
-      this.labelsGroup.querySelectorAll(".region-capital-marker.hovered").forEach((m) => {
-        m.classList.remove("hovered");
-        if (this.scale < 1.40 && !m.classList.contains("selected")) {
-          m.style.display = "none";
-        }
-      });
+    // Clean up hover highlights on active city marker immediately
+    if (this.labelsGroup && this.activeHoverMarker) {
+      this.activeHoverMarker.classList.remove("hovered");
+      if (!this.activeHoverMarker.classList.contains("selected")) {
+        this.activeHoverMarker.style.display = "none";
+        const label = this.activeHoverMarker.querySelector(".province-city-label, .region-capital-label");
+        if (label) label.style.display = "none";
+      }
+      this.activeHoverMarker = null;
     }
   }
 
@@ -341,8 +355,9 @@ export class MapEngine {
   /**
    * Hierarchical Level of Detail:
    * 1. scale < 1.40 (Continental Zoom): Macro Great Power sovereign titles
-   * 2. scale >= 1.40: Settlement dots visible
-   * 3. City names are ONLY displayed when hovering over the province or region (or selected)
+   * 2. City dots and city names are STRICTLY HOVER/SELECTED ONLY:
+   *    Never render hundreds of permanent dots over the entire map!
+   *    Displays only when the user hovers over the specific province or region (or selects it).
    */
   updateZoomLOD() {
     if (!this.labelsGroup) return;
@@ -358,39 +373,7 @@ export class MapEngine {
       }
     });
 
-    // 2. Regional Capital Markers - dots visible above 1.4x zoom, labels strictly on hover
-    this.labelsGroup.querySelectorAll(".region-capital-marker").forEach((marker) => {
-      const isHov = marker.classList.contains("hovered");
-      const isSel = marker.classList.contains("selected");
-      const label = marker.querySelector(".region-capital-label");
-
-      if (this.scale >= 1.40 || isHov || isSel) {
-        marker.style.display = "block";
-        if (label) {
-          label.style.display = (isHov || isSel) ? "block" : "none";
-        }
-      } else {
-        marker.style.display = "none";
-        if (label) label.style.display = "none";
-      }
-    });
-
-    // 3. Granular Province City Markers - dots visible above 1.8x zoom, labels strictly on hover
-    this.labelsGroup.querySelectorAll(".province-city-marker").forEach((marker) => {
-      const isHov = marker.classList.contains("hovered");
-      const isSel = marker.classList.contains("selected");
-      const label = marker.querySelector(".province-city-label");
-
-      if (this.scale >= 1.80 || isHov || isSel) {
-        marker.style.display = "block";
-        if (label) {
-          label.style.display = (isHov || isSel) ? "block" : "none";
-        }
-      } else {
-        marker.style.display = "none";
-        if (label) label.style.display = "none";
-      }
-    });
+    // 2. City markers: STRICTLY HOVER/SELECTED ONLY (Zero dot clutter, 60 FPS smooth zooming)
   }
 
   zoom(factor) {
@@ -533,6 +516,7 @@ export class MapEngine {
       const [rx, ry] = reg.center;
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       g.classList.add("region-capital-marker");
+      g.style.display = "none"; // Hover or selected only!
       g.setAttribute("data-region-id", reg.id);
       g.setAttribute("data-rx", rx.toString());
       g.setAttribute("data-ry", ry.toString());
@@ -570,6 +554,7 @@ export class MapEngine {
       const [cx, cy] = prov.center;
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       g.classList.add("province-city-marker");
+      g.style.display = "none"; // Hover or selected only!
       if (prov.is_capital) g.classList.add("capital");
       g.setAttribute("data-prov-id", prov.id);
       g.setAttribute("data-cx", cx.toString());
@@ -828,8 +813,13 @@ export class MapEngine {
     this.regionsGroup.querySelectorAll(".region-path.region-selected").forEach((el) => {
       el.classList.remove("region-selected");
     });
-    this.labelsGroup.querySelectorAll(".province-city-marker.selected").forEach((el) => {
+    this.labelsGroup.querySelectorAll(".province-city-marker.selected, .region-capital-marker.selected").forEach((el) => {
       el.classList.remove("selected");
+      if (!el.classList.contains("hovered")) {
+        el.style.display = "none";
+        const label = el.querySelector(".province-city-label, .region-capital-label");
+        if (label) label.style.display = "none";
+      }
     });
 
     if (prov) {
@@ -849,6 +839,7 @@ export class MapEngine {
       const cityMarker = this.labelsGroup.querySelector(`.province-city-marker[data-prov-id="${prov.id}"]`);
       if (cityMarker) {
         cityMarker.classList.add("selected");
+        cityMarker.style.display = "block";
         const label = cityMarker.querySelector(".province-city-label");
         if (label) label.style.display = "block";
       }

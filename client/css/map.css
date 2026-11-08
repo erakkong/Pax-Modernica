@@ -142,8 +142,14 @@ svg#europe-map-svg {
    VICTORIA 3 CITY SETTLEMENT MARKERS & LOD
    ========================================================================= */
 .province-city-marker {
+  display: none;
   cursor: pointer;
   pointer-events: auto;
+}
+
+.province-city-marker.hovered,
+.province-city-marker.selected {
+  display: block !important;
 }
 
 .province-city-dot {
@@ -228,8 +234,14 @@ svg#europe-map-svg {
 
 /* Regional Capital Markers (Medium Zoom) */
 .region-capital-marker {
+  display: none;
   cursor: pointer;
   pointer-events: auto;
+}
+
+.region-capital-marker.hovered,
+.region-capital-marker.selected {
+  display: block !important;
 }
 
 .region-capital-dot {

@@ -12,6 +12,7 @@ import numpy as np
 from scipy import ndimage
 import json
 import os
+import math
 from collections import defaultdict
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -65,29 +66,7 @@ ind2 = ndimage.distance_transform_edt(~pos2, return_distances=False, return_indi
 res2 = markers2[tuple(ind2)]
 res2[land2 == 0] = 1 # Keep sea
 
-# ==========================================
-# 2. TIER 1: SEGMENT IMAGE 1 (1041 PROVINCES)
-# ==========================================
-print("Segmentiere granulare Provinzen aus Bild 1 (Zero-Gap Watershed)...")
-land1 = (gw1 <= 245).astype(np.uint8)
-seeds1 = ((gw1 > 175) & (gw1 <= 245)).astype(np.uint8)
-num1, labels1, stats1, centroids1 = cv2.connectedComponentsWithStats(seeds1)
-valid1 = [i for i in range(1, num1) if stats1[i, cv2.CC_STAT_AREA] >= 35]
-
-markers1 = np.zeros(gw1.shape, dtype=np.int32)
-markers1[land1 == 0] = 1 # 1 is Sea
-prov_mid_to_sidx = {}
-for idx, s_idx in enumerate(valid1, start=2):
-    markers1[labels1 == s_idx] = idx
-    prov_mid_to_sidx[idx] = s_idx
-
-cv2.watershed(cv2.cvtColor(w1, cv2.COLOR_BGR2RGB), markers1)
-pos1 = (markers1 > 0)
-ind1 = ndimage.distance_transform_edt(~pos1, return_distances=False, return_indices=True)
-res1 = markers1[tuple(ind1)]
-res1[land1 == 0] = 1 # Keep sea
-
-print(f"Erkannt: {len(valid1)} Provinzen und {len(valid2)} Regionen.")
+print(f"Erkannt: {len(valid2)} Regionen aus Bild 2.")
 
 def classify_region_exact(cx, cy, s_idx):
     """
@@ -104,31 +83,29 @@ def classify_region_exact(cx, cy, s_idx):
 
     # 2. SCANDINAVIA - NORWAY & DENMARK
     if 580 <= cx <= 730 and cy < 110:
-        return f"reg_finnmark_{s_idx}", "nation_denmark", "Finnmark & Eismeerküste (Hammerfest)", "Norwegisch", "Samisch", "Protestantisch", "Animistisch", "Stockfisch & Robben", "tundra", "reg_trondheim", "Hammerfest"
-    if 480 <= cx <= 600 and 110 <= cy < 270:
-        return f"reg_nordland_{s_idx}", "nation_denmark", "Nordland & Lofoten (Bodø & Tromsø)", "Norwegisch", "Samisch", "Protestantisch", "Protestantisch", "Dorschfang & Tran", "mountains", "reg_trondheim", "Bodø"
-    if 470 <= cx <= 560 and 260 <= cy < 320:
+        return f"reg_finnmark_{s_idx}", "nation_denmark", "Finnmark & Eismeerküste (Hammerfest)", "Norwegisch", "Samisch", "Protestantisch", "Animistisch", "Stockfisch & Robben", "tundra", "reg_finnmark", "Hammerfest"
+    if 480 <= cx <= 600 and 110 <= cy < 260:
+        return f"reg_nordland_{s_idx}", "nation_denmark", "Nordland & Lofoten (Bodø & Tromsø)", "Norwegisch", "Samisch", "Protestantisch", "Protestantisch", "Dorschfang & Tran", "mountains", "reg_nordland", "Tromsø"
+    if 470 <= cx <= 560 and 260 <= cy < 295:
         return f"reg_trondheim_{s_idx}", "nation_denmark", "Trøndelag (Trondheim & Røros)", "Norwegisch", "Norwegisch", "Protestantisch", "Protestantisch", "Kupfergruben Røros & Holz", "mountains", "reg_trondheim", "Trondheim"
-    if 440 <= cx <= 495 and 310 <= cy < 370:
-        return f"reg_bergen_{s_idx}", "nation_denmark", "Vestlandet (Bergen & Stavanger)", "Norwegisch", "Hanseatisch", "Protestantisch", "Protestantisch", "Heringsexport, Holz & Werften", "mountains", "reg_oslo", "Bergen"
-    if 495 <= cx <= 545 and 310 <= cy < 370:
-        return f"reg_oslo_{s_idx}", "nation_denmark", "Østlandet (Christiania / Oslo)", "Norwegisch", "Dänisch", "Protestantisch", "Protestantisch", "Bauholz, Eisen & Festung", "forest", "reg_oslo", "Christiania"
+    if 440 <= cx <= 555 and 295 <= cy < 380:
+        return f"reg_oslo_{s_idx}", "nation_denmark", "Königreich Norwegen (Christiania & Bergen)", "Norwegisch", "Dänisch", "Protestantisch", "Protestantisch", "Bauholz, Eisen & Festung", "forest", "reg_oestlandet", "Christiania"
 
     # 3. SWEDEN & BALTIC EMPIRE (1700 Dominium Maris Baltici)
     if 600 <= cx <= 720 and 100 <= cy < 180:
-        return f"reg_lappland_{s_idx}", "nation_sweden", "Lappland & Norrbotten (Luleå)", "Schwedisch", "Samisch", "Protestantisch", "Animistisch", "Rentierzucht & Eisenerz", "taiga", "reg_norrland", "Luleå"
+        return f"reg_lappland_{s_idx}", "nation_sweden", "Lappland & Norrbotten (Luleå)", "Schwedisch", "Samisch", "Protestantisch", "Animistisch", "Rentierzucht & Eisenerz", "taiga", "reg_lappland", "Luleå"
     if 580 <= cx <= 670 and 180 <= cy < 260:
-        return f"reg_vaesterbotten_{s_idx}", "nation_sweden", "Västerbotten & Jämtland (Umeå)", "Schwedisch", "Norwegisch", "Protestantisch", "Protestantisch", "Teer & Nadelholz", "forest", "reg_norrland", "Umeå"
+        return f"reg_vaesterbotten_{s_idx}", "nation_sweden", "Västerbotten & Jämtland (Umeå)", "Schwedisch", "Norwegisch", "Protestantisch", "Protestantisch", "Teer & Nadelholz", "forest", "reg_vaesterbotten", "Umeå"
     if 580 <= cx <= 660 and 260 <= cy < 330:
         return f"reg_norrland_{s_idx}", "nation_sweden", "Västernorrland (Härnösand & Sundsvall)", "Schwedisch", "Schwedisch", "Protestantisch", "Protestantisch", "Holzflößerei & Leinen", "forest", "reg_norrland", "Sundsvall"
     if 540 <= cx <= 595 and 290 <= cy < 350:
-        return f"reg_dalarna_{s_idx}", "nation_sweden", "Dalarna & Bergslagen (Falun)", "Schwedisch", "Schwedisch", "Protestantisch", "Protestantisch", "Große Kupfergrube Falun", "hills", "reg_norrland", "Falun"
+        return f"reg_dalarna_{s_idx}", "nation_sweden", "Dalarna & Bergslagen (Falun)", "Schwedisch", "Schwedisch", "Protestantisch", "Protestantisch", "Große Kupfergrube Falun", "hills", "reg_dalarna", "Falun"
     if 560 <= cx <= 620 and 330 <= cy < 375:
         return f"reg_stockholm_{s_idx}", "nation_sweden", "Svealand & Stockholm", "Schwedisch", "Finnisch", "Protestantisch", "Protestantisch", "Reichshauptstadt & Stangeneisen", "forest", "reg_stockholm", "Stockholm"
     if 490 <= cx <= 555 and 355 <= cy < 400:
         return f"reg_goeteborg_{s_idx}", "nation_sweden", "Västergötland & Göteborg", "Schwedisch", "Holländisch", "Protestantisch", "Protestantisch", "Nordseehafen & Textilmanufaktur", "plains", "reg_goeteborg", "Göteborg"
     if 555 <= cx <= 605 and 360 <= cy < 390:
-        return f"reg_oestergoetland_{s_idx}", "nation_sweden", "Östergötland (Linköping & Norrköping)", "Schwedisch", "Schwedisch", "Protestantisch", "Protestantisch", "Waffenfabriken & Getreide", "plains", "reg_smarland", "Norrköping"
+        return f"reg_oestergoetland_{s_idx}", "nation_sweden", "Östergötland (Linköping & Norrköping)", "Schwedisch", "Schwedisch", "Protestantisch", "Protestantisch", "Waffenfabriken & Getreide", "plains", "reg_oestergoetland", "Linköping"
     # Skåne & Blekinge (evaluated before Småland to prevent northern encroachment)
     if 530 <= cx <= 575 and 395 <= cy < 435:
         return f"reg_skane_{s_idx}", "nation_sweden", "Skåne & Blekinge (Malmö & Karlskrona)", "Schonisch", "Dänisch", "Protestantisch", "Protestantisch", "Flottenbasis Karlskrona & Korn", "plains", "reg_skane", "Malmö"
@@ -159,15 +136,15 @@ def classify_region_exact(cx, cy, s_idx):
 
     # 4. DENMARK PROPER
     if 470 <= cx <= 525 and 360 <= cy < 395:
-        return f"reg_nordjuetland_{s_idx}", "nation_denmark", "Nordjütland (Aalborg & Viborg)", "Dänisch", "Dänisch", "Protestantisch", "Protestantisch", "Hering, Kalk & Rinderzucht", "plains", "reg_juetland", "Aalborg"
+        return f"reg_nordjuetland_{s_idx}", "nation_denmark", "Nordjütland (Aalborg & Viborg)", "Dänisch", "Dänisch", "Protestantisch", "Protestantisch", "Hering, Kalk & Rinderzucht", "plains", "reg_nordjuetland", "Aalborg"
     if 470 <= cx <= 515 and 395 <= cy < 440:
         return f"reg_juetland_{s_idx}", "nation_denmark", "Südjütland & Schleswig (Aarhus & Flensburg)", "Dänisch", "Deutsch", "Protestantisch", "Protestantisch", "Ochsenhandel & Getreide", "plains", "reg_juetland", "Aarhus"
     if 480 <= cx <= 505 and 405 <= cy < 435:
-        return f"reg_fyn_{s_idx}", "nation_denmark", "Fünen & Langeland (Odense)", "Dänisch", "Dänisch", "Protestantisch", "Protestantisch", "Gartenbau & Obst", "plains", "reg_copenhagen", "Odense"
+        return f"reg_fyn_{s_idx}", "nation_denmark", "Fünen & Langeland (Odense)", "Dänisch", "Dänisch", "Protestantisch", "Protestantisch", "Gartenbau & Obst", "plains", "reg_fyn", "Odense"
     if 505 <= cx <= 535 and 400 <= cy < 435:
         return f"reg_copenhagen_{s_idx}", "nation_denmark", "Dänische Inseln: Seeland (Kopenhagen)", "Dänisch", "Deutsch", "Protestantisch", "Protestantisch", "Öresundzoll & Flottenbasis", "plains", "reg_copenhagen", "Kopenhagen"
     if 535 <= cx <= 555 and 405 <= cy < 430:
-        return f"reg_bornholm_{s_idx}", "nation_denmark", "Insel Bornholm (Rønne)", "Dänisch", "Schwedisch", "Protestantisch", "Protestantisch", "Granit & Hering", "plains", "reg_copenhagen", "Rønne"
+        return f"reg_bornholm_{s_idx}", "nation_denmark", "Insel Bornholm (Rønne)", "Dänisch", "Schwedisch", "Protestantisch", "Protestantisch", "Granit & Hering", "plains", "reg_bornholm", "Rønne"
 
     # 5. GREAT BRITAIN & IRELAND
     if 270 <= cx <= 340 and 340 <= cy < 380:
@@ -524,19 +501,53 @@ CITIES_BY_POOL = {
     # DENMARK & NORWAY & ICELAND
     "reg_copenhagen": [
         "Kopenhagen", "Roskilde", "Helsingør", "Næstved", "Køge", "Hillerød", "Slagelse", "Holbæk",
-        "Ringsted", "Kallundborg", "Sorø", "Vordingborg", "Nykøbing Falster", "Stege", "Rønne"
+        "Ringsted", "Kallundborg", "Sorø", "Vordingborg", "Nykøbing Falster", "Stege"
+    ],
+    "reg_fyn": [
+        "Odense", "Svendborg", "Nyborg", "Assens", "Faaborg", "Middelfart", "Kerteminde", "Rudkøbing"
     ],
     "reg_juetland": [
-        "Aarhus", "Aalborg", "Ribe", "Viborg", "Horsens", "Randers", "Kolding", "Vejle",
-        "Schleswig", "Flensburg", "Kiel", "Hadersleben", "Tondern", "Esbjerg", "Fredericia", "Skagen"
+        "Aarhus", "Horsens", "Randers", "Kolding", "Vejle", "Fredericia", "Ribe", "Schleswig",
+        "Flensburg", "Kiel", "Hadersleben", "Tondern", "Esbjerg"
+    ],
+    "reg_nordjuetland": [
+        "Aalborg", "Viborg", "Hjørring", "Thisted", "Skagen", "Frederikshavn", "Sæby", "Nykøbing Mors"
+    ],
+    "reg_bornholm": [
+        "Rønne", "Nexø", "Allinge-Sandvig", "Svaneke", "Hasle", "Aakirkeby"
     ],
     "reg_oslo": [
-        "Christiania", "Bergen", "Stavanger", "Kristiansand", "Drammen", "Fredrikstad", "Skien",
-        "Tønsberg", "Kongsberg", "Moss", "Hamar", "Arendal", "Larvik", "Halden", "Kongsvinger"
+        "Christiania", "Drammen", "Fredrikstad", "Halden", "Kongsberg", "Tønsberg", "Skien",
+        "Moss", "Hamar", "Lillehammer", "Kongsvinger", "Larvik", "Sarpsborg", "Hønefoss",
+        "Gjøvik", "Notodden", "Kragero", "Brevik", "Porsgrunn", "Drøbak", "Sandefjord", "Holmestrand",
+        "Mysen", "Askim", "Jessheim", "Eidsvoll", "Elverum", "Rena", "Kongsberg Gruve"
+    ],
+    "reg_oestlandet": [
+        "Christiania", "Drammen", "Fredrikstad", "Halden", "Kongsberg", "Tønsberg", "Skien",
+        "Moss", "Hamar", "Lillehammer", "Kongsvinger", "Larvik", "Sarpsborg", "Hønefoss",
+        "Gjøvik", "Notodden", "Kragero", "Brevik", "Porsgrunn", "Drøbak", "Sandefjord", "Holmestrand",
+        "Mysen", "Askim", "Jessheim", "Eidsvoll", "Elverum", "Rena", "Kongsberg Gruve"
+    ],
+    "reg_vestlandet": [
+        "Bergen", "Stavanger", "Haugesund", "Florø", "Førde", "Egersund", "Ålesund", "Voss", "Odda",
+        "Sogndal", "Måløy", "Sandane", "Sauda", "Kopervik", "Skudeneshavn", "Leirvik", "Bryne", "Ålgård",
+        "Ulsteinvik", "Nordfjordeid", "Stryn", "Volda", "Ørsta", "Stranda", "Høyanger"
     ],
     "reg_trondheim": [
-        "Trondheim", "Bodø", "Tromsø", "Molde", "Kristiansund", "Røros", "Hammerfest", "Vardø",
-        "Steinkjer", "Levanger", "Namsos", "Narvik", "Harstad", "Svolvær", "Brønnøysund"
+        "Trondheim", "Røros", "Steinkjer", "Levanger", "Namsos", "Kristiansund", "Molde", "Stjørdal", "Oppdal",
+        "Orkanger", "Verdal", "Melhus", "Sunndalsøra", "Hitra", "Frøya", "Åfjord", "Kolvereid", "Malm",
+        "Kyrksæterøra", "Rissa", "Selbu", "Tydal", "Meldal", "Bjugn", "Åndalsnes"
+    ],
+    "reg_nordland": [
+        "Tromsø", "Bodø", "Narvik", "Harstad", "Svolvær", "Brønnøysund", "Mosjøen", "Sandnessjøen", "Sortland",
+        "Leknes", "Fauske", "Mo i Rana", "Andenes", "Kabelvåg", "Stokmarknes", "Rognan", "Lødingen", "Innhavet"
+    ],
+    "reg_finnmark": [
+        "Hammerfest", "Vardø", "Vadsø", "Alta", "Kautokeino", "Kirkenes", "Karasjok", "Havøysund", "Berlevåg",
+        "Båtsfjord", "Tana", "Honningvåg", "Kjøllefjord", "Gamvik", "Mehamn"
+    ],
+    "reg_soerlandet": [
+        "Kristiansand", "Arendal", "Mandal", "Flekkefjord", "Grimstad", "Risør", "Farsund"
     ],
     "reg_island": [
         "Reykjavik", "Akureyri", "Skálholt", "Hólar", "Isafjörður", "Vestmannaeyjar", "Keflavík",
@@ -560,8 +571,19 @@ CITIES_BY_POOL = {
         "Uddevalla", "Lidköping", "Vänersborg", "Trollhättan", "Hjo", "Skövde"
     ],
     "reg_smarland": [
-        "Kalmar", "Växjö", "Linköping", "Norrköping", "Västervik", "Eksjö", "Oskarshamn",
-        "Vimmerby", "Söderköping", "Vadstena", "Skänninge", "Motala"
+        "Kalmar", "Växjö", "Västervik", "Eksjö", "Oskarshamn", "Vimmerby", "Nässjö", "Vetlanda"
+    ],
+    "reg_oestergoetland": [
+        "Linköping", "Norrköping", "Motala", "Vadstena", "Söderköping", "Skänninge"
+    ],
+    "reg_dalarna": [
+        "Falun", "Borlänge", "Mora", "Leksand", "Avesta", "Hedemora", "Rättvik"
+    ],
+    "reg_vaesterbotten": [
+        "Umeå", "Skellefteå", "Östersund", "Strömsund", "Vilhelmina", "Dorotea"
+    ],
+    "reg_lappland": [
+        "Luleå", "Piteå", "Kiruna", "Gällivare", "Jokkmokk", "Arvidsjaur"
     ],
     "reg_gotland": [
         "Visby", "Slite", "Hemse", "Klintehamn", "Burgsvik", "Fårösund", "Ljugarn"
@@ -1108,153 +1130,189 @@ for mid, s_idx in reg_mid_to_sidx.items():
 
 print(f"Kompiliert: {len(compiled_regions)} historische Vektor-Regionen aus Bild 2.")
 
-# 2. COMPILE ALL PROVINCES FROM IMAGE 1
+# 2. COMPILE ALL PROVINCES STRICTLY WITHIN EACH REGION (IMAGE 1 SUBDIVISIONS OF IMAGE 2 REGIONS)
+seeds1_all = ((gw1 > 175) & (gw1 <= 245)).astype(np.uint8)
 compiled_provinces = {}
 used_city_names = set()
+global_prov_idx = 1
 
-for mid, s_idx in prov_mid_to_sidx.items():
-    pmask = (res1 == mid).astype(np.uint8)
-    contours, _ = cv2.findContours(pmask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    subpaths = []
-    for c in contours:
-        poly = cv2.approxPolyDP(c, 0.65, True)
-        pts = poly.reshape(-1, 2)
-        if len(pts) >= 3:
-            subpaths.append("M " + " ".join([f"{p[0]},{p[1]}" for p in pts]) + " Z")
-    if not subpaths:
+for mid, reg_data in compiled_regions.items():
+    y_idx, x_idx = np.where(res2 == mid)
+    if len(y_idx) == 0:
         continue
+    min_y, max_y = np.min(y_idx), np.max(y_idx) + 1
+    min_x, max_x = np.min(x_idx), np.max(x_idx) + 1
 
-    cx = float(round(centroids1[s_idx][0], 1))
-    cy = float(round(centroids1[s_idx][1], 1))
-    area1 = int(stats1[s_idx, cv2.CC_STAT_AREA])
+    crop_reg = (res2[min_y:max_y, min_x:max_x] == mid)
+    crop_seeds = (seeds1_all[min_y:max_y, min_x:max_x] & crop_reg).astype(np.uint8)
 
-    # Find parent region in res2
-    xi = max(0, min(1023, int(round(cx))))
-    yi = max(0, min(927, int(round(cy))))
-    parent_mid = res2[yi, xi]
+    num_p, labels_p, stats_p, centroids_p = cv2.connectedComponentsWithStats(crop_seeds)
+    v_provs = [i for i in range(1, num_p) if stats_p[i, cv2.CC_STAT_AREA] >= 20]
 
-    if parent_mid not in compiled_regions or parent_mid <= 1:
-        # Search 5x5 window
-        for dy in range(-4, 5):
-            for dx in range(-4, 5):
-                ny, nx = yi + dy, xi + dx
-                if 0 <= ny < 928 and 0 <= nx < 1024:
-                    val = res2[ny, nx]
-                    if val in compiled_regions and val > 1:
-                        parent_mid = val
-                        break
-            if parent_mid in compiled_regions and parent_mid > 1:
-                break
-
-    if parent_mid not in compiled_regions or parent_mid <= 1:
-        parent_mid = min(
-            compiled_regions.keys(),
-            key=lambda k: (cx - compiled_regions[k]["center"][0])**2 + (cy - compiled_regions[k]["center"][1])**2
-        )
-
-    parent_reg = compiled_regions[parent_mid]
-    owner_id = parent_reg["owner_id"]
-    pool_key = parent_reg.get("pool_key", "reg_brandenburg")
-
-    name_list = CITIES_BY_POOL.get(pool_key, [])
-    
-    # Pick first unused authentic town name from the regional pool
-    chosen_name = None
-    for candidate in name_list:
-        if candidate not in used_city_names:
-            chosen_name = candidate
-            break
-            
-    if not chosen_name:
-        # If pool exhausted, draw from nation's historical reserve bank
-        reserves = NATION_RESERVE_CITIES.get(owner_id, [])
-        for candidate in reserves:
-            if candidate not in used_city_names:
-                chosen_name = candidate
-                break
-
-    if not chosen_name:
-        # Still not found: pick an authentic geographic landmark name (no generic numbers!)
-        reg_base = parent_reg["name"].split("(")[0].strip()
-        cardinals = ["Nord", "Süd", "Ost", "West", "Zentral", "Ober", "Unter", "Hinter", "Vorder", "Tal", "Berg"]
-        for card in cardinals:
-            cand = f"{card}-{reg_base}"
-            if cand not in used_city_names:
-                chosen_name = cand
-                break
-                
-    if not chosen_name:
-        chosen_name = f"{parent_reg.get('capital_city', 'Stadt')} {s_idx}"
-        
-    used_city_names.add(chosen_name)
-    prov_name = chosen_name
-
-    if "iceland" in parent_reg["id"] or parent_reg.get("pool_key") == "reg_island":
-        prov_id = f"prov_iceland_{s_idx}"
+    # Gather sub-province masks
+    sub_prov_masks = []
+    if len(v_provs) <= 1:
+        sub_prov_masks.append({
+            "mask": crop_reg.astype(np.uint8),
+            "cx": float(round(np.mean(x_idx), 1)),
+            "cy": float(round(np.mean(y_idx), 1)),
+            "area": int(len(x_idx))
+        })
     else:
-        prov_id = f"prov_{s_idx}"
+        crop_markers = np.zeros(crop_reg.shape, dtype=np.int32)
+        for ip, sp in enumerate(v_provs, start=1):
+            crop_markers[labels_p == sp] = ip
+        pos = (crop_markers > 0)
+        _, ind = ndimage.distance_transform_edt(~pos, return_distances=True, return_indices=True)
+        crop_sub = crop_markers[tuple(ind)]
 
-    # Authentic economic wealth & growth rate as seen in reference screenshots
-    base_wealth = int(round(3500 + (area1 * 12.5) + (hash(str(s_idx)) % 3200)))
-    base_growth = int(round(50 + (area1 % 35) + (hash(str(s_idx)) % 15)))
-    base_growth = min(96, max(45, base_growth))
-    pop_val = max(18000, area1 * 720 + (hash(str(s_idx)) % 14000))
+        for ip in range(1, len(v_provs) + 1):
+            sub_m = ((crop_sub == ip) & crop_reg).astype(np.uint8)
+            sub_area = int(np.sum(sub_m))
+            if sub_area >= 12:
+                sub_ys, sub_xs = np.where(sub_m)
+                sub_prov_masks.append({
+                    "mask": sub_m,
+                    "cx": float(round(np.mean(sub_xs) + min_x, 1)),
+                    "cy": float(round(np.mean(sub_ys) + min_y, 1)),
+                    "area": sub_area
+                })
+        if not sub_prov_masks:
+            sub_prov_masks.append({
+                "mask": crop_reg.astype(np.uint8),
+                "cx": float(round(np.mean(x_idx), 1)),
+                "cy": float(round(np.mean(y_idx), 1)),
+                "area": int(len(x_idx))
+            })
 
-    # Dynamic Demographics Seed per Province
-    seed = (s_idx * 37 + area1 * 13) % 100
-    cult_prim_pct = 74 + (seed % 21) # 74% - 94%
-    cult_sec_pct = 100 - cult_prim_pct
-    rel_prim_pct = 70 + (seed % 25) # 70% - 94%
-    rel_sec_pct = 100 - rel_prim_pct
+    # Sort sub-provinces so the one closest to reg_data['center'] or largest area is first (capital)
+    sub_prov_masks.sort(key=lambda s: (
+        math.hypot(s["cx"] - reg_data["center"][0], s["cy"] - reg_data["center"][1]) - (s["area"] * 0.05)
+    ))
 
-    # Dynamic Standard of Living (10.0 - 16.5)
-    sol_score = round(11.2 + (seed % 35) * 0.12, 1)
-    sol_label = "Verarmt" if sol_score < 11.8 else ("Bescheiden" if sol_score < 14.0 else "Wohlhabend")
+    pool_key = reg_data.get("pool_key", "reg_brandenburg")
+    name_list = CITIES_BY_POOL.get(pool_key, [])
 
-    compiled_provinces[prov_id] = {
-        "id": prov_id,
-        "name": prov_name,
-        "region_id": parent_reg["id"],
-        "region_name": parent_reg["name"],
-        "owner_id": owner_id,
-        "center": [cx, cy],
-        "city_pos": [cx, cy],
-        "svg_path": " ".join(subpaths),
-        "area": area1,
-        "population": pop_val,
-        "economy": base_wealth,
-        "growth_rate": base_growth,
-        "tax_revenue": max(8, round(area1 * 0.18)),
-        "terrain": parent_reg["terrain"],
-        "culture": parent_reg["culture"],
-        "secondary_culture": parent_reg.get("secondary_culture", "Minderheit"),
-        "culture_breakdown": {
-            "primary": parent_reg["culture"],
-            "primary_pct": cult_prim_pct,
-            "secondary": parent_reg.get("secondary_culture", "Minderheit"),
-            "secondary_pct": cult_sec_pct
-        },
-        "religion": parent_reg["religion"],
-        "secondary_religion": parent_reg.get("secondary_religion", "Katholisch"),
-        "religion_breakdown": {
-            "primary": parent_reg["religion"],
-            "primary_pct": rel_prim_pct,
-            "secondary": parent_reg.get("secondary_religion", "Katholisch"),
-            "secondary_pct": rel_sec_pct
-        },
-        "sol_score": sol_score,
-        "sol_label": sol_label,
-        "goods_produced": parent_reg["goods_produced"],
-        "buildings": {
-            "barracks": 1 if area1 > 150 else 0,
-            "fort": 1 if area1 > 300 else 0,
-            "port": 1 if ("Fisch" in parent_reg["goods_produced"] or "Schiff" in parent_reg["goods_produced"] or "Flotte" in parent_reg["goods_produced"]) else 0,
-            "administration": 1
-        },
-        "infrastructure_level": 2,
-        "fortification_level": 1 if area1 > 200 else 0
-    }
-    parent_reg["provinces"].append(prov_id)
+    for i_sub, sub_info in enumerate(sub_prov_masks):
+        m = sub_info["mask"]
+        cx = sub_info["cx"]
+        cy = sub_info["cy"]
+        area = sub_info["area"]
+
+        cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        subpaths = []
+        for c in cnts:
+            if cv2.contourArea(c) < 8 and len(cnts) > 1:
+                continue
+            poly = cv2.approxPolyDP(c, 0.65, True)
+            pts = poly.reshape(-1, 2)
+            if len(pts) >= 3:
+                pts[:, 0] += min_x
+                pts[:, 1] += min_y
+                subpaths.append("M " + " ".join([f"{p[0]},{p[1]}" for p in pts]) + " Z")
+        if not subpaths:
+            continue
+
+        is_capital = False
+        chosen_name = None
+
+        if i_sub == 0:
+            cap_cand = reg_data.get("capital_city")
+            if cap_cand and cap_cand not in used_city_names:
+                chosen_name = cap_cand
+                is_capital = True
+
+        if not chosen_name:
+            for cand in name_list:
+                if cand not in used_city_names:
+                    chosen_name = cand
+                    break
+
+        if not chosen_name:
+            reserves = NATION_RESERVE_CITIES.get(reg_data["owner_id"], [])
+            for cand in reserves:
+                if cand not in used_city_names:
+                    chosen_name = cand
+                    break
+
+        if not chosen_name:
+            reg_base = reg_data["name"].split("(")[0].strip()
+            cardinals = ["Nord", "Süd", "Ost", "West", "Zentral", "Ober", "Unter", "Hinter", "Vorder", "Tal", "Berg"]
+            for card in cardinals:
+                cand = f"{card}-{reg_base}"
+                if cand not in used_city_names:
+                    chosen_name = cand
+                    break
+
+        if not chosen_name:
+            chosen_name = f"{reg_data.get('capital_city', 'Stadt')} {global_prov_idx}"
+
+        used_city_names.add(chosen_name)
+
+        if "iceland" in reg_data["id"] or reg_data.get("pool_key") == "reg_island":
+            prov_id = f"prov_iceland_{global_prov_idx}"
+        else:
+            prov_id = f"prov_{global_prov_idx}"
+        global_prov_idx += 1
+
+        base_wealth = int(round(3500 + (area * 14.0) + ((global_prov_idx * 17) % 2500)))
+        base_growth = int(round(52 + (area % 30) + ((global_prov_idx * 13) % 16)))
+        base_growth = min(96, max(45, base_growth))
+        pop_val = max(18000, area * 780 + ((global_prov_idx * 137) % 15000))
+
+        seed = (global_prov_idx * 37 + area * 11) % 100
+        cult_prim_pct = 76 + (seed % 20)
+        cult_sec_pct = 100 - cult_prim_pct
+        rel_prim_pct = 72 + (seed % 24)
+        rel_sec_pct = 100 - rel_prim_pct
+        sol_score = round(11.2 + (seed % 35) * 0.12, 1)
+        sol_label = "Verarmt" if sol_score < 11.8 else ("Bescheiden" if sol_score < 14.0 else "Wohlhabend")
+
+        compiled_provinces[prov_id] = {
+            "id": prov_id,
+            "name": chosen_name,
+            "is_capital": is_capital,
+            "region_id": reg_data["id"],
+            "region_name": reg_data["name"],
+            "owner_id": reg_data["owner_id"],
+            "center": [cx, cy],
+            "city_pos": [cx, cy],
+            "svg_path": " ".join(subpaths),
+            "area": area,
+            "population": pop_val,
+            "economy": base_wealth,
+            "growth_rate": base_growth,
+            "tax_revenue": max(8, round(area * 0.18)),
+            "terrain": reg_data["terrain"],
+            "culture": reg_data["culture"],
+            "secondary_culture": reg_data.get("secondary_culture", "Minderheit"),
+            "culture_breakdown": {
+                "primary": reg_data["culture"],
+                "primary_pct": cult_prim_pct,
+                "secondary": reg_data.get("secondary_culture", "Minderheit"),
+                "secondary_pct": cult_sec_pct
+            },
+            "religion": reg_data["religion"],
+            "secondary_religion": reg_data.get("secondary_religion", "Katholisch"),
+            "religion_breakdown": {
+                "primary": reg_data["religion"],
+                "primary_pct": rel_prim_pct,
+                "secondary": reg_data.get("secondary_religion", "Katholisch"),
+                "secondary_pct": rel_sec_pct
+            },
+            "sol_score": sol_score,
+            "sol_label": sol_label,
+            "goods_produced": reg_data["goods_produced"],
+            "buildings": {
+                "barracks": 1 if area > 140 else 0,
+                "fort": 1 if area > 280 else 0,
+                "port": 1 if ("Fisch" in reg_data["goods_produced"] or "Schiff" in reg_data["goods_produced"] or "Flotte" in reg_data["goods_produced"]) else 0,
+                "administration": 1
+            },
+            "infrastructure_level": 2,
+            "fortification_level": 1 if area > 200 else 0
+        }
+        reg_data["provinces"].append(prov_id)
 
 # Assign Named Major Capitals with authentic nation-matched coordinates and Victoria 3 demographics
 capital_provinces = {
@@ -1276,7 +1334,9 @@ capital_provinces = {
     "prov_rome": (525, 695, "reg_kirchenstaat", "nation_papal", "Rom", "Italienisch", "Italienisch", "Katholisch", "Katholisch", 96.0, 99.0, 15.7, "Wohlhabend", 145000, 14200),
     "prov_warsaw": (665, 485, "reg_warsaw", "nation_poland", "Warschau", "Polnisch", "Jüdisch", "Katholisch", "Jüdisch", 82.0, 84.0, 14.6, "Wohlhabend", 160000, 12000),
     "prov_munich": (530, 565, "reg_bayern", "nation_bavaria", "München", "Bayerisch", "Fränkisch", "Katholisch", "Katholisch", 91.0, 97.0, 14.4, "Wohlhabend", 85000, 10500),
-    "prov_venice": (540, 630, "reg_venice", "nation_venice", "Venedig", "Venetianisch", "Griechisch", "Katholisch", "Orthodox", 86.0, 91.0, 16.0, "Wohlhabend", 155000, 19500)
+    "prov_venice": (540, 630, "reg_venice", "nation_venice", "Venedig", "Venetianisch", "Griechisch", "Katholisch", "Orthodox", 86.0, 91.0, 16.0, "Wohlhabend", 155000, 19500),
+    "prov_riga": (710, 410, "reg_livland", "nation_sweden", "Riga", "Deutsch-Baltisch", "Lettisch", "Protestantisch", "Katholisch", 84.0, 89.0, 15.0, "Wohlhabend", 110000, 13500),
+    "prov_smolensk": (775, 435, "reg_smolensk", "nation_russia", "Smolensk", "Russisch", "Belarussisch", "Orthodox", "Orthodox", 88.0, 92.0, 13.8, "Bescheiden", 120000, 11000)
 }
 
 for cap_id, (target_x, target_y, reg_prefix, exp_owner, cap_name, cult, sec_cult, rel, sec_rel, c_pct, r_pct, sol, sol_lbl, c_pop, c_econ) in capital_provinces.items():
@@ -1363,3 +1423,4 @@ with open(output_path, "w", encoding="utf-8") as f:
     json.dump(output_data, f, ensure_ascii=False)
 
 print(f"Erfolgreich generiert: {output_path} ({os.path.getsize(output_path) // 1024} KB)")
+os._exit(0)
